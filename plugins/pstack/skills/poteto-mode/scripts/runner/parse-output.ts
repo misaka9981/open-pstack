@@ -167,6 +167,7 @@ export function parseProviderOutput(
     case "claude":
       return parseClaude(stdout, requestedModel);
     case "codex":
+    case "magpie":
       return parseCodex(stdout);
     case "grok":
       return parseGrok(stdout, requestedModel);

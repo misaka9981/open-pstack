@@ -370,13 +370,20 @@ function preflightPassed(provider: Provider, model: string, result: ProcessResul
       return /logged in/i.test(combined);
     case "grok":
       return /logged in/i.test(combined) && combined.includes(model);
+    case "magpie":
+      return true;
   }
 }
 
 function successfulPreflightEvidence(provider: Provider, model: string): string {
-  return provider === "grok"
-    ? `authenticated; model ${model} available`
-    : "authenticated";
+  switch (provider) {
+    case "grok":
+      return `authenticated; model ${model} available`;
+    case "magpie":
+      return "codex CLI available; relay and model are proven by invocation";
+    default:
+      return "authenticated";
+  }
 }
 
 function unavailableStatus(value: string): ReceiptStatus {
@@ -396,6 +403,7 @@ function preflightFailureStatus(
 ): ReceiptStatus {
   const status = unavailableStatus(value);
   if (status !== "child-failed") return status;
+  if (provider === "magpie") return "unavailable-cli";
   return provider === "grok" && !value.includes(model)
     ? "unavailable-model"
     : "unauthenticated";
@@ -450,7 +458,7 @@ function modelProof(
       modelEvidence: "provider-report",
     };
   }
-  if (provider === "codex" && reported === null) {
+  if ((provider === "codex" || provider === "magpie") && reported === null) {
     return {
       reportedModel: null,
       modelVerified: false,
