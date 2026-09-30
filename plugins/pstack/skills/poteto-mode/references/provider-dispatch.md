@@ -19,6 +19,10 @@ The allowed effort universe is exactly `low`, `medium`, `high`, `xhigh`, `max`. 
 
 `fable` and `opus` are Claude Code's rolling aliases. Claude resolves each alias to the latest available family revision. A runner receipt keeps the requested alias in `model` and the concrete provider-reported revision in `reportedModel`; verification accepts only a numeric `claude-fable-*` or `claude-opus-*` revision from the matching family.
 
+## Where the sheet lives
+
+On Claude Code, a `pstack-models.md` at the plugin root is the model sheet. The SessionStart hook injects it inside a `<pstack-model-sheet>` block. It replaces `~/.claude/pstack-models.md`, so ignore a user sheet while the plugin ships one. Without a plugin sheet, Claude Code uses `~/.claude/pstack-models.md` from its `CLAUDE.md` include. Codex always uses `~/.codex/pstack-models.md` from its `AGENTS.md` block, because Codex does not run the hook.
+
 ## Read-time normalization
 
 Normalize configured descriptors before matching them to the matrix or choosing a route. If a provider-qualified Claude model starts with `claude-fable-` or `claude-opus-` and its remaining revision contains only digits and hyphens, replace that model component in memory with `fable` or `opus`. Preserve provider, effort, role, and lane order. Use only the normalized descriptor for native dispatch or runner argv. Never pass the versioned predecessor to Claude.

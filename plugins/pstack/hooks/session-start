@@ -1,8 +1,17 @@
 #!/usr/bin/env bash
 # SessionStart hook for the pstack plugin: prints the poteto-mode dispatch
 # mandate to stdout, which Claude Code injects as session context directly.
-# A missing context file fails the hook cleanly instead of injecting noise.
+# When the plugin ships a model sheet, the hook appends it as the Claude Code
+# model sheet. A missing context file fails the hook cleanly instead of
+# injecting noise.
 
 set -euo pipefail
 
-exec cat "$(cd "$(dirname "$0")" && pwd)/session-start-context.md"
+dir="$(cd "$(dirname "$0")" && pwd)"
+cat "$dir/session-start-context.md"
+sheet="$dir/../pstack-models.md"
+if [ -f "$sheet" ]; then
+	printf '\n<pstack-model-sheet>\n'
+	cat "$sheet"
+	printf '</pstack-model-sheet>\n'
+fi

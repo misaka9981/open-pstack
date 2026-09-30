@@ -21,6 +21,8 @@ Codex writes `~/.codex/pstack-models.md`. Codex has no `@` include, so mirror th
 <!-- pstack:models:end -->
 ```
 
+On Claude Code, first check for a `<pstack-model-sheet>` block injected at session start, or a `pstack-models.md` at the installed plugin root. If either exists, the repository owns the sheet. Report its path and role map, say that model changes go into that file in the repository followed by a plugin update, and stop without probing or writing. See the sheet location rule in `provider-dispatch.md`.
+
 ## Steps
 
 ### 1. Establish the parent

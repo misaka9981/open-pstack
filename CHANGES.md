@@ -2,6 +2,10 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.5.1 ships the model sheet with the plugin
+
+The repository now owns the Claude Code model sheet at `plugins/pstack/pstack-models.md`. The SessionStart hook appends it to the poteto-mode mandate inside a `<pstack-model-sheet>` block. That sheet replaces `~/.claude/pstack-models.md`, and `/setup-pstack` on Claude Code reports it and stops without writing. Model changes are edits to that file followed by a plugin update. The shipped sheet assigns code roles, `how explorer`, and `swarm workers` to `claude:opus@high`; judgment, hardest tasks, and `how explainer` to `claude:fable@high`; and every panel to Fable and Opus at `high`. Why and Reflect stay on `inherit-parent`. Codex does not run the hook and keeps `~/.codex/pstack-models.md`. `runner/shipped-sheet.test.ts` requires every documented role once, only matrix families at selectable efforts, and a verbatim injection by the hook.
+
 ## 1.5.0 syncs to Cursor pstack 0.15.5
 
 Open Pstack 1.5.0 tracks Cursor pstack 0.15.5 at `12d587dfb20741cafc376c42c696c5f6e2a64487`. It imports upstream commits `f5bdd68`, `889ec4b`, `5bf2b15`, `70b2dc8`, `b42effe`, `b0b9c7a`, and `12d587d`.
