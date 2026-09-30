@@ -51,10 +51,12 @@ const SHEET_ROLES = [
 const SETUP_SECTION_ORDER = [
   "### 2. Load current state",
   "### 3. Parse per-family efforts",
-  "### 4. Collect one requested effort per family",
-  "### 5. Probe the four requested pairs",
-  "### 6. Render, preserving role families",
-  "### 7. Confirm and commit",
+  "### 4. Ask for a budget",
+  "### 5. Choose role families",
+  "### 6. Collect one requested effort per used family",
+  "### 7. Probe the requested pairs",
+  "### 8. Render, preserving role families",
+  "### 9. Confirm and commit",
 ] as const;
 
 interface MatrixRow {
@@ -219,7 +221,7 @@ describe("model matrix", () => {
       ["fable", "max"],
       ["sol", "max"],
       ["grok", "xhigh"],
-      ["opus", "xhigh"],
+      ["opus", "max"],
     ]);
     expect(
       rows
@@ -277,9 +279,10 @@ describe("model matrix", () => {
 
   it("keeps setup's first-run default panel copy aligned with the matrix", () => {
     const sheet = firstRunSheet(setup);
+    expect(sheet).toContain("\n<!-- budget: unlimited (max) -->\n");
     const roles = sheet
       .split("\n")
-      .filter((line) => line.includes(": "))
+      .filter((line) => line.includes(": ") && !line.startsWith("<!--"))
       .map((line) => line.slice(0, line.indexOf(": ")));
     expect(roles).toEqual([...SHEET_ROLES]);
     const byFamily = new Map<string, MatrixRow>(
@@ -318,6 +321,19 @@ describe("model matrix", () => {
     expect(setup).toContain("Do not probe or write while any inconsistency is unresolved.");
     expect(setup).toContain("A failed probe writes nothing:");
     expect(setup).toContain("Run one probe per family");
+    expect(setup).toContain("Probe only the selected `provider:model@effort` pair of each used family.");
+    expect(setup).toContain("Do not ask about an unused family.");
+    expect(setup).toContain("or a family that step 7 did not probe.");
+    expect(setup).toContain("Setup never substitutes a family on its own.");
+    expect(setup).toContain("The descriptors keep the only effort values");
+    for (const label of [
+      "`unlimited — keep max`",
+      "`large — xhigh reasoning`",
+      "`medium — high reasoning`",
+      "`small — medium reasoning`",
+    ]) {
+      expect(setup).toContain(label);
+    }
     expect(setup).toContain("normalized complete role map from step 2");
     expect(setup).toContain("starts with `claude-fable-` or `claude-opus-`");
     expect(setup).toContain("preserving the provider, effort, role, and lane order");

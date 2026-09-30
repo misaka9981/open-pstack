@@ -349,33 +349,35 @@ else
   note "ok: routed skills stay model-invocable"
 fi
 
-sol_descriptor="$(awk -F '|' '
-  $2 ~ /^[[:space:]]*sol[[:space:]]*$/ {
+grok_descriptor="$(awk -F '|' '
+  $2 ~ /^[[:space:]]*grok[[:space:]]*$/ {
     for (i = 4; i <= 6; i++) gsub(/^[[:space:]]+|[[:space:]]+$/, "", $i)
     print $4 ":" $5 "@" $6
   }
 ' "$dispatch")"
-solo_code_bad=""
-if [ -z "$sol_descriptor" ]; then
-  solo_code_bad="could not read the sol row from $dispatch"$'\n'
+code_role_bad=""
+if [ -z "$grok_descriptor" ]; then
+  code_role_bad="could not read the grok row from $dispatch"$'\n'
 fi
-for role in bug-fix perf-issue hillclimb; do
+for role in "feature, refactoring" bug-fix perf-issue hillclimb; do
   setup_descriptor="$(sed -n "s/^${role}: //p" "$setup")"
-  if [ "$setup_descriptor" != "$sol_descriptor" ]; then
-    solo_code_bad="${solo_code_bad}${setup} ${role}: [${setup_descriptor}] != [${sol_descriptor}]"$'\n'
-  fi
-  role_playbook="$plugin/skills/poteto-mode/playbooks/$role.md"
-  playbook_descriptor="$(sed -n 's/.*default `\([^`]*\)`.*/\1/p' "$role_playbook")"
-  if [ "$playbook_descriptor" != "$sol_descriptor" ]; then
-    solo_code_bad="${solo_code_bad}${role_playbook}: [${playbook_descriptor}] != [${sol_descriptor}]"$'\n'
+  if [ "$setup_descriptor" != "$grok_descriptor" ]; then
+    code_role_bad="${code_role_bad}${setup} ${role}: [${setup_descriptor}] != [${grok_descriptor}]"$'\n'
   fi
 done
-if [ -n "$solo_code_bad" ]; then
-  note "FAIL: solo code roles must use the sol row:"
-  note "$solo_code_bad"
+for playbook in feature refactoring bug-fix perf-issue hillclimb; do
+  role_playbook="$plugin/skills/poteto-mode/playbooks/$playbook.md"
+  playbook_descriptor="$(sed -n 's/.*default `\([^`]*\)`.*/\1/p' "$role_playbook")"
+  if [ "$playbook_descriptor" != "$grok_descriptor" ]; then
+    code_role_bad="${code_role_bad}${role_playbook}: [${playbook_descriptor}] != [${grok_descriptor}]"$'\n'
+  fi
+done
+if [ -n "$code_role_bad" ]; then
+  note "FAIL: code-delegate roles must use the grok row:"
+  note "$code_role_bad"
   fail=1
 else
-  note "ok: solo code roles stay on the sol row ($sol_descriptor)"
+  note "ok: code-delegate roles use the grok row ($grok_descriptor)"
 fi
 
 codex_manifest="$plugin/.codex-plugin/plugin.json"
