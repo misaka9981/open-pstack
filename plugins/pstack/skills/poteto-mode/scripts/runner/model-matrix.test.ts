@@ -22,7 +22,7 @@ const MATRIX_HEADER = [
 ] as const;
 
 const FAMILY_ORDER = ["fable", "sol", "grok", "opus"] as const;
-const PROVIDERS = ["claude", "codex", "grok"] as const;
+const MATRIX_PROVIDERS = ["claude", "codex", "grok"] as const;
 const DESCRIPTOR_RE =
   /(claude|codex|grok):[a-z0-9.-]+@(low|medium|high|xhigh|max)/g;
 const PANEL_ROLES = [
@@ -134,7 +134,7 @@ function parseModelMatrix(markdown: string): MatrixRow[] {
       selectableRaw,
       stemRaw,
     ] = cells;
-    if (!(PROVIDERS as readonly string[]).includes(provider)) {
+    if (!(MATRIX_PROVIDERS as readonly string[]).includes(provider)) {
       throw new Error(`invalid provider: ${provider}`);
     }
     const selectableEfforts = selectableRaw.split(/\s+/).map(asEffort);

@@ -27,6 +27,10 @@ export function preflightCommand(provider: Provider): CommandSpec {
       };
     case "grok":
       return { command: "grok", args: ["models"], stdin: "none" };
+    case "magpie":
+      // Codex cannot list a custom provider's catalog, so the relay and model
+      // are proven by the invocation itself.
+      return { command: "codex", args: ["--version"], stdin: "none" };
   }
 }
 
@@ -63,6 +67,37 @@ function effortOverride(effort: Effort): string {
   return `model_reasoning_effort=${JSON.stringify(effort)}`;
 }
 
+function codexExec(options: RunnerOptions, config: readonly string[]): CommandSpec {
+  return {
+    command: "codex",
+    args: [
+      "exec",
+      "--model",
+      options.model,
+      "--config",
+      effortOverride(options.effort),
+      ...config,
+      "--sandbox",
+      codexSandbox(options.mode),
+      "--cd",
+      options.cwd,
+      "--skip-git-repo-check",
+      "--ephemeral",
+      "--disable",
+      "plugins",
+      "--disable",
+      "multi_agent",
+      "--disable",
+      "hooks",
+      "--disable",
+      "memories",
+      "--json",
+      "-",
+    ],
+    stdin: "prompt",
+  };
+}
+
 export function invocationCommand(options: RunnerOptions): CommandSpec {
   switch (options.provider) {
     case "claude":
@@ -91,33 +126,9 @@ export function invocationCommand(options: RunnerOptions): CommandSpec {
         stdin: "prompt",
       };
     case "codex":
-      return {
-        command: "codex",
-        args: [
-          "exec",
-          "--model",
-          options.model,
-          "--config",
-          effortOverride(options.effort),
-          "--sandbox",
-          codexSandbox(options.mode),
-          "--cd",
-          options.cwd,
-          "--skip-git-repo-check",
-          "--ephemeral",
-          "--disable",
-          "plugins",
-          "--disable",
-          "multi_agent",
-          "--disable",
-          "hooks",
-          "--disable",
-          "memories",
-          "--json",
-          "-",
-        ],
-        stdin: "prompt",
-      };
+      return codexExec(options, []);
+    case "magpie":
+      return codexExec(options, ["--config", 'model_provider="magpie"']);
     case "grok":
       return {
         command: "grok",

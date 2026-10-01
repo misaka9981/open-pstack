@@ -2,6 +2,10 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.5.2 routes magpie relay lanes
+
+`pstack-runner` accepts `--provider magpie` for the local relay that Codex and Pi use. A magpie lane runs `codex exec` with `model_provider="magpie"` and the same sandbox, feature, and JSONL flags as a `codex` lane. A Codex parent reaches `magpie:*` only through the runner, because `spawn_agent` has no provider parameter and a spawned child ignores an agent profile's `model_provider`. Claude Code does not route magpie. The preflight only proves that the Codex CLI exists, so the one invocation proves the relay and model. A rejected id is an `unavailable-model` dropout, and a sandboxed Codex parent that cannot start the nested CLI is a `child-failed` dropout. Setup does not offer relay models yet.
+
 ## 1.5.1 ships the model sheet with the plugin
 
 The repository now owns the Claude Code model sheet at `plugins/pstack/pstack-models.md`. The SessionStart hook appends it to the poteto-mode mandate inside a `<pstack-model-sheet>` block. That sheet replaces `~/.claude/pstack-models.md`, and `/setup-pstack` on Claude Code reports it and stops without writing. Model changes are edits to that file followed by a plugin update. The shipped sheet assigns code roles, `how explorer`, and `swarm workers` to `claude:opus@high`; judgment, hardest tasks, and `how explainer` to `claude:fable@high`; and every panel to Fable and Opus at `high`. Why and Reflect stay on `inherit-parent`. Codex does not run the hook and keeps `~/.codex/pstack-models.md`. `runner/shipped-sheet.test.ts` requires every documented role once, only matrix families at selectable efforts, and a verbatim injection by the hook.

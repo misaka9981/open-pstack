@@ -26,7 +26,7 @@ const args = process.argv.slice(2);
 const name = process.argv[1].split("/").at(-1);
 const isPreflight =
   (name === "claude" && args[0] === "auth") ||
-  (name === "codex" && args[0] === "login") ||
+  (name === "codex" && (args[0] === "login" || args[0] === "--version")) ||
   (name === "grok" && args[0] === "models");
 const stage = isPreflight ? "preflight" : "model";
 const startedPath = isPreflight
@@ -63,6 +63,10 @@ if (name === "claude" && args[0] === "auth") {
 }
 if (name === "codex" && args[0] === "login") {
   console.log("Logged in using ChatGPT");
+  process.exit(0);
+}
+if (name === "codex" && args[0] === "--version") {
+  console.log("codex-cli 0.0.0");
   process.exit(0);
 }
 if (name === "grok" && args[0] === "models") {
@@ -142,7 +146,9 @@ function options(provider: Provider, suffix: string = provider): RunnerOptions {
       ? "fable"
       : provider === "codex"
         ? "gpt-5.6-sol"
-        : "grok-4.6";
+        : provider === "magpie"
+          ? "wevnal/glm-5.3"
+          : "grok-4.6";
   return {
     parent,
     provider,
@@ -272,20 +278,21 @@ afterEach(() => {
 });
 
 describe("runLane", () => {
-  for (const provider of ["claude", "codex", "grok"] as const) {
+  for (const provider of ["claude", "codex", "grok", "magpie"] as const) {
     it(`executes and receipts the ${provider} external lane`, async () => {
       const input = options(provider);
+      const pinned = provider === "codex" || provider === "magpie";
       const result = await runLane(input);
       expect(result.exitCode).toBe(0);
       expect(readFileSync(input.outputPath, "utf8")).toContain(
-        provider.toUpperCase()
+        provider === "magpie" ? "CODEX" : provider.toUpperCase()
       );
       expect(receipt(input.receiptPath)).toMatchObject({
         status: "complete",
         provider,
         model: input.model,
-        modelVerified: provider !== "codex",
-        modelEvidence: provider === "codex" ? "pinned-argv" : "provider-report",
+        modelVerified: !pinned,
+        modelEvidence: pinned ? "pinned-argv" : "provider-report",
         preflight: { status: "passed" },
       });
       if (provider === "claude") {
@@ -304,6 +311,20 @@ describe("runLane", () => {
       reportedModel: null,
       modelVerified: false,
       modelEvidence: "pinned-argv",
+    });
+  });
+
+  it("classifies a magpie model the relay rejects as unavailable", async () => {
+    process.env.FAKE_INVALID_MODEL = "1";
+    const input = options("magpie");
+    const result = await runLane(input);
+    expect(result.exitCode).toBe(69);
+    expect(existsSync(input.outputPath)).toBe(false);
+    expect(receipt(input.receiptPath)).toMatchObject({
+      status: "unavailable-model",
+      provider: "magpie",
+      model: "wevnal/glm-5.3",
+      preflight: { status: "passed" },
     });
   });
 
@@ -929,6 +950,10 @@ describe("childEnvironment", () => {
       KEEP_ME: "yes",
     });
     expect(childEnvironment("grok", source)).toEqual({
+      PATH: "/bin",
+      KEEP_ME: "yes",
+    });
+    expect(childEnvironment("magpie", source)).toEqual({
       PATH: "/bin",
       KEEP_ME: "yes",
     });

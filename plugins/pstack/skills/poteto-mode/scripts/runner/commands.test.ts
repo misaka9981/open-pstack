@@ -49,6 +49,44 @@ describe("invocationCommand", () => {
     expect(spec.args).not.toContain("danger-full-access");
   });
 
+  it("routes magpie through Codex with the relay provider override", () => {
+    const spec = invocationCommand(
+      options({
+        parent: "codex",
+        provider: "magpie",
+        model: "wevnal/glm-5.3",
+        effort: "high",
+      })
+    );
+    expect(spec.command).toBe("codex");
+    expect(spec.stdin).toBe("prompt");
+    expect(spec.args).toEqual([
+      "exec",
+      "--model",
+      "wevnal/glm-5.3",
+      "--config",
+      'model_reasoning_effort="high"',
+      "--config",
+      'model_provider="magpie"',
+      "--sandbox",
+      "read-only",
+      "--cd",
+      "/tmp/worktree",
+      "--skip-git-repo-check",
+      "--ephemeral",
+      "--disable",
+      "plugins",
+      "--disable",
+      "multi_agent",
+      "--disable",
+      "hooks",
+      "--disable",
+      "memories",
+      "--json",
+      "-",
+    ]);
+  });
+
   it("passes Claude model, effort, permissions, and no-recursion controls", () => {
     const spec = invocationCommand(
       options({
@@ -156,6 +194,14 @@ describe("invocationCommand", () => {
       {
         provider: "codex" as const,
         model: "gpt-5.6-sol",
+        flag: (effort: "low" | "medium" | "high") => [
+          "--config",
+          `model_reasoning_effort="${effort}"`,
+        ],
+      },
+      {
+        provider: "magpie" as const,
+        model: "wevnal/glm-5.3",
         flag: (effort: "low" | "medium" | "high") => [
           "--config",
           `model_reasoning_effort="${effort}"`,
