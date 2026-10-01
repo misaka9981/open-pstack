@@ -34,7 +34,7 @@ Each selectable effort passed a one-turn runner probe through the relay. That pr
 
 ## Where the sheet lives
 
-On Claude Code, a `pstack-models.md` at the plugin root is the model sheet. The SessionStart hook injects it inside a `<pstack-model-sheet>` block. It replaces `~/.claude/pstack-models.md`, so ignore a user sheet while the plugin ships one. Without a plugin sheet, Claude Code uses `~/.claude/pstack-models.md` from its `CLAUDE.md` include. Codex always uses `~/.codex/pstack-models.md` from its `AGENTS.md` block, because Codex does not run the hook.
+On Claude Code, a `pstack-models.md` at the plugin root is the model sheet. The SessionStart hook injects it inside a `<pstack-model-sheet>` block. It replaces `~/.claude/pstack-models.md`, so ignore a user sheet while the plugin ships one. Without a plugin sheet, Claude Code uses `~/.claude/pstack-models.md` from its `CLAUDE.md` include. Codex always uses `~/.codex/pstack-models.md` from its `AGENTS.md` block, because Codex does not run the hook. Pi uses `~/.pi/agent/pstack-models.md`, mirrored into one bounded `<!-- pstack:models:begin -->` / `<!-- pstack:models:end -->` block in `~/.pi/agent/AGENTS.md` the same way.
 
 ## Read-time normalization
 
@@ -52,8 +52,9 @@ The top-level harness resolves the route once. A child receives an assigned prov
 |---|---|---|---|---|
 | Claude Code | native `Agent` | external runner | external runner | not routed |
 | Codex | external runner | native `spawn_agent` | external runner | external runner |
+| Pi | not routed | native `subagent` (`openai-codex`) | not routed | native `subagent` (`magpie`) |
 
-A `not routed` cell is a named dropout. Claude Code keeps its configured providers and does not use the relay.
+A `not routed` cell is a named dropout. Claude Code keeps its configured providers and does not use the relay. A Pi parent reaches Codex models through Pi's `openai-codex` provider and relay models through its `magpie` provider; it has no route to Claude or Grok.
 
 A Codex parent reaches `magpie:*` only through the external runner. `spawn_agent` has no provider parameter, and a spawned child ignores an agent profile's `model_provider`: the child keeps the parent's provider and rejects the relay model id. This table assumes the Codex parent runs on its default provider.
 
@@ -65,6 +66,7 @@ Native dispatch avoids a second CLI startup and its base context.
 
 - Claude Code: match the descriptor's `(provider, model)` to one model-matrix row, then dispatch it through `pstack-<stem>-<effort>` using that row's Claude-native agent stem and the descriptor's effort. Those definitions select the rolling model alias, requested effort, and `background: true`. `pstack-fable-max` and `pstack-opus-xhigh` remain in that set. Pass the complete task, grounding paths, access mode, and unique output location in the `Agent` prompt. Retain the task handle and drain it only after fan-out.
 - Codex: call `spawn_agent` with the descriptor's model and `reasoning_effort`, the complete task, grounding paths, access mode, and unique output location. Use an isolated worktree for a writer. Codex subagents already run concurrently.
+- Pi: launch every lane as a child of one async pi-subagents workflow with the mapped `<pi provider>/<model>:<effort>` and a pstack agent, as [`pi-tools.md`](pi-tools.md) specifies. Never use a foreground or single-agent launch, because those carry pi-subagents' implicit 30-minute deadline.
 
 Do not send a same-provider descriptor to the external runner. It rejects that call because the native route is cheaper and already available.
 
@@ -115,6 +117,8 @@ Success requires all of these:
 2. Receipt status `complete`.
 3. Either `modelVerified: true` with `modelEvidence: "provider-report"`, or a Codex or magpie receipt with `reportedModel: null`, `modelVerified: false`, and `modelEvidence: "pinned-argv"`. For Claude's `fable` and `opus` aliases, the concrete provider report must belong to the requested family. Codex 0.149.0 accepts the exact `--model` argument but does not report the served model in its JSONL stream.
 4. A non-empty output file.
+
+A Pi lane has no runner receipt. It succeeds when its workflow result has `ok: true` and a non-empty output, and its child transcript's assistant messages report the mapped provider and model. A child that fails, including one whose model is not in Pi's registry, is a dropout.
 
 The receipt also carries elapsed time, token usage when the CLI exposes it, and cost when available. Keep it with the arena or review artifacts so parent-harness comparisons are evidence-based.
 

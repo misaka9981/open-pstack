@@ -7,7 +7,7 @@ description: "Fan out N parallel workers, drain them, and return one report. Use
 
 Fan out N parallel workers. They may cover separate slices, race the same brief, or mix both. The parent waits, aggregates, and returns one report.
 
-**Dispatch contract.** Resolve each worker descriptor through [`provider-dispatch.md`](../poteto-mode/references/provider-dispatch.md). The parent starts native and external lanes; workers never route themselves. On Codex, resolve remaining Claude tool names via [`codex-tools.md`](../poteto-mode/references/codex-tools.md).
+**Dispatch contract.** Resolve each worker descriptor through [`provider-dispatch.md`](../poteto-mode/references/provider-dispatch.md). The parent starts native and external lanes; workers never route themselves. On Codex or Pi, resolve remaining Claude tool names via [`codex-tools.md`](../poteto-mode/references/codex-tools.md) or [`pi-tools.md`](../poteto-mode/references/pi-tools.md).
 
 ## Start
 

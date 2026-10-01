@@ -2,6 +2,10 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.5.4 adds Pi as a third harness
+
+A root `package.json` makes the repository a Pi package. It loads the shared `plugins/pstack/skills/` tree unchanged and ships four pi-subagents agents under the `pstack` namespace: `pstack.lane`, `pstack.lane-readonly`, `pstack.poteto-agent`, and `pstack.comment-sicko`. The namespace keeps same-named user agents from shadowing them. `poteto-mode/references/pi-tools.md` maps Claude tool names to Pi and defines dispatch. Every lane is a child of one async pi-subagents workflow, because foreground and single-agent launches carry an implicit 30-minute deadline. Descriptors map to `openai-codex/<model>:<effort>` and `magpie/<model>:<effort>`. Claude and Grok are not routed from Pi. A failed child is a dropout while its siblings finish, and the child transcript reports the served provider and model. `provider-dispatch.md` adds the Pi route row, native-lane rule, sheet location (`~/.pi/agent/pstack-models.md` mirrored into `~/.pi/agent/AGENTS.md`), and completion rule. Every shared reference to `codex-tools.md` now also names `pi-tools.md`, and `runner/pi-package.test.ts` enforces that pairing. Setup on a Pi parent and the pi-pstack `/poteto-mode` toggle are not included.
+
 ## 1.5.3 lets setup offer two relay families
 
 `provider-dispatch.md` adds a relay family table with `deepseek-flash` (`magpie:wevnal/deepseek-v4.1-flash`) and `glm-flash` (`magpie:wevnal/glm-5.3-flash`). Both accept every effort from `low` to `max`; each passed a one-turn runner probe. `setup-pstack` maps, asks efforts for, probes, and preserves these families like matrix families. They stay outside the model matrix, so first-run defaults and the default panel do not change, and a Claude Code parent does not route them. `model-matrix.test.ts` keeps the relay table separate from the matrix.
