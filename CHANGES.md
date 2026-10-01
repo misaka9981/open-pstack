@@ -2,6 +2,10 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.5.5 runs setup on a Pi parent
+
+`setup-pstack` accepts Pi as a parent. The probe table gains a Pi column. Sol maps to `openai-codex/gpt-5.6-sol` (the matrix keeps upstream's Sol choice), and the two relay families map to `magpie/<model>`. Fable, Opus, and Grok are not routed, so a Pi operator moves those roles to Sol, a relay family, or an alias. Each Pi probe is one child of an async pi-subagents workflow on `pstack.lane-readonly`. It passes when the child returns the marker and its transcript reports the mapped provider and model. Setup writes `~/.pi/agent/pstack-models.md` and mirrors it into one bounded block in `~/.pi/agent/AGENTS.md`.
+
 ## 1.5.4 adds Pi as a third harness
 
 A root `package.json` makes the repository a Pi package. It loads the shared `plugins/pstack/skills/` tree unchanged and ships four pi-subagents agents under the `pstack` namespace: `pstack.lane`, `pstack.lane-readonly`, `pstack.poteto-agent`, and `pstack.comment-sicko`. The namespace keeps same-named user agents from shadowing them. `poteto-mode/references/pi-tools.md` maps Claude tool names to Pi and defines dispatch. Every lane is a child of one async pi-subagents workflow, because foreground and single-agent launches carry an implicit 30-minute deadline. Descriptors map to `openai-codex/<model>:<effort>` and `magpie/<model>:<effort>`. Claude and Grok are not routed from Pi. A failed child is a dropout while its siblings finish, and the child transcript reports the served provider and model. `provider-dispatch.md` adds the Pi route row, native-lane rule, sheet location (`~/.pi/agent/pstack-models.md` mirrored into `~/.pi/agent/AGENTS.md`), and completion rule. Every shared reference to `codex-tools.md` now also names `pi-tools.md`, and `runner/pi-package.test.ts` enforces that pairing. Setup on a Pi parent and the pi-pstack `/poteto-mode` toggle are not included.
