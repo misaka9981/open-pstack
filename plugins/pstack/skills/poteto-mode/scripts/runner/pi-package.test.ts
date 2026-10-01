@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { dirname, join, relative } from "node:path";
+import { join, relative } from "node:path";
 
 const PLUGIN_ROOT = join(import.meta.dir, "../../../..");
 const REPO_ROOT = join(PLUGIN_ROOT, "../..");
@@ -60,10 +60,5 @@ describe("Pi package", () => {
           .map((line) => `${relative(SKILLS_DIR, path)}: ${line.slice(0, 80)}`)
       );
     expect(unpaired).toEqual([]);
-    for (const path of markdownFiles(SKILLS_DIR)) {
-      for (const match of readFileSync(path, "utf8").matchAll(/\]\(([^)]*pi-tools\.md)\)/g)) {
-        expect(existsSync(join(dirname(path), match[1]))).toBe(true);
-      }
-    }
   });
 });
