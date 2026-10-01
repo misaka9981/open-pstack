@@ -11,7 +11,7 @@ pstack model choices are provider-qualified descriptors:
 | Family | Upstream pstack choice | Provider | Model | Default effort | Selectable efforts | Claude-native agent stem |
 |---|---|---|---|---|---|---|
 | fable | fable | claude | fable | max | low medium high xhigh max | fable |
-| sol | gpt-5.6-sol-max | codex | gpt-5.6-sol | max | low medium high xhigh max | - |
+| sol | gpt-5.6-sol-max | codex | gpt-6.1-sol | max | low medium high xhigh max | - |
 | grok | grok-4.7-xhigh-fast | grok | grok-4.6 | xhigh | low medium high xhigh max | - |
 | opus | opus | claude | opus | max | low medium high xhigh max | opus |
 

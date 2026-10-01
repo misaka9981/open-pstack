@@ -10,15 +10,16 @@ open-pstack tracks [Cursor's pstack](https://github.com/cursor/plugins/tree/main
 | Path | `pstack/` |
 | Commit | `12d587dfb20741cafc376c42c696c5f6e2a64487` |
 | Upstream version | `0.15.5` |
-| open-pstack version | `1.5.7` |
+| open-pstack version | `1.5.8` |
 
-The table above is the current Cursor sync point. Open Pstack 1.5.7 imports this 0.15.5 sync. `README-UPSTREAM.md` preserves the upstream pstack README verbatim. `CHANGES.md` and `NOTICE.md` describe the adaptations and provenance.
+The table above is the current Cursor sync point. Open Pstack 1.5.8 imports this 0.15.5 sync. `README-UPSTREAM.md` preserves the upstream pstack README verbatim. `CHANGES.md` and `NOTICE.md` describe the adaptations and provenance.
 
 ## Upstream-only exclusions
 
 - Commits `799151d` and `6fecddb` add and relocate `make-bot-ui`. It depends on Cursor routines, webhook events, and UI primitives that Claude Code and Codex do not share.
 - Four `disable-model-invocation: true` lines from `73f8be4` are not applied to `how`, `why`, `unslop`, or `typescript-best-practices`. Poteto-mode invokes those skills by name, and the flag blocks that route on Claude Code.
 - The `23a56e2` Fable defaults for `bug-fix`, `perf-issue`, and `hillclimb` were never applied. `889ec4b` and `70b2dc8` superseded them with Grok, and Open Pstack now follows that default.
+- The Sol family runs `gpt-6.1-sol` instead of upstream's `gpt-5.6-sol` (`gpt-5.6-sol-max`). The maintainer chose the newer model, and it is the Codex model the magpie relay exposes to Pi (#21).
 - The Grok 4.7 slug from `70b2dc8` is not applied. The Grok route keeps `grok:grok-4.6` until a maintainer with the Grok CLI probes `grok-4.7` through the runner.
 - `70b2dc8` shrinks the default panels to Opus 5.5, Sol, and Grok. Open Pstack moves judgment roles to `claude:opus@max` but keeps Fable as the fourth panel lane, so the panel default stays the model-matrix quad.
 - The `70b2dc8` and `12d587d` lines that rerun a rejected model on its family default or the closest valid slug are not applied. They conflict with the no-fallback contract in `provider-dispatch.md`.

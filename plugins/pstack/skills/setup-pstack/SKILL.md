@@ -73,7 +73,7 @@ Probe only the selected `provider:model@effort` pair of each used family. Run on
 | Family | Pair source | Claude parent route | Codex parent route | Pi parent route | Availability proof |
 |---|---|---|---|---|---|
 | Fable | Fable matrix row + selected effort | native Agent `pstack-fable-<effort>` | Claude CLI | not routed | native one-turn probe or `claude auth status --json` plus one-turn probe |
-| Sol | Sol matrix row + selected effort | `codex exec` | native `spawn_agent` | `subagent` `magpie/codex/gpt-5.6-sol` | `codex login status` plus one-turn probe or native one-turn probe |
+| Sol | Sol matrix row + selected effort | `codex exec` | native `spawn_agent` | `subagent` `magpie/codex/gpt-6.1-sol` | `codex login status` plus one-turn probe or native one-turn probe |
 | Grok | Grok matrix row + selected effort | Grok CLI | Grok CLI | not routed | `grok models` must list the requested model; one-turn probe |
 | Opus | Opus matrix row + selected effort | native Agent `pstack-opus-<effort>` | Claude CLI | not routed | native one-turn probe or `claude auth status --json` plus one-turn probe |
 | DeepSeek Flash | deepseek-flash relay row + selected effort | not routed | `codex exec` on `magpie` | `subagent` `magpie/wevnal/deepseek-v4.1-flash` | Codex: one-turn runner probe, whose preflight proves only the Codex CLI. Pi: native one-turn probe |
@@ -120,11 +120,11 @@ how explorer: grok:grok-4.6@xhigh
 how explainer: claude:opus@max
 why investigators, synthesizer: inherit-parent
 reflect tooling, judgment, divergent, synthesizer: inherit-parent
-arena runners: claude:fable@max, codex:gpt-5.6-sol@max, grok:grok-4.6@xhigh, claude:opus@max
-arena cross-judge pool: claude:fable@max, codex:gpt-5.6-sol@max, grok:grok-4.6@xhigh, claude:opus@max
+arena runners: claude:fable@max, codex:gpt-6.1-sol@max, grok:grok-4.6@xhigh, claude:opus@max
+arena cross-judge pool: claude:fable@max, codex:gpt-6.1-sol@max, grok:grok-4.6@xhigh, claude:opus@max
 swarm workers: grok:grok-4.6@xhigh
-architect runners: claude:fable@max, codex:gpt-5.6-sol@max, grok:grok-4.6@xhigh, claude:opus@max
-interrogate reviewers: claude:fable@max, codex:gpt-5.6-sol@max, grok:grok-4.6@xhigh, claude:opus@max
+architect runners: claude:fable@max, codex:gpt-6.1-sol@max, grok:grok-4.6@xhigh, claude:opus@max
+interrogate reviewers: claude:fable@max, codex:gpt-6.1-sol@max, grok:grok-4.6@xhigh, claude:opus@max
 ```
 
 ### 10. Wire it in

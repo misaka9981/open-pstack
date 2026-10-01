@@ -2,6 +2,10 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.5.8 moves Sol to gpt-6.1-sol
+
+The Sol matrix family now pins `codex:gpt-6.1-sol` instead of upstream's `gpt-5.6-sol`. The upstream-choice column still records `gpt-5.6-sol-max`, and `UPSTREAM.md` lists the deviation. The magpie relay exposes `codex/gpt-6.1-sol` to Pi, so Pi Sol lanes map to `magpie/codex/gpt-6.1-sol`. Setup's first-run panels, the interrogate, arena, and architect defaults, and the docs follow. An existing sheet that still names `codex:gpt-5.6-sol` is inconsistent state for setup and needs one setup rerun.
+
 ## 1.5.7 routes Codex models on Pi through magpie
 
 On a Pi parent, `codex:<model>@<effort>` now maps to `magpie/codex/<model>:<effort>`, the Codex models the magpie relay serves, instead of Pi's `openai-codex` provider. Every Pi lane now goes through the relay, and each child transcript carries a provider-reported `responseModel`. `pi-tools.md`, the provider-dispatch Pi route row, and setup's Pi column change together. The relay accepted `codex/gpt-5.6-sol` at every effort from `low` to `max`. Claude Code and Codex routes are unchanged.
