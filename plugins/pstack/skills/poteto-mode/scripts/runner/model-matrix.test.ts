@@ -385,7 +385,7 @@ describe("model matrix", () => {
 
   it("routes setup's Pi parent only to Sol and relay families", () => {
     const sol = rows.find((row) => row.family === "sol");
-    expect(sol?.model).toBe("gpt-5.6-sol");
+    expect(sol?.model).toBe("gpt-6.1-sol");
     expect(setup).toContain("Claude Code, Codex, or Pi.");
     expect(setup).toContain(`| \`subagent\` \`magpie/codex/${sol?.model}\` |`);
     for (const family of ["Fable", "Grok", "Opus"]) {
