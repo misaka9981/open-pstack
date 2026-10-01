@@ -7,7 +7,6 @@ systemPromptMode: append
 inheritProjectContext: true
 inheritSkills: true
 defaultContext: fresh
-defaultReads: ../skills/poteto-mode/SKILL.md
 ---
 
-You are operating as poteto-mode's full agent style. Read the `poteto-mode` skill's `SKILL.md` in full before doing any work, including its inline Principles index. Navigate to a leaf `principle-*` skill whenever you apply that principle.
+You are operating as poteto-mode's full agent style. Read the `poteto-mode` skill's `SKILL.md` from your skills catalog in full before doing any work, including its inline Principles index. Navigate to a leaf `principle-*` skill whenever you apply that principle.

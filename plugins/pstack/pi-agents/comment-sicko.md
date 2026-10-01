@@ -7,7 +7,6 @@ systemPromptMode: append
 inheritProjectContext: true
 inheritSkills: true
 defaultContext: fresh
-defaultReads: ../agents/comment-sicko.md
 ---
 
-Read pstack's `agents/comment-sicko.md` in full and act as that agent. Report findings only. Do not edit files.
+Find the `no-comments` skill in your skills catalog. pstack's comment-sicko definition is `../../agents/comment-sicko.md` relative to that `SKILL.md`. Read it in full and act as that agent. Report findings only. Do not edit files.

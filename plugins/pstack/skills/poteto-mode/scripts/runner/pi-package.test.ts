@@ -36,17 +36,17 @@ describe("Pi package", () => {
     }
   });
 
-  it("namespaces every Pi agent and resolves its default reads", () => {
+  it("namespaces every Pi agent without run-relative default reads", () => {
     const names = readdirSync(PI_AGENTS_DIR).filter((name) => name.endsWith(".md")).sort();
     expect(names).toEqual(["comment-sicko.md", "lane-readonly.md", "lane.md", "poteto-agent.md"]);
+    expect(existsSync(join(SKILLS_DIR, "no-comments", "../../agents/comment-sicko.md"))).toBe(true);
     for (const name of names) {
       const fields = frontmatter(readFileSync(join(PI_AGENTS_DIR, name), "utf8"));
       expect(fields.name).toBe(name.slice(0, -3));
       expect(fields.package).toBe("pstack");
       expect(fields.tools.length).toBeGreaterThan(0);
-      if (fields.defaultReads !== undefined) {
-        expect(existsSync(join(PI_AGENTS_DIR, fields.defaultReads))).toBe(true);
-      }
+      // pi-subagents resolves defaultReads against the run cwd and drops missing paths.
+      expect(fields.defaultReads).toBeUndefined();
     }
   });
 
