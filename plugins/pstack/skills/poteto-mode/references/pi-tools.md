@@ -29,7 +29,7 @@ Every pstack launch is one async workflow. Write the script as a ```` ```js work
 
 | Descriptor | Pi `model` |
 |---|---|
-| `codex:<model>@<effort>` | `openai-codex/<model>:<effort>` |
+| `codex:<model>@<effort>` | `magpie/codex/<model>:<effort>` |
 | `magpie:<model>@<effort>` | `magpie/<model>:<effort>` |
 | `inherit-parent`, `auto` | omit `model` |
 | `claude:*`, `grok:*` | not routed (named dropout) |

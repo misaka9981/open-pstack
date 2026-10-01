@@ -52,9 +52,9 @@ The top-level harness resolves the route once. A child receives an assigned prov
 |---|---|---|---|---|
 | Claude Code | native `Agent` | external runner | external runner | not routed |
 | Codex | external runner | native `spawn_agent` | external runner | external runner |
-| Pi | not routed | native `subagent` (`openai-codex`) | not routed | native `subagent` (`magpie`) |
+| Pi | not routed | native `subagent` (`magpie/codex/…`) | not routed | native `subagent` (`magpie`) |
 
-A `not routed` cell is a named dropout. Claude Code keeps its configured providers and does not use the relay. A Pi parent reaches Codex models through Pi's `openai-codex` provider and relay models through its `magpie` provider; it has no route to Claude or Grok.
+A `not routed` cell is a named dropout. Claude Code keeps its configured providers and does not use the relay. A Pi parent reaches Codex models as the relay's `codex/` models and the other relay models directly, all through Pi's `magpie` provider; it has no route to Claude or Grok.
 
 A Codex parent reaches `magpie:*` only through the external runner. `spawn_agent` has no provider parameter, and a spawned child ignores an agent profile's `model_provider`: the child keeps the parent's provider and rejects the relay model id. This table assumes the Codex parent runs on its default provider.
 
