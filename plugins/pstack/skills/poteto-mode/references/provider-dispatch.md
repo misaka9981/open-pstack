@@ -23,7 +23,14 @@ The allowed effort universe is exactly `low`, `medium`, `high`, `xhigh`, `max`. 
 
 `magpie` is a local relay that Codex reaches through a `model_providers.magpie` entry in the user's `~/.codex/config.toml`. Its descriptors name the relay's model id, which may contain `/`: `magpie:wevnal/glm-5.3@high`. Split a descriptor on the first `:` and the last `@`. The runner never reads the relay URL; Codex resolves the provider name from the user's config.
 
-Relay models are not matrix families. Setup does not offer them yet, so a sheet uses one only when the operator writes the descriptor by hand. A relay model with the same name as a family model is still a different lane. Never rewrite `claude:opus` to `magpie:wevnal/claude-opus-5-5` or the reverse.
+Setup offers only the relay families below. They stay outside the model matrix, so they never join the first-run defaults or the default panel. A role uses one only when the operator assigns it. A relay model with the same name as a family model is still a different lane. Never rewrite `claude:opus` to `magpie:wevnal/claude-opus-5-5` or the reverse.
+
+| Family | Provider | Model | Default effort | Selectable efforts |
+|---|---|---|---|---|
+| deepseek-flash | magpie | wevnal/deepseek-v4.1-flash | max | low medium high xhigh max |
+| glm-flash | magpie | wevnal/glm-5.3-flash | max | low medium high xhigh max |
+
+Each selectable effort passed a one-turn runner probe through the relay. That proves the relay accepts the effort, not the reasoning depth it applies.
 
 ## Where the sheet lives
 

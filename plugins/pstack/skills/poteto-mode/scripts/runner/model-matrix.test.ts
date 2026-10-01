@@ -21,6 +21,14 @@ const MATRIX_HEADER = [
   "Claude-native agent stem",
 ] as const;
 
+const RELAY_HEADER = [
+  "Family",
+  "Provider",
+  "Model",
+  "Default effort",
+  "Selectable efforts",
+] as const;
+
 const FAMILY_ORDER = ["fable", "sol", "grok", "opus"] as const;
 const MATRIX_PROVIDERS = ["claude", "codex", "grok"] as const;
 const DESCRIPTOR_RE =
@@ -157,6 +165,48 @@ function parseModelMatrix(markdown: string): MatrixRow[] {
       defaultEffort,
       selectableEfforts,
       claudeNativeAgentStem,
+    };
+  });
+}
+
+interface RelayRow {
+  family: string;
+  provider: string;
+  model: string;
+  defaultEffort: Effort;
+  selectableEfforts: Effort[];
+}
+
+function parseRelayFamilies(markdown: string): RelayRow[] {
+  const lines = markdown.split(/\r?\n/);
+  const start = lines.findIndex((line) => line.trim() === "## Relay providers");
+  if (start < 0) {
+    throw new Error("missing ## Relay providers");
+  }
+  const end = lines.findIndex((line, i) => i > start && line.startsWith("## "));
+  const table = lines
+    .slice(start + 1, end < 0 ? lines.length : end)
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith("|"));
+  const header = splitRow(table[0]);
+  if (header.join("|") !== RELAY_HEADER.join("|")) {
+    throw new Error(`unexpected relay header: ${header.join(" | ")}`);
+  }
+  if (!isSeparator(splitRow(table[1]))) {
+    throw new Error("relay header separator missing");
+  }
+  return table.slice(2).map((line) => {
+    const cells = splitRow(line);
+    if (cells.length !== RELAY_HEADER.length) {
+      throw new Error(`relay row has ${cells.length} cells: ${line}`);
+    }
+    const [family, provider, model, defaultEffortRaw, selectableRaw] = cells;
+    return {
+      family,
+      provider,
+      model,
+      defaultEffort: asEffort(defaultEffortRaw),
+      selectableEfforts: selectableRaw.split(/\s+/).map(asEffort),
     };
   });
 }
@@ -307,6 +357,27 @@ describe("model matrix", () => {
         throw new Error(`missing first-run panel row: ${role}`);
       }
       expect(line).toBe(`${role}: ${expectedPanel}`);
+    }
+  });
+
+  it("keeps relay families selectable but outside the matrix defaults", () => {
+    const relays = parseRelayFamilies(readFileSync(DISPATCH_PATH, "utf8"));
+    expect(relays.map((row) => [row.family, row.provider, row.model])).toEqual([
+      ["deepseek-flash", "magpie", "wevnal/deepseek-v4.1-flash"],
+      ["glm-flash", "magpie", "wevnal/glm-5.3-flash"],
+    ]);
+    const matrixFamilies = new Set(rows.map((row) => row.family));
+    const matrixPairs = new Set(rows.map((row) => `${row.provider}:${row.model}`));
+    const sheet = firstRunSheet(setup);
+    for (const row of relays) {
+      expect(matrixFamilies.has(row.family)).toBe(false);
+      expect(matrixPairs.has(`${row.provider}:${row.model}`)).toBe(false);
+      expect(row.selectableEfforts).toEqual(
+        EFFORTS.filter((effort) => row.selectableEfforts.includes(effort))
+      );
+      expect(row.selectableEfforts).toContain(row.defaultEffort);
+      expect(sheet).not.toContain(`${row.provider}:${row.model}@`);
+      expect(setup).toContain(`| ${row.family} relay row + selected effort | not routed |`);
     }
   });
 

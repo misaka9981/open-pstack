@@ -2,6 +2,10 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.5.3 lets setup offer two relay families
+
+`provider-dispatch.md` adds a relay family table with `deepseek-flash` (`magpie:wevnal/deepseek-v4.1-flash`) and `glm-flash` (`magpie:wevnal/glm-5.3-flash`). Both accept every effort from `low` to `max`; each passed a one-turn runner probe. `setup-pstack` maps, asks efforts for, probes, and preserves these families like matrix families. They stay outside the model matrix, so first-run defaults and the default panel do not change, and a Claude Code parent does not route them. `model-matrix.test.ts` keeps the relay table separate from the matrix.
+
 ## 1.5.2 routes magpie relay lanes
 
 `pstack-runner` accepts `--provider magpie` for the local relay that Codex and Pi use. A magpie lane runs `codex exec` with `model_provider="magpie"` and the same sandbox, feature, and JSONL flags as a `codex` lane. A Codex parent reaches `magpie:*` only through the runner, because `spawn_agent` has no provider parameter and a spawned child ignores an agent profile's `model_provider`. Claude Code does not route magpie. The preflight only proves that the Codex CLI exists, so the one invocation proves the relay and model. A rejected id is an `unavailable-model` dropout, and a sandboxed Codex parent that cannot start the nested CLI is a `child-failed` dropout. Setup does not offer relay models yet.

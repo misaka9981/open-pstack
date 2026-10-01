@@ -37,7 +37,7 @@ Treat the normalized values as current role-to-family assignments. Overlay those
 
 ### 3. Parse per-family efforts
 
-Read the model matrix. Every non-alias value must match `<provider>:<model>@<effort>`. Map it to exactly one matrix family by `(provider, model)`, require its effort to appear in that row's Selectable efforts cell, and collect the effort. `inherit-parent` and `auto` rows carry no family effort.
+Read the model matrix and the relay family table in `provider-dispatch.md`. Every non-alias value must match `<provider>:<model>@<effort>`, split on the first `:` and the last `@`. Map it to exactly one matrix or relay family by `(provider, model)`, require its effort to appear in that row's Selectable efforts cell, and collect the effort. `inherit-parent` and `auto` rows carry no family effort.
 
 An unmatched provider/model, out-of-domain effort, duplicate role, or unknown non-retired role is inconsistent state. Stop, show the conflicting rows verbatim, and ask for an explicit matrix family or alias replacement. If one or more families have mixed efforts, show every conflicting family and role row, then ask for one normalized effort per family from its Selectable efforts cell. Do not invent a precedence rule. Do not probe or write while any inconsistency is unresolved.
 
@@ -52,17 +52,17 @@ Ask one budget question with these four labels. Prefer `AskUserQuestion` over fr
 - `medium — high reasoning`
 - `small — medium reasoning`
 
-`unlimited` proposes each family's matrix Default effort. `large`, `medium`, and `small` propose `xhigh`, `high`, or `medium` for every family. The budget only sets the proposals in step 6. It never changes a role's family or an alias.
+`unlimited` proposes each family's Default effort. `large`, `medium`, and `small` propose `xhigh`, `high`, or `medium` for every family. The budget only sets the proposals in step 6. It never changes a role's family or an alias.
 
 ### 5. Choose role families
 
-Show every role with its current family or alias, and every retired row step 2 dropped. Ask whether to keep those role-to-family assignments or change named roles. Keeping them is the default. Apply only role changes the operator names; never offer a reset of a customized sheet to the first-run assignments. A changed role may use any matrix family, `inherit-parent`, or `auto`.
+Show every role with its current family or alias, and every retired row step 2 dropped. Ask whether to keep those role-to-family assignments or change named roles. Keeping them is the default. Apply only role changes the operator names; never offer a reset of a customized sheet to the first-run assignments. A changed role may use any matrix or relay family, `inherit-parent`, or `auto`.
 
-Assign a role only to a family whose provider this parent can reach. If the operator lacks a provider, for example the Grok CLI, move each of its roles to another family or an alias here. Setup never substitutes a family on its own. A family with no remaining non-alias occurrence is unused. It needs no effort, probe, or sheet entry.
+Assign a role only to a family whose provider this parent can reach. A Claude Code parent does not route relay families. If the operator lacks a provider, for example the Grok CLI, move each of its roles to another family or an alias here. Setup never substitutes a family on its own. A family with no remaining non-alias occurrence is unused. It needs no effort, probe, or sheet entry.
 
 ### 6. Collect one requested effort per used family
 
-Ask one effort question for each matrix family the role map from step 5 uses, in matrix row order. Name each model, its current value when it has one, the budget's proposal, and the Selectable efforts from its matrix row. Empty input accepts the budget's proposal. Do not ask about an unused family.
+Ask one effort question for each matrix or relay family the role map from step 5 uses, in matrix row order and then relay row order. Name each model, its current value when it has one, the budget's proposal, and the Selectable efforts from its matrix row. Empty input accepts the budget's proposal. Do not ask about an unused family.
 
 ### 7. Probe the requested pairs
 
@@ -74,6 +74,8 @@ Probe only the selected `provider:model@effort` pair of each used family. Run on
 | Sol | Sol matrix row + selected effort | `codex exec` | native `spawn_agent` | `codex login status` plus one-turn probe or native one-turn probe |
 | Grok | Grok matrix row + selected effort | Grok CLI | Grok CLI | `grok models` must list the requested model; one-turn probe |
 | Opus | Opus matrix row + selected effort | native Agent `pstack-opus-<effort>` | Claude CLI | native one-turn probe or `claude auth status --json` plus one-turn probe |
+| DeepSeek Flash | deepseek-flash relay row + selected effort | not routed | `codex exec` on `magpie` | one-turn runner probe; preflight proves only the Codex CLI |
+| GLM Flash | glm-flash relay row + selected effort | not routed | `codex exec` on `magpie` | one-turn runner probe; preflight proves only the Codex CLI |
 
 Use a tiny read-only probe that returns a unique marker. A login-status command alone proves credentials, not that the requested model and effort flags run. Record native and external results separately. Never call the external launcher for the parent's own provider. On a Claude parent, the Fable and Opus probes are one-turn runs of the mapped `pstack-<stem>-<effort>` agent. On a Codex parent, the Sol probe is native `spawn_agent` with the selected `reasoning_effort`. Every other pair uses the external runner with the selected effort flag.
 
@@ -86,7 +88,7 @@ Build the new sheet in memory. Do not write it yet.
 - First run: start from the complete role assignments in step 9.
 - Rerun: start from the normalized complete role map from step 2, preserving each loaded row's lane order and family (or alias) per lane.
 
-Apply the role changes from step 5. Rewrite every matrix-family descriptor to `provider:model@<requested effort for that family>`. Leave `inherit-parent` and `auto` unchanged. An effort-only rerun cannot change a role's family. Changing Grok's effort updates every Grok occurrence and does not move a Sol role onto Grok. Refuse an unqualified slug, an unavailable route, a model other than the four matrix families, a provider/model mismatch, or a family that step 7 did not probe.
+Apply the role changes from step 5. Rewrite every matrix- or relay-family descriptor to `provider:model@<requested effort for that family>`. Leave `inherit-parent` and `auto` unchanged. An effort-only rerun cannot change a role's family. Changing Grok's effort updates every Grok occurrence and does not move a Sol role onto Grok. Refuse an unqualified slug, an unavailable route, a model outside the matrix and relay families, a provider/model mismatch, or a family that step 7 did not probe.
 
 Add one `<!-- budget: <label> (<target effort>) -->` comment line with the step 4 answer, using `max` as the target for `unlimited`. It is an HTML comment so that it is neither a heading nor a role row. It records the answer and is not a setting. The descriptors keep the only effort values, so a later hand edit of a descriptor wins.
 
