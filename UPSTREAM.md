@@ -1,6 +1,6 @@
 # Upstream synchronization
 
-open-pstack tracks [Cursor's pstack](https://github.com/cursor/plugins/tree/main/pstack) while adapting Cursor-specific primitives for Claude Code and Codex.
+open-pstack tracks [Cursor's pstack](https://github.com/cursor/plugins/tree/main/pstack) while adapting Cursor-specific primitives for Claude Code, Codex, and Pi.
 
 ## Current sync point
 
@@ -10,9 +10,9 @@ open-pstack tracks [Cursor's pstack](https://github.com/cursor/plugins/tree/main
 | Path | `pstack/` |
 | Commit | `12d587dfb20741cafc376c42c696c5f6e2a64487` |
 | Upstream version | `0.15.5` |
-| open-pstack version | `1.5.3` |
+| open-pstack version | `1.5.4` |
 
-The table above is the current Cursor sync point. Open Pstack 1.5.3 imports this 0.15.5 sync. `README-UPSTREAM.md` preserves the upstream pstack README verbatim. `CHANGES.md` and `NOTICE.md` describe the adaptations and provenance.
+The table above is the current Cursor sync point. Open Pstack 1.5.4 imports this 0.15.5 sync. `README-UPSTREAM.md` preserves the upstream pstack README verbatim. `CHANGES.md` and `NOTICE.md` describe the adaptations and provenance.
 
 ## Upstream-only exclusions
 
@@ -45,10 +45,10 @@ No output means the tracked pstack tree has not changed. This comparison does no
 ## Incorporate a change
 
 1. Create or update a GitHub issue in `ericlitman/open-pstack` and branch from current `main`.
-2. Read each upstream pstack commit in order. Bring over its intent and content, then apply only the Claude Code and Codex substitutions documented in `CHANGES.md`.
-3. Keep one shared `plugins/pstack/skills/` tree. Put harness translation in the existing `codex-tools.md` and provider routing in `provider-dispatch.md`; do not fork a skill per harness.
+2. Read each upstream pstack commit in order. Bring over its intent and content, then apply only the Claude Code, Codex, and Pi substitutions documented in `CHANGES.md`.
+3. Keep one shared `plugins/pstack/skills/` tree. Put harness translation in the existing `codex-tools.md` and `pi-tools.md` and provider routing in `provider-dispatch.md`; do not fork a skill per harness.
 4. Update the commit and version in this file, the affected provenance rows in `NOTICE.md`, and `README-UPSTREAM.md` when upstream changes it.
-5. Run CI-equivalent checks locally, then run the installed Claude Code and Codex behavioral lanes required by the changed surface. Unit tests alone are not a release gate.
+5. Run CI-equivalent checks locally, then run the installed Claude Code, Codex, and Pi behavioral lanes required by the changed surface. Unit tests alone are not a release gate.
 6. Merge the reviewed PR before tagging the next open-pstack release.
 
 Cursor's version and open-pstack's version are independent. Cursor's version identifies the imported content; open-pstack's version identifies the cross-harness distribution.

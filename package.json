@@ -1,0 +1,12 @@
+{
+  "name": "open-pstack",
+  "private": true,
+  "description": "pstack for Pi: the shared skill tree and pstack's pi-subagents agents.",
+  "keywords": ["pi-package"],
+  "pi": {
+    "skills": ["./plugins/pstack/skills"],
+    "subagents": {
+      "agents": ["./plugins/pstack/pi-agents"]
+    }
+  }
+}

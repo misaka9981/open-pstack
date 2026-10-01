@@ -32,7 +32,7 @@ pstack does not ask you to trust an agent on day one. It helps the agent leave e
 
 ## Install
 
-You need a current Claude Code or Codex installation. For the full four-model review, install and sign in to the Claude Code, Codex, and Grok command-line tools. [Bun](https://bun.sh) runs the small local tool that starts models outside the app you are using. You can still use the core workflows with fewer models.
+You need a current Claude Code, Codex, or Pi installation. For the full four-model review, install and sign in to the Claude Code, Codex, and Grok command-line tools. [Bun](https://bun.sh) runs the small local tool that starts models outside the app you are using. You can still use the core workflows with fewer models.
 
 ### Claude Code
 
@@ -61,6 +61,17 @@ multi_agent = true
 ```
 
 Start a new Codex task after installation so it can discover the new skills and setting.
+
+### Pi
+
+Pi delegates through [pi-subagents](https://pi.dev/packages/pi-subagents). Install it, then install Open Pstack from a local checkout:
+
+```shell
+pi install npm:pi-subagents
+pi install /path/to/open-pstack
+```
+
+Invoke the main entry point with `/skill:poteto-mode`. Pi reaches Codex models through its `openai-codex` provider and relay models through `magpie`; it has no route to Claude or Grok.
 
 ## Get started
 
@@ -155,7 +166,7 @@ This repository also keeps:
 
 ## Staying close to Lauren's pstack
 
-Open Pstack 1.5.3 tracks pstack 0.15.5 at Cursor commit [`12d587dfb20741cafc376c42c696c5f6e2a64487`](https://github.com/cursor/plugins/commit/12d587dfb20741cafc376c42c696c5f6e2a64487).
+Open Pstack 1.5.4 tracks pstack 0.15.5 at Cursor commit [`12d587dfb20741cafc376c42c696c5f6e2a64487`](https://github.com/cursor/plugins/commit/12d587dfb20741cafc376c42c696c5f6e2a64487).
 
 The two projects have separate version numbers. The pstack version identifies Lauren's upstream content. The Open Pstack version identifies the Claude Code and Codex package built from it.
 
@@ -165,7 +176,7 @@ In this repository, “upstream” means Lauren's original pstack. Open Pstack d
 
 Fixes for Claude Code or Codex and help bringing over new pstack releases are welcome. Search [GitHub Issues](https://github.com/ericlitman/open-pstack/issues) before opening a new issue. For larger behavior changes, explain why the change belongs in Open Pstack instead of Lauren's original project.
 
-Read [UPSTREAM.md](UPSTREAM.md) before changing content brought over from Lauren's pstack. Pull requests must keep one shared skill tree for Claude Code and Codex and pass the repository's tests, type checks, plugin validation, and static checks.
+Read [UPSTREAM.md](UPSTREAM.md) before changing content brought over from Lauren's pstack. Pull requests must keep one shared skill tree for Claude Code, Codex, and Pi and pass the repository's tests, type checks, plugin validation, and static checks.
 
 ## License
 
