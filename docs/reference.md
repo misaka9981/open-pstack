@@ -2,9 +2,9 @@
 
 This page contains the full skill, dependency, runtime, and porting reference. For the plain-English introduction and quick start, see the [main README](../README.md).
 
-[Poteto](https://x.com/poteto)'s [pstack](https://github.com/cursor/plugins/tree/main/pstack), adapted to run in Claude Code and Codex without Cursor. One shared skill tree serves both harnesses; Grok remains available as a model-provider lane. Version 1.5.5 is synced to Cursor pstack v0.15.5 at `12d587dfb20741cafc376c42c696c5f6e2a64487`. See [UPSTREAM.md](../UPSTREAM.md) for the exact sync contract.
+[Poteto](https://x.com/poteto)'s [pstack](https://github.com/cursor/plugins/tree/main/pstack), adapted to run in Claude Code and Codex without Cursor. One shared skill tree serves both harnesses; Grok remains available as a model-provider lane. Version 1.5.6 is synced to Cursor pstack v0.15.5 at `12d587dfb20741cafc376c42c696c5f6e2a64487`. See [UPSTREAM.md](../UPSTREAM.md) for the exact sync contract.
 
-Original by Lauren Tan. This distribution builds on Michael Denyer's [pstack-claude](https://github.com/michael-denyer/pstack-claude) port and retains its history and MIT attribution. It imports seven MIT-licensed skills from [cursor-team-kit](https://github.com/cursor/plugins/tree/main/cursor-team-kit): `deslop`, `thermo-nuclear-code-quality-review`, `make-pr-easy-to-review`, `fix-ci`, `fix-merge-conflicts`, `get-pr-comments`, `what-did-i-get-done`.
+Original by Lauren Tan. This distribution builds on Michael Denyer's [pstack-claude](https://github.com/michael-denyer/pstack-claude) port and retains its history and MIT attribution. It imports one MIT-licensed skill, `deslop`, from [cursor-team-kit](https://github.com/cursor/plugins/tree/main/cursor-team-kit), because pstack routes to it.
 
 > if you want to go fast, go deep first. pstack helps you write less, but higher quality code. rigorous agent workflows you can parallelize with confidence.
 
@@ -59,7 +59,7 @@ The marketplace install is the normal user path. Direct links are only for testi
 ├── plugins/pstack/                   # the plugin itself
 │   ├── .claude-plugin/plugin.json    # Claude Code manifest
 │   ├── .codex-plugin/plugin.json     # Codex manifest (skills: ./skills/)
-│   ├── skills/                       # 54 skills shared by Claude Code, Codex, and Pi
+│   ├── skills/                       # 48 skills shared by Claude Code, Codex, and Pi
 │   │   ├── poteto-mode/references/{codex-tools,provider-dispatch}.md  # tool + provider routing
 │   │   └── poteto-mode/scripts/      # bun/bash/node tooling: watch-pr, orch, runner, check-plan.mjs, worktree-audit.sh
 │   ├── hooks/                        # SessionStart auto-fire: injects the poteto-mode mandate (Claude Code only)
@@ -112,7 +112,7 @@ Not declared as deps, but referenced in skill bodies:
 - **Claude Code, Codex, and Grok Build CLIs** — the external runner uses the assigned subscribed CLI directly. Install and authenticate only the providers present in your model sheet. Same-provider work stays native; the runner refuses it.
 - **`jq` and `rg` (ripgrep)** — only for `scripts/worktree-audit.sh` (the Worktree cleanup playbook). Without them the audit still runs but blanks its PR and LAST_CHAT columns, so it warns on stderr rather than returning a table that looks complete.
 
-No third-party plugins. The harsher-critique escape hatch lives in the bundled `thermo-nuclear-code-quality-review` skill (imported from cursor-team-kit), not in an external plugin.
+No third-party plugins.
 
 ## Skills
 
@@ -145,12 +145,6 @@ The table uses the short upstream names. Claude Code exposes each native skill w
 | `/maintain-verification-skill` | re-sync a drifted verification skill and its feature map |
 | `/deslop` | deslop a diff before commit |
 | `/babysit` | monitor an open PR, fix CI/comments, keep it merge-ready |
-| `/thermo-nuclear-code-quality-review` | extremely strict maintainability audit |
-| `/make-pr-easy-to-review` | clean noisy history and improve PR description before review |
-| `/fix-ci` | find failing PR checks, inspect logs, apply focused fixes |
-| `/fix-merge-conflicts` | non-interactively resolve merge conflicts, validate, finalize |
-| `/get-pr-comments` | fetch and summarize review comments from the active PR |
-| `/what-did-i-get-done` | summarize authored commits over a user-chosen period |
 
 ## Subagents
 
@@ -168,12 +162,6 @@ The port is editorial, not mechanical. Anywhere upstream pstack assumed Cursor-s
 
 - **`skills/babysit/`** — Claude Code analog of Cursor's closed-source `/babysit` built-in. Wraps `gh pr view` / `gh pr checks` / `gh run view --log-failed` plus the `loop` skill for pacing. Independently authored; workflow informed by Cursor's public `/babysit` behavior — not a copy of Cursor's implementation. Since the v0.14.2 sync, poteto-mode routes PR-status requests to the ported `playbooks/babysit.md` instead, and this skill is the standalone `/babysit` entry point.
 - **`skills/deslop/`** — imported verbatim from `cursor-team-kit`. Cleans AI tells out of diffs before commit.
-- **`skills/thermo-nuclear-code-quality-review/`** — imported verbatim from `cursor-team-kit`.
-- **`skills/make-pr-easy-to-review/`** — imported verbatim from `cursor-team-kit`. Composes with `opening-a-pr` and `babysit`.
-- **`skills/fix-ci/`** — imported verbatim from `cursor-team-kit`. Narrower CI-fix primitive that `babysit` can route to.
-- **`skills/fix-merge-conflicts/`** — imported verbatim from `cursor-team-kit`. Pairs with `babysit` step 5.
-- **`skills/get-pr-comments/`** — imported verbatim from `cursor-team-kit`. Primitive for `babysit` step 4 and `reflect`.
-- **`skills/what-did-i-get-done/`** — imported verbatim from `cursor-team-kit`. Commit summary over a chosen period.
 
 ### What's substituted in skill bodies
 
@@ -216,7 +204,7 @@ The earlier port collapsed panels to Claude-only models. The bundled runner rest
 - **Model-rejection fallbacks** (upstream `70b2dc8`, `12d587d`). Upstream reruns a rejected slug on its family default or the closest valid slug. Open Pstack reports a named dropout instead, per its no-fallback contract.
 - **Sticky mode** (upstream `#144`) — Cursor-only `mode`/`icon`/`color`/`reminder` frontmatter with no Claude Code equivalent. The port's 0.9.5 SessionStart hook is the analog and already carries the non-trivial / trivial / opt-out logic.
 - **`is_background: true` on `poteto-agent`** (upstream `99559f2`) — Cursor names this key differently. Claude-native frontier definitions use `background: true`; ad-hoc `poteto-agent` calls remain background dispatches at the call site.
-- **`cursor-team-kit` beyond the seven imported skills** — the rest either duplicate Claude Code built-ins (`verify-this` → the `verify` skill and built-in verification discipline; `check-compiler-errors` → LSP diagnostics; `control-cli`/`control-ui` → `run`/`verify`, already the substitution targets) or overlap skills this port ships (`loop-on-ci`, `review-and-ship`, `weekly-review` vs `babysit`, `fix-ci`, `make-pr-easy-to-review`, `what-did-i-get-done`). `pr-review-canvas` is Cursor-UI-specific.
+- **`cursor-team-kit` beyond `deslop`** — pstack routes only to `deslop`. The rest are not pstack skills: they duplicate Claude Code built-ins (`verify-this` → the `verify` skill and built-in verification discipline; `check-compiler-errors` → LSP diagnostics; `control-cli`/`control-ui` → `run`/`verify`, already the substitution targets) or stand outside pstack's workflows (`loop-on-ci`, `review-and-ship`, `weekly-review`, `fix-ci`, `make-pr-easy-to-review`, `what-did-i-get-done`, `thermo-nuclear-code-quality-review`). `pr-review-canvas` is Cursor-UI-specific.
 
 ### Forking note
 
@@ -227,5 +215,5 @@ Editing skill bodies forks this from upstream. Re-syncing to a future pstack rel
 MIT. Three upstream LICENSE files are preserved:
 
 - [LICENSE](../LICENSE) — pstack (Lauren Tan)
-- [LICENSE-cursor-team-kit](../LICENSE-cursor-team-kit) — Cursor (covers the `deslop` and `thermo-nuclear-code-quality-review` skills)
+- [LICENSE-cursor-team-kit](../LICENSE-cursor-team-kit) — Cursor (covers the `deslop` skill)
 - [LICENSE-superpowers](../LICENSE-superpowers) — superpowers, Jesse Vincent (covers the vendored `hooks/run-hook.cmd`)
