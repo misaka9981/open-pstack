@@ -1,6 +1,6 @@
 ---
 name: setup-pstack
-description: Configure pstack's provider-qualified models, reasoning budget, per-family requested effort, and parent-owned routes per role. Verifies each native or external Claude, Codex, and Grok lane the sheet uses before writing it. Use for /setup-pstack, "configure pstack models", "pstack budget", or changing pstack's model choices.
+description: Configure pstack's provider-qualified models, reasoning budget, per-family requested effort, and parent-owned routes per role. Verifies each native or external Claude, Codex, Grok, and relay lane the sheet uses before writing it. Use for /setup-pstack, "configure pstack models", "pstack budget", or changing pstack's model choices.
 ---
 
 # Setup pstack
@@ -21,13 +21,15 @@ Codex writes `~/.codex/pstack-models.md`. Codex has no `@` include, so mirror th
 <!-- pstack:models:end -->
 ```
 
+Pi writes `~/.pi/agent/pstack-models.md` (under `PI_CODING_AGENT_DIR` when set) and mirrors its exact bytes into the same bounded block in `~/.pi/agent/AGENTS.md`.
+
 On Claude Code, first check for a `<pstack-model-sheet>` block injected at session start, or a `pstack-models.md` at the installed plugin root. If either exists, the repository owns the sheet. Report its path and role map, say that model changes go into that file in the repository followed by a plugin update, and stop without probing or writing. See the sheet location rule in `provider-dispatch.md`.
 
 ## Steps
 
 ### 1. Establish the parent
 
-Use the harness and tool surface running this skill: Claude Code or Codex. Environment markers may corroborate that top-level answer, but do not launch a child and ask it to detect where it came from. Record the parent because the same descriptor takes a different route in each harness.
+Use the harness and tool surface running this skill: Claude Code, Codex, or Pi. Environment markers may corroborate that top-level answer, but do not launch a child and ask it to detect where it came from. Record the parent because the same descriptor takes a different route in each harness.
 
 ### 2. Load current state
 
@@ -58,7 +60,7 @@ Ask one budget question with these four labels. Prefer `AskUserQuestion` over fr
 
 Show every role with its current family or alias, and every retired row step 2 dropped. Ask whether to keep those role-to-family assignments or change named roles. Keeping them is the default. Apply only role changes the operator names; never offer a reset of a customized sheet to the first-run assignments. A changed role may use any matrix or relay family, `inherit-parent`, or `auto`.
 
-Assign a role only to a family whose provider this parent can reach. A Claude Code parent does not route relay families. If the operator lacks a provider, for example the Grok CLI, move each of its roles to another family or an alias here. Setup never substitutes a family on its own. A family with no remaining non-alias occurrence is unused. It needs no effort, probe, or sheet entry.
+Assign a role only to a family whose provider this parent can reach. A Claude Code parent does not route relay families. A Pi parent reaches only the Sol family and the relay families; move every Fable, Opus, and Grok role to one of them or to an alias. If the operator lacks a provider, for example the Grok CLI, move each of its roles to another family or an alias here. Setup never substitutes a family on its own. A family with no remaining non-alias occurrence is unused. It needs no effort, probe, or sheet entry.
 
 ### 6. Collect one requested effort per used family
 
@@ -68,16 +70,16 @@ Ask one effort question for each matrix or relay family the role map from step 5
 
 Probe only the selected `provider:model@effort` pair of each used family. Run one probe per family, even when two families share a provider. Do not enumerate or offer older models as substitutes. A failed probe writes nothing: report the failing pair and provider, stop, and keep the active sheet plus parent integration bytes unchanged. A failed first run creates neither artifact. To drop an unavailable provider, rerun and reassign its roles in step 5.
 
-| Family | Pair source | Claude parent route | Codex parent route | Availability proof |
-|---|---|---|---|---|
-| Fable | Fable matrix row + selected effort | native Agent `pstack-fable-<effort>` | Claude CLI | native one-turn probe or `claude auth status --json` plus one-turn probe |
-| Sol | Sol matrix row + selected effort | `codex exec` | native `spawn_agent` | `codex login status` plus one-turn probe or native one-turn probe |
-| Grok | Grok matrix row + selected effort | Grok CLI | Grok CLI | `grok models` must list the requested model; one-turn probe |
-| Opus | Opus matrix row + selected effort | native Agent `pstack-opus-<effort>` | Claude CLI | native one-turn probe or `claude auth status --json` plus one-turn probe |
-| DeepSeek Flash | deepseek-flash relay row + selected effort | not routed | `codex exec` on `magpie` | one-turn runner probe; preflight proves only the Codex CLI |
-| GLM Flash | glm-flash relay row + selected effort | not routed | `codex exec` on `magpie` | one-turn runner probe; preflight proves only the Codex CLI |
+| Family | Pair source | Claude parent route | Codex parent route | Pi parent route | Availability proof |
+|---|---|---|---|---|---|
+| Fable | Fable matrix row + selected effort | native Agent `pstack-fable-<effort>` | Claude CLI | not routed | native one-turn probe or `claude auth status --json` plus one-turn probe |
+| Sol | Sol matrix row + selected effort | `codex exec` | native `spawn_agent` | `subagent` `openai-codex/gpt-5.6-sol` | `codex login status` plus one-turn probe or native one-turn probe |
+| Grok | Grok matrix row + selected effort | Grok CLI | Grok CLI | not routed | `grok models` must list the requested model; one-turn probe |
+| Opus | Opus matrix row + selected effort | native Agent `pstack-opus-<effort>` | Claude CLI | not routed | native one-turn probe or `claude auth status --json` plus one-turn probe |
+| DeepSeek Flash | deepseek-flash relay row + selected effort | not routed | `codex exec` on `magpie` | `subagent` `magpie/wevnal/deepseek-v4.1-flash` | Codex: one-turn runner probe, whose preflight proves only the Codex CLI. Pi: native one-turn probe |
+| GLM Flash | glm-flash relay row + selected effort | not routed | `codex exec` on `magpie` | `subagent` `magpie/wevnal/glm-5.3-flash` | Codex: one-turn runner probe, whose preflight proves only the Codex CLI. Pi: native one-turn probe |
 
-Use a tiny read-only probe that returns a unique marker. A login-status command alone proves credentials, not that the requested model and effort flags run. Record native and external results separately. Never call the external launcher for the parent's own provider. On a Claude parent, the Fable and Opus probes are one-turn runs of the mapped `pstack-<stem>-<effort>` agent. On a Codex parent, the Sol probe is native `spawn_agent` with the selected `reasoning_effort`. Every other pair uses the external runner with the selected effort flag.
+Use a tiny read-only probe that returns a unique marker. A login-status command alone proves credentials, not that the requested model and effort flags run. Record native and external results separately. Never call the external launcher for the parent's own provider. On a Claude parent, the Fable and Opus probes are one-turn runs of the mapped `pstack-<stem>-<effort>` agent. On a Codex parent, the Sol probe is native `spawn_agent` with the selected `reasoning_effort`. On a Pi parent, every probe is one child of an async pi-subagents workflow with agent `pstack.lane-readonly` and the mapped `<pi provider>/<model>:<effort>`, as [`pi-tools.md`](../poteto-mode/references/pi-tools.md) specifies. It passes when the child returns the marker and its transcript reports the mapped provider and model. Every other pair uses the external runner with the selected effort flag.
 
 Receipts and native transcripts prove the requested effort and the route. They do not prove a provider's hidden applied reasoning depth. There is no implicit timeout, weaker-model fallback, same-provider external fallback, or second mutable configuration source.
 
@@ -127,7 +129,7 @@ interrogate reviewers: claude:fable@max, codex:gpt-5.6-sol@max, grok:grok-4.6@xh
 
 ### 10. Wire it in
 
-Render the parent integration in memory before either write. On Claude, the integration is the single `@~/.claude/pstack-models.md` include in `~/.claude/CLAUDE.md`. On Codex, it is the exact sheet bytes between one `<!-- pstack:models:begin -->` and `<!-- pstack:models:end -->` pair in `~/.codex/AGENTS.md`. Replace that whole bounded block on a rerun. Insert one block at the end on first run. If either marker is missing, duplicated, or reversed, stop and report inconsistent state instead of guessing a boundary.
+Render the parent integration in memory before either write. On Claude, the integration is the single `@~/.claude/pstack-models.md` include in `~/.claude/CLAUDE.md`. On Codex, it is the exact sheet bytes between one `<!-- pstack:models:begin -->` and `<!-- pstack:models:end -->` pair in `~/.codex/AGENTS.md`. On Pi, it is the same bounded block in `~/.pi/agent/AGENTS.md`. Replace that whole bounded block on a rerun. Insert one block at the end on first run. If either marker is missing, duplicated, or reversed, stop and report inconsistent state instead of guessing a boundary.
 
 Snapshot every target's current bytes. Write the sheet and parent integration only after every step 7 probe passes and the operator confirms. Read both targets back and compare them with the in-memory render. If either write or readback fails, restore every snapshot and report the failure. An unchanged rerun must produce byte-identical sheet and integration content after normalization.
 
@@ -135,6 +137,6 @@ Do not copy the model sheet between harnesses without rerunning the parent-speci
 
 ### 11. Behavioral smoke
 
-Before declaring setup complete, run one small read-only mixed panel from this parent: every distinct descriptor in the written sheet, distinct output/receipt paths, and an independent cross-judge. Launch Claude-native agents and every external process in the background with retained handles, then drain them. Verify the native transcript entries and every external receipt. A structural config check or unit test is not a substitute.
+Before declaring setup complete, run one small read-only mixed panel from this parent: every distinct descriptor in the written sheet, distinct output/receipt paths, and an independent cross-judge. Launch Claude-native agents and every external process in the background with retained handles, then drain them. On Pi, launch the panel as one async workflow and verify each child transcript. Verify the native transcript entries and every external receipt. A structural config check or unit test is not a substitute.
 
 Report the sheet path, parent route table, requested-effort probe results, smoke results, and external elapsed/token/cost receipts. Re-running this skill re-probes and updates the same sheet. Do not claim the provider exposed hidden applied-effort observability.

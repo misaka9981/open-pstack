@@ -377,8 +377,22 @@ describe("model matrix", () => {
       );
       expect(row.selectableEfforts).toContain(row.defaultEffort);
       expect(sheet).not.toContain(`${row.provider}:${row.model}@`);
-      expect(setup).toContain(`| ${row.family} relay row + selected effort | not routed |`);
+      expect(setup).toContain(
+        `| ${row.family} relay row + selected effort | not routed | \`codex exec\` on \`magpie\` | \`subagent\` \`magpie/${row.model}\` |`
+      );
     }
+  });
+
+  it("routes setup's Pi parent only to Sol and relay families", () => {
+    const sol = rows.find((row) => row.family === "sol");
+    expect(sol?.model).toBe("gpt-5.6-sol");
+    expect(setup).toContain("Claude Code, Codex, or Pi.");
+    expect(setup).toContain(`| \`subagent\` \`openai-codex/${sol?.model}\` |`);
+    for (const family of ["Fable", "Grok", "Opus"]) {
+      const line = setup.split("\n").find((entry) => entry.startsWith(`| ${family} | `));
+      expect(line?.split(" | ")[4]).toBe("not routed");
+    }
+    expect(setup).toContain("`~/.pi/agent/AGENTS.md`");
   });
 
   it("keeps setup's fail-closed reconfiguration order", () => {
