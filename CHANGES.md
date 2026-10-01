@@ -2,6 +2,10 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.5.6 drops six cursor-team-kit skills
+
+`thermo-nuclear-code-quality-review`, `make-pr-easy-to-review`, `fix-ci`, `fix-merge-conflicts`, `get-pr-comments`, and `what-did-i-get-done` came from Cursor's separate `cursor-team-kit` plugin. They are not pstack skills, and no pstack skill or playbook referenced them. They are removed. `thermo-nuclear-code-quality-review` also collided with same-named user skills, and Pi skipped the bundled copy. `deslop` stays because poteto-mode and its playbooks route to it, and `babysit` stays as pstack's `/babysit` entry point. The catalog drops from 54 to 48 skills.
+
 ## 1.5.5 runs setup on a Pi parent
 
 `setup-pstack` accepts Pi as a parent. The probe table gains a Pi column. Sol maps to `openai-codex/gpt-5.6-sol` (the matrix keeps upstream's Sol choice), and the two relay families map to `magpie/<model>`. Fable, Opus, and Grok are not routed, so a Pi operator moves those roles to Sol, a relay family, or an alias. Each Pi probe is one child of an async pi-subagents workflow on `pstack.lane-readonly`. It passes when the child returns the marker and its transcript reports the mapped provider and model. Setup writes `~/.pi/agent/pstack-models.md` and mirrors it into one bounded block in `~/.pi/agent/AGENTS.md`.
