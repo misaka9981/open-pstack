@@ -2,6 +2,10 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.5.7 routes Codex models on Pi through magpie
+
+On a Pi parent, `codex:<model>@<effort>` now maps to `magpie/codex/<model>:<effort>`, the Codex models the magpie relay serves, instead of Pi's `openai-codex` provider. Every Pi lane now goes through the relay, and each child transcript carries a provider-reported `responseModel`. `pi-tools.md`, the provider-dispatch Pi route row, and setup's Pi column change together. The relay accepted `codex/gpt-5.6-sol` at every effort from `low` to `max`. Claude Code and Codex routes are unchanged.
+
 ## 1.5.6 drops six cursor-team-kit skills
 
 `thermo-nuclear-code-quality-review`, `make-pr-easy-to-review`, `fix-ci`, `fix-merge-conflicts`, `get-pr-comments`, and `what-did-i-get-done` came from Cursor's separate `cursor-team-kit` plugin. They are not pstack skills, and no pstack skill or playbook referenced them. They are removed. `thermo-nuclear-code-quality-review` also collided with same-named user skills, and Pi skipped the bundled copy. `deslop` stays because poteto-mode and its playbooks route to it, and `babysit` stays as pstack's `/babysit` entry point. The catalog drops from 54 to 48 skills.

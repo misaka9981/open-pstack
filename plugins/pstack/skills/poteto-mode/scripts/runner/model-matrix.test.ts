@@ -387,7 +387,7 @@ describe("model matrix", () => {
     const sol = rows.find((row) => row.family === "sol");
     expect(sol?.model).toBe("gpt-5.6-sol");
     expect(setup).toContain("Claude Code, Codex, or Pi.");
-    expect(setup).toContain(`| \`subagent\` \`openai-codex/${sol?.model}\` |`);
+    expect(setup).toContain(`| \`subagent\` \`magpie/codex/${sol?.model}\` |`);
     for (const family of ["Fable", "Grok", "Opus"]) {
       const line = setup.split("\n").find((entry) => entry.startsWith(`| ${family} | `));
       expect(line?.split(" | ")[4]).toBe("not routed");
