@@ -1,12 +1,12 @@
 {
   "name": "pstack",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "description": "if you want to go fast, go deep first. pstack helps you write less, but higher quality code. rigorous agent workflows you can parallelize with confidence. Codex port of the Claude Code plugin; skills are shared, tool names resolve via skills/poteto-mode/references/codex-tools.md.",
   "author": {
     "name": "Lauren Tan"
   },
-  "homepage": "https://github.com/ericlitman/open-pstack",
-  "repository": "https://github.com/ericlitman/open-pstack",
+  "homepage": "https://github.com/misaka9981/open-pstack",
+  "repository": "https://github.com/misaka9981/open-pstack",
   "license": "MIT",
   "keywords": [
     "pstack",
@@ -49,7 +49,7 @@
       "Work on this in poteto-mode.",
       "Interrogate this diff with multiple models."
     ],
-    "websiteURL": "https://github.com/ericlitman/open-pstack",
+    "websiteURL": "https://github.com/misaka9981/open-pstack",
     "brandColor": "#7C3AED"
   }
 }

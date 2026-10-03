@@ -10,9 +10,9 @@ open-pstack tracks [Cursor's pstack](https://github.com/cursor/plugins/tree/main
 | Path | `pstack/` |
 | Commit | `23e4138daa01c42d4969f7a5465f82704e64f798` |
 | Upstream version | `0.15.6` |
-| open-pstack version | `1.6.2` |
+| open-pstack version | `1.6.3` |
 
-The table above is the current Cursor sync point. Open Pstack 1.6.2 imports this 0.15.6 sync. `README-UPSTREAM.md` preserves the upstream pstack README verbatim. `CHANGES.md` and `NOTICE.md` describe the adaptations and provenance.
+The table above is the current Cursor sync point. Open Pstack 1.6.3 imports this 0.15.6 sync. `README-UPSTREAM.md` preserves the upstream pstack README verbatim. `CHANGES.md` and `NOTICE.md` describe the adaptations and provenance.
 
 ## Upstream-only exclusions
 
@@ -46,7 +46,7 @@ No output means the tracked pstack tree has not changed. This comparison does no
 
 ## Incorporate a change
 
-1. Create or update a GitHub issue in `ericlitman/open-pstack` and branch from current `main`.
+1. Create or update a GitHub issue in `misaka9981/open-pstack` and branch from current `main`.
 2. Read each upstream pstack commit in order. Bring over its intent and content, then apply only the Claude Code, Codex, and Pi substitutions documented in `CHANGES.md`.
 3. Keep one shared `plugins/pstack/skills/` tree. Put harness translation in the existing `codex-tools.md` and `pi-tools.md` and provider routing in `provider-dispatch.md`; do not fork a skill per harness.
 4. Update the commit and version in this file, the affected provenance rows in `NOTICE.md`, and `README-UPSTREAM.md` when upstream changes it.

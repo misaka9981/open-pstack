@@ -1,8 +1,8 @@
 # open-pstack
 
-[![CI](https://github.com/ericlitman/open-pstack/actions/workflows/ci.yml/badge.svg)](https://github.com/ericlitman/open-pstack/actions/workflows/ci.yml)
-[![Latest release](https://img.shields.io/github/v/release/ericlitman/open-pstack)](https://github.com/ericlitman/open-pstack/releases/latest)
-[![MIT license](https://img.shields.io/github/license/ericlitman/open-pstack)](LICENSE)
+[![CI](https://github.com/misaka9981/open-pstack/actions/workflows/ci.yml/badge.svg)](https://github.com/misaka9981/open-pstack/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/misaka9981/open-pstack)](https://github.com/misaka9981/open-pstack/releases/latest)
+[![MIT license](https://img.shields.io/github/license/misaka9981/open-pstack)](LICENSE)
 
 **Open Pstack brings [Lauren Tan (@poteto)](https://x.com/poteto)'s [pstack](https://github.com/cursor/plugins/tree/main/pstack) to Claude Code and Codex.** Its job is to stay as close to her original work as possible while translating the parts that depend on Cursor.
 
@@ -39,7 +39,7 @@ You need a current Claude Code, Codex, or Pi installation. For the full four-mod
 Run these commands inside Claude Code:
 
 ```text
-/plugin marketplace add ericlitman/open-pstack
+/plugin marketplace add misaka9981/open-pstack
 /plugin install pstack@open-pstack
 /reload-plugins
 ```
@@ -49,7 +49,7 @@ Run these commands inside Claude Code:
 Run these commands in your shell:
 
 ```shell
-codex plugin marketplace add ericlitman/open-pstack --ref main
+codex plugin marketplace add misaka9981/open-pstack --ref main
 codex plugin add pstack@open-pstack
 ```
 
@@ -91,7 +91,7 @@ In Codex, ask:
 Use pstack:setup-pstack to configure pstack.
 ```
 
-Setup checks the models you can actually run, shows how each one will start, and asks before saving the choices. The current default group uses Fable, GPT-5.6 Sol, Grok 4.6, and Opus.
+Setup checks the models you can actually run, shows how each one will start, and asks before saving the choices. The current default group uses Fable, GPT-6.1 Sol, Grok 4.6, and Opus.
 
 An older model sheet starts using the rolling aliases in memory as soon as this release is installed. Run setup once after updating to persist that migration. It replaces versioned Fable and Opus entries while preserving every role assignment and effort selection.
 
@@ -166,7 +166,7 @@ This repository also keeps:
 
 ## Staying close to Lauren's pstack
 
-Open Pstack 1.6.2 tracks pstack 0.15.6 at Cursor commit [`23e4138daa01c42d4969f7a5465f82704e64f798`](https://github.com/cursor/plugins/commit/23e4138daa01c42d4969f7a5465f82704e64f798).
+Open Pstack 1.6.3 tracks pstack 0.15.6 at Cursor commit [`23e4138daa01c42d4969f7a5465f82704e64f798`](https://github.com/cursor/plugins/commit/23e4138daa01c42d4969f7a5465f82704e64f798).
 
 The two projects have separate version numbers. The pstack version identifies Lauren's upstream content. The Open Pstack version identifies the Claude Code and Codex package built from it.
 
@@ -174,7 +174,7 @@ In this repository, “upstream” means Lauren's original pstack. Open Pstack d
 
 ## Contributing
 
-Fixes for Claude Code or Codex and help bringing over new pstack releases are welcome. Search [GitHub Issues](https://github.com/ericlitman/open-pstack/issues) before opening a new issue. For larger behavior changes, explain why the change belongs in Open Pstack instead of Lauren's original project.
+Fixes for Claude Code or Codex and help bringing over new pstack releases are welcome. Search [GitHub Issues](https://github.com/misaka9981/open-pstack/issues) before opening a new issue. For larger behavior changes, explain why the change belongs in Open Pstack instead of Lauren's original project.
 
 Read [UPSTREAM.md](UPSTREAM.md) before changing content brought over from Lauren's pstack. Pull requests must keep one shared skill tree for Claude Code, Codex, and Pi and pass the repository's tests, type checks, plugin validation, and static checks.
 
