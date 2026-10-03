@@ -49,7 +49,7 @@ Pass the complete task, grounding paths, access mode, and output location in `ta
 
 ## Completion evidence
 
-A lane succeeds when its result has `ok: true` and a non-empty output. Prove the model from the child transcript `<session dir>/subagent-artifacts/<child run id>_<agent>_transcript.jsonl`. Its assistant messages carry `provider` and `model`, and the relay adds `responseModel`. They must match the mapped descriptor. Record the child run id with the lane result.
+A lane succeeds when its result has `ok: true` and a non-empty output. Prove the model from the child transcript `<session dir>/subagent-artifacts/<child run id>_<agent>_transcript.jsonl`. Its assistant messages carry the `provider` and `model` that Pi requested, and they must match the mapped descriptor. Pi's `openai-responses` client never writes `responseModel`. Its `openai-completions` client writes it only when the served id differs from the requested id. The relay's `codex/` models use the `openai-responses` client, so their transcripts usually have no `responseModel`. When `responseModel` is present, it must name the requested model, with or without the relay's `<vendor>/` prefix. A mismatch is a dropout. When it is absent, record the model evidence as pinned, not provider-reported. Record the child run id with the lane result.
 
 ## Claude built-in skills pstack references
 
