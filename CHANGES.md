@@ -4,7 +4,7 @@ This port applies the Cursor → Claude Code substitutions in skill bodies. Earl
 
 ## 1.6.2 keeps the Claude Code model sheet out of Codex
 
-Codex CLI now runs plugin SessionStart hooks. It ran `hooks/hooks.json`, so every Codex session received the Claude Code model sheet next to the Codex sheet from `~/.codex/AGENTS.md`, and the two disagreed (#24). The Codex manifest now declares its own SessionStart hook, which overrides `hooks/hooks.json` on Codex. It runs the same `hooks/session-start` script with a `codex` argument, and the script appends the plugin sheet only for Claude Code. Codex sessions keep the poteto-mode mandate. The 1.5.1 entry below says that Codex does not run the hook; that is no longer true.
+Codex CLI now runs plugin SessionStart hooks. It ran `hooks/hooks.json`, so every Codex session received the Claude Code model sheet next to the Codex sheet from `~/.codex/AGENTS.md`, and the two disagreed (#24). The Codex manifest now declares its own SessionStart hook, which overrides `hooks/hooks.json` on Codex. It runs the same `hooks/session-start` script with a `codex` argument, and the script appends the plugin sheet only for Claude Code. Codex sessions keep the poteto-mode mandate. The hook source is new, so Codex asks the operator to trust it again before it runs. The 1.5.1 entry below says that Codex does not run the hook; that is no longer true.
 
 ## 1.6.1 corrects Pi lane model evidence
 
