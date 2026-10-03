@@ -1,7 +1,7 @@
 ---
 name: poteto-agent
 package: pstack
-description: Poteto-mode delegate. Reads the poteto-mode skill in full before any work. Resume an existing poteto-agent for the conversation rather than spawning a sibling.
+description: Poteto-mode delegate. Reads the poteto-mode skill in full before any work. Spawn a fresh poteto-agent for each new task, and resume one only in the strict cases that poteto-mode's Subagents section names.
 tools: read, grep, find, ls, bash, edit, write
 systemPromptMode: append
 inheritProjectContext: true
