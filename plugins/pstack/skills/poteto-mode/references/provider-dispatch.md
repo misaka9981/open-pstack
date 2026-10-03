@@ -34,7 +34,7 @@ Each selectable effort passed a one-turn runner probe through the relay. That pr
 
 ## Where the sheet lives
 
-On Claude Code, a `pstack-models.md` at the plugin root is the model sheet. The SessionStart hook injects it inside a `<pstack-model-sheet>` block. It replaces `~/.claude/pstack-models.md`, so ignore a user sheet while the plugin ships one. Without a plugin sheet, Claude Code uses `~/.claude/pstack-models.md` from its `CLAUDE.md` include. Codex always uses `~/.codex/pstack-models.md` from its `AGENTS.md` block, because Codex does not run the hook. Pi uses `~/.pi/agent/pstack-models.md`, mirrored into one bounded `<!-- pstack:models:begin -->` / `<!-- pstack:models:end -->` block in `~/.pi/agent/AGENTS.md` the same way.
+On Claude Code, a `pstack-models.md` at the plugin root is the model sheet. The SessionStart hook injects it inside a `<pstack-model-sheet>` block. It replaces `~/.claude/pstack-models.md`, so ignore a user sheet while the plugin ships one. Without a plugin sheet, Claude Code uses `~/.claude/pstack-models.md` from its `CLAUDE.md` include. Codex always uses `~/.codex/pstack-models.md` from its `AGENTS.md` block. Codex runs the plugin's SessionStart hook, but the Codex manifest passes `codex` to it, so the hook injects the poteto-mode mandate without the Claude Code sheet. Pi uses `~/.pi/agent/pstack-models.md`, mirrored into one bounded `<!-- pstack:models:begin -->` / `<!-- pstack:models:end -->` block in `~/.pi/agent/AGENTS.md` the same way.
 
 ## Read-time normalization
 

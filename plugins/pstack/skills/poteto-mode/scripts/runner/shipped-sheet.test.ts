@@ -74,4 +74,19 @@ describe("shipped model sheet", () => {
     expect(output).toContain("You have pstack.");
     expect(output).toContain(`\n<pstack-model-sheet>\n${sheet}</pstack-model-sheet>\n`);
   });
+
+  it("is left out of the Codex SessionStart context", () => {
+    const manifest = JSON.parse(
+      readFileSync(join(PLUGIN_ROOT, ".codex-plugin/plugin.json"), "utf8")
+    );
+    const commands = manifest.hooks.hooks.SessionStart.flatMap(
+      (entry: { hooks: { command: string }[] }) => entry.hooks.map((hook) => hook.command)
+    );
+    expect(commands).toEqual(['"${PLUGIN_ROOT}/hooks/run-hook.cmd" session-start codex']);
+    const run = Bun.spawnSync(["bash", HOOK_PATH, "codex"]);
+    expect(run.exitCode).toBe(0);
+    const output = run.stdout.toString();
+    expect(output).toContain("You have pstack.");
+    expect(output).not.toContain("pstack-model-sheet");
+  });
 });

@@ -2,6 +2,10 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.6.2 keeps the Claude Code model sheet out of Codex
+
+Codex CLI now runs plugin SessionStart hooks. It ran `hooks/hooks.json`, so every Codex session received the Claude Code model sheet next to the Codex sheet from `~/.codex/AGENTS.md`, and the two disagreed (#24). The Codex manifest now declares its own SessionStart hook, which overrides `hooks/hooks.json` on Codex. It runs the same `hooks/session-start` script with a `codex` argument, and the script appends the plugin sheet only for Claude Code. Codex sessions keep the poteto-mode mandate. The hook source is new, so Codex asks the operator to trust it again before it runs. The 1.5.1 entry below says that Codex does not run the hook; that is no longer true.
+
 ## 1.6.1 corrects Pi lane model evidence
 
 The 1.5.7 entry below says that each Pi child transcript carries a provider-reported `responseModel`. That is not always true. Pi's `openai-responses` client never writes `responseModel`. Its `openai-completions` client writes it only when the served id differs from the requested id. The magpie relay configures its `codex/` models with `openai-responses`, so Sol lanes usually have no `responseModel`. `pi-tools.md` now requires the transcript `provider` and `model` to match the descriptor. It checks `responseModel` only when it is present, and it records pinned evidence when it is absent (#23).

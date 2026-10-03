@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
 # SessionStart hook for the pstack plugin: prints the poteto-mode dispatch
-# mandate to stdout, which Claude Code injects as session context directly.
-# When the plugin ships a model sheet, the hook appends it as the Claude Code
-# model sheet. A missing context file fails the hook cleanly instead of
-# injecting noise.
+# mandate to stdout, which the harness injects as session context directly.
+# Each manifest names its harness as the first argument; Claude Code's
+# hooks.json omits it. Only Claude Code gets the plugin model sheet, because
+# Codex reads its own sheet from ~/.codex/AGENTS.md. A missing context file
+# fails the hook cleanly instead of injecting noise.
 
 set -euo pipefail
 
+harness="${1:-claude}"
 dir="$(cd "$(dirname "$0")" && pwd)"
 cat "$dir/session-start-context.md"
 sheet="$dir/../pstack-models.md"
-if [ -f "$sheet" ]; then
+if [ "$harness" = claude ] && [ -f "$sheet" ]; then
 	printf '\n<pstack-model-sheet>\n'
 	cat "$sheet"
 	printf '</pstack-model-sheet>\n'
