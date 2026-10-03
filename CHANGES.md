@@ -2,6 +2,18 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.6.0 syncs to Cursor pstack 0.15.6
+
+Open Pstack 1.6.0 tracks Cursor pstack 0.15.6 at `23e4138daa01c42d4969f7a5465f82704e64f798`. It imports that one upstream commit (#26). The catalog grows from 48 to 50 skills, including 24 principles.
+
+**New skills.** `principle-explain-the-number` asks what limits a measured number and rules out that it measured something else. `benchmark-checklist` runs that check as seven questions before anyone reports a performance number. Poteto-mode, Perf issue, and Hillclimb route to the checklist by name. It ships without upstream's `disable-model-invocation: true`, because that flag blocks the named route on Claude Code. The principle leaf takes `user-invocable: false` like the other 23.
+
+**Fresh subagents.** Poteto-mode gives new work to a fresh subagent with consolidated scope. It resumes an existing agent only when the work needs that agent's checkout, uncommitted changes, or running process. Both `poteto-agent` definitions, for Claude Code and Pi, now say the same. Swarm respawns a worker whose result misses its brief. An autonomy default now tells the operator in plain words what they could ask for instead, not a one-word reply token.
+
+**Autopilot.** Upstream removed `/goal`, so the port drops its standing-orders substitute from both autopilot playbooks and the plan skeleton. The audit tick runs every hour. On Claude Code it is `/loop 1h` with the tick prompt, and Codex and Pi arm the same cadence per their tool maps. The tick remains an observation cadence, so a lane is still stood down only on affirmative failure evidence. An owner whose agent cannot start a turn counts as such evidence. Owners push after every verifiable unit. After a merge, a fresh owner takes the next queue item. A green head with a matching patch ID does not need another rebase when trunk moves. Right before the merge, the owner checks that `git merge-tree` against the trunk tip is clean and that trunk changed no path the PR touches or its CI depends on. The port reads trunk through `<base-remote>`, not `origin/main`. The plan skeleton stays harness-neutral, so `check-plan.mjs` requires "hourly audit tick" instead of upstream's `/loop 1h` marker.
+
+**Other upstream changes.** Opening a PR puts each body section under a `##` heading, adds `## What changed`, always fills `## Scope`, and drops the ban on `## Summary` and `## Test plan`. The port still omits the 40-line squash-body cutoff. Upstream's rule to use a run's built-in PR tool is not applied, because Claude Code, Codex, and Pi have no such tool. Technical-writing drops its `Source:` lines. The TypeScript patterns replace the hand-validated cast with a schema-first Zod example. `README-UPSTREAM.md` takes the upstream README verbatim. The Cursor manifest and `docs/guide/` stay outside the port.
+
 ## 1.5.8 moves Sol to gpt-6.1-sol
 
 The Sol matrix family now pins `codex:gpt-6.1-sol` instead of upstream's `gpt-5.6-sol`. The upstream-choice column still records `gpt-5.6-sol-max`, and `UPSTREAM.md` lists the deviation. The magpie relay exposes `codex/gpt-6.1-sol` to Pi, so Pi Sol lanes map to `magpie/codex/gpt-6.1-sol`. Setup's first-run panels, the interrogate, arena, and architect defaults, and the docs follow. An existing sheet that still names `codex:gpt-5.6-sol` is inconsistent state for setup and needs one setup rerun.
