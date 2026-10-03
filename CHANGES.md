@@ -2,6 +2,10 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.6.3 points links at misaka9981/open-pstack
+
+The install commands, badges, contributing link, `UPSTREAM.md` step 1, and the plugin manifests' homepage, repository, and website fields now name `misaka9981/open-pstack`, the repository every harness installs from. They named `ericlitman/open-pstack`, which is a separate repository (#29). Historical records keep their original links: earlier entries in this file, `docs/plans/`, and the links to issue #8 in `ericlitman/open-pstack`, which `docs/reference.md` now labels with that repository's name. The README and `docs/reference.md` name GPT-6.1 Sol as the default Sol model, matching 1.5.8.
+
 ## 1.6.2 keeps the Claude Code model sheet out of Codex
 
 Codex CLI now runs plugin SessionStart hooks. It ran `hooks/hooks.json`, so every Codex session received the Claude Code model sheet next to the Codex sheet from `~/.codex/AGENTS.md`, and the two disagreed (#24). The Codex manifest now declares its own SessionStart hook, which overrides `hooks/hooks.json` on Codex. It runs the same `hooks/session-start` script with a `codex` argument, and the script appends the plugin sheet only for Claude Code. Codex sessions keep the poteto-mode mandate. The hook source is new, so Codex asks the operator to trust it again before it runs. The 1.5.1 entry below says that Codex does not run the hook; that is no longer true.
