@@ -59,7 +59,7 @@ The marketplace install is the normal user path. Direct links are only for testi
 ├── plugins/pstack/                   # the plugin itself
 │   ├── .claude-plugin/plugin.json    # Claude Code manifest
 │   ├── .codex-plugin/plugin.json     # Codex manifest (skills: ./skills/)
-│   ├── skills/                       # 50 skills shared by Claude Code, Codex, and Pi
+│   ├── skills/                       # 51 skills shared by Claude Code, Codex, and Pi
 │   │   ├── poteto-mode/references/{codex-tools,provider-dispatch}.md  # tool + provider routing
 │   │   └── poteto-mode/scripts/      # bun/bash/node tooling: watch-pr, orch, runner, check-plan.mjs, worktree-audit.sh
 │   ├── hooks/                        # SessionStart auto-fire: injects the poteto-mode mandate (the model sheet only on Claude Code)
@@ -128,6 +128,7 @@ The table uses the short upstream names. Claude Code exposes each native skill w
 | `/interrogate` | have four different models try to break a diff |
 | `/automate-me` | draft your own personal -mode skill from recent transcripts |
 | `/reflect` | capture a long task's lessons as a skill edit |
+| `/correct` | make a mistake agents keep repeating in this repo impossible, enforced by architecture, types, lint, or tests before docs (user-invoked only) |
 | `/tdd` | fix a bug by writing the failing test first, then the fix |
 | `/benchmark-checklist` | vet a benchmark, speedup, or regression you measured before you report or act on it |
 | `/typescript-best-practices` | ground type-system discipline in TypeScript syntax |

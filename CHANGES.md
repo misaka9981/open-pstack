@@ -2,6 +2,16 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.7.0 syncs to Cursor pstack 0.15.9
+
+Open Pstack 1.7.0 tracks Cursor pstack 0.15.9 at `e43c7ee26e0038c6c1fa8380dd34ce86ff94cb2a`. It imports three upstream commits, `9511e60`, `a586282`, and `e43c7ee` (#31). The catalog grows from 50 to 51 skills.
+
+**New skill.** `correct` finds the mistakes agents keep repeating in a repo and fixes each class at the highest level that works. Architecture comes first, then types and lint, then tests, and docs come last. It keeps a table that pairs each rule with what enforces it. The skill keeps upstream's `disable-model-invocation: true`, so only the user starts it. Poteto-mode does not route to it by name, and the command trampolines that made the flag unsafe in 0.9.8 no longer exist. On Claude Code 2.1.289, a typed `/pstack:correct` loads the skill, and the Skill tool refuses a model call. In Codex and Pi, asking for the skill by name loads it. Whether Codex and Pi hide it from model-initiated use is unverified.
+
+**Architect and perf.** Architect assumes the next contributor is an agent that sees only the files it opened. Its design red flags add split ownership, two ways to do one task, importable internals, and hand-synced lists. Perf issue replaces the eight strategy families with seven performance mantras, tried cheapest first. Hillclimb orders perf hypotheses by those mantras, and Benchmark-checklist names them. Perf issue keeps the port's provider-dispatch delegation line instead of upstream's `grok-4.7-xhigh-fast` default.
+
+**Grok Bot.** None of the three commits touches Grok Bot content. The only Grok Bot feature upstream is `make-bot-ui`, which stays excluded because it is built from Cursor routine, webhook, and secret-request primitives. The port ships no Grok Bot feature. Bugbot triage covers any automated PR-review bot, and the `grok` model route is a provider, not Grok Bot.
+
 ## 1.6.3 points links at misaka9981/open-pstack
 
 The install commands, badges, contributing link, `UPSTREAM.md` step 1, and the plugin manifests' homepage, repository, and website fields now name `misaka9981/open-pstack`, the repository every harness installs from. They named `ericlitman/open-pstack`, which is a separate repository (#29). Historical records keep their original links: earlier entries in this file, `docs/plans/`, and the links to issue #8 in `ericlitman/open-pstack`, which `docs/reference.md` now labels with that repository's name. The README and `docs/reference.md` name GPT-6.1 Sol as the default Sol model, matching 1.5.8.

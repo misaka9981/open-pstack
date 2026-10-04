@@ -349,6 +349,26 @@ else
   note "ok: routed skills stay model-invocable"
 fi
 
+user_only_skills=(correct)
+user_only_bad=""
+for name in "${user_only_skills[@]}"; do
+  user_only_skill="$plugin/skills/$name/SKILL.md"
+  front="$(sed -n '2,/^---$/p' "$user_only_skill")"
+  if ! printf '%s\n' "$front" | grep -q '^disable-model-invocation: true$'; then
+    user_only_bad="${user_only_bad}${user_only_skill}"$'\n'
+  fi
+  if grep -rqF "**$name** skill" "$plugin/skills/poteto-mode"; then
+    user_only_bad="${user_only_bad}poteto-mode routes to user-only skill $name by name"$'\n'
+  fi
+done
+if [ -n "$user_only_bad" ]; then
+  note "FAIL: user-only skills must keep disable-model-invocation and stay unrouted:"
+  note "$user_only_bad"
+  fail=1
+else
+  note "ok: user-only skills keep disable-model-invocation and stay unrouted"
+fi
+
 grok_descriptor="$(awk -F '|' '
   $2 ~ /^[[:space:]]*grok[[:space:]]*$/ {
     for (i = 4; i <= 6; i++) gsub(/^[[:space:]]+|[[:space:]]+$/, "", $i)
