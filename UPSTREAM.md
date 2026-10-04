@@ -8,15 +8,15 @@ open-pstack tracks [Cursor's pstack](https://github.com/cursor/plugins/tree/main
 | --- | --- |
 | Repository | `https://github.com/cursor/plugins.git` |
 | Path | `pstack/` |
-| Commit | `23e4138daa01c42d4969f7a5465f82704e64f798` |
-| Upstream version | `0.15.6` |
-| open-pstack version | `1.6.3` |
+| Commit | `e43c7ee26e0038c6c1fa8380dd34ce86ff94cb2a` |
+| Upstream version | `0.15.9` |
+| open-pstack version | `1.7.0` |
 
-The table above is the current Cursor sync point. Open Pstack 1.6.3 imports this 0.15.6 sync. `README-UPSTREAM.md` preserves the upstream pstack README verbatim. `CHANGES.md` and `NOTICE.md` describe the adaptations and provenance.
+The table above is the current Cursor sync point. Open Pstack 1.7.0 imports this 0.15.9 sync. `README-UPSTREAM.md` preserves the upstream pstack README verbatim. `CHANGES.md` and `NOTICE.md` describe the adaptations and provenance.
 
 ## Upstream-only exclusions
 
-- Commits `799151d` and `6fecddb` add and relocate `make-bot-ui`. It depends on Cursor routines, webhook events, and UI primitives that Claude Code and Codex do not share.
+- Commits `799151d` and `6fecddb` add and relocate `make-bot-ui`. It builds a page whose buttons wake a Cursor-hosted Grok Bot. It depends on Cursor routines, webhook events, a secret-request card, and UI primitives that Claude Code, Codex, and Pi do not share.
 - Four `disable-model-invocation: true` lines from `73f8be4` are not applied to `how`, `why`, `unslop`, or `typescript-best-practices`. Poteto-mode invokes those skills by name, and the flag blocks that route on Claude Code. For the same reason, `benchmark-checklist` from `23e4138` ships without the flag. The new `principle-explain-the-number` leaf takes `user-invocable: false` like the other principle leaves.
 - The `23a56e2` Fable defaults for `bug-fix`, `perf-issue`, and `hillclimb` were never applied. `889ec4b` and `70b2dc8` superseded them with Grok, and Open Pstack now follows that default.
 - The Sol family runs `gpt-6.1-sol` instead of upstream's `gpt-5.6-sol` (`gpt-5.6-sol-max`). The maintainer chose the newer model, and it is the Codex model the magpie relay exposes to Pi (#21).
@@ -38,8 +38,8 @@ Fetch and inspect only commits that touched pstack after the recorded sync point
 
 ```shell
 git fetch cursor main
-git log --oneline 23e4138daa01c42d4969f7a5465f82704e64f798..cursor/main -- pstack
-git diff --stat 23e4138daa01c42d4969f7a5465f82704e64f798..cursor/main -- pstack
+git log --oneline e43c7ee26e0038c6c1fa8380dd34ce86ff94cb2a..cursor/main -- pstack
+git diff --stat e43c7ee26e0038c6c1fa8380dd34ce86ff94cb2a..cursor/main -- pstack
 ```
 
 No output means the tracked pstack tree has not changed. This comparison does not need a polling service or generated mirror branch.
