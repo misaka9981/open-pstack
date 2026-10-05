@@ -121,7 +121,7 @@ The table uses the short upstream names. Claude Code exposes each native skill w
 | skill | use it when |
 | --- | --- |
 | `/poteto-mode` | default entry point for any non-trivial task |
-| `/poteto-help` | learn how to set up and use pstack, or find which skill, playbook, or principle fits a task (user-invoked only) |
+| `/poteto-help` | learn how to set up and use pstack, or find which skill, playbook, or principle fits a task (user-invoked only on Claude Code and Pi) |
 | `/how` | walk through how a subsystem works |
 | `/why` | investigate why something was built this way (parallel multi-MCP evidence) |
 | `/architect` | settle types and module shape before writing code that crosses a function boundary |
@@ -129,7 +129,7 @@ The table uses the short upstream names. Claude Code exposes each native skill w
 | `/interrogate` | have four different models try to break a diff |
 | `/automate-me` | draft your own personal -mode skill from recent transcripts |
 | `/reflect` | capture a long task's lessons as a skill edit |
-| `/correct` | make a mistake agents keep repeating in this repo impossible, enforced by architecture, types, lint, or tests before docs (user-invoked only) |
+| `/correct` | make a mistake agents keep repeating in this repo impossible, enforced by architecture, types, lint, or tests before docs (user-invoked only on Claude Code and Pi) |
 | `/tdd` | fix a bug by writing the failing test first, then the fix |
 | `/benchmark-checklist` | vet a benchmark, speedup, or regression you measured before you report or act on it |
 | `/typescript-best-practices` | ground type-system discipline in TypeScript syntax |
