@@ -21,6 +21,8 @@ Open Pstack 1.8.0 tracks Cursor pstack 0.15.10 at `4e5b1cf2ccb0ea3716f08c8ee0a58
 
 **Guide edits.** Upstream also edits `docs/guide/{README,01-setup,02-poteto-mode,05-build-and-clean}.md`. The guide stays outside the port, so those edits have no local target. Guide page 5 now says `typescript-best-practices` does not load on its own. That does not hold here: the port's copy keeps `paths` frontmatter, which loads it for `.ts` and `.tsx` files on Claude Code. `README-UPSTREAM.md` takes the upstream README verbatim. `docs/reference.md` named 1.6.3 and 0.15.6 as the current sync after 1.7.0; it now names this sync.
 
+**Claude poteto-agent preload.** The Claude Code `poteto-agent` definition now preloads `pstack:poteto-mode` through its `skills` frontmatter (#34). A Claude subagent starts with isolated context, so the prompt alone named the skill but did not put its body in context. The description line is unchanged. A static invariant in `tests/skill-collision-repro.sh` fails when the binding is missing. The preload is Claude-only. Codex has no `poteto-agent` type, so `codex-tools.md` keeps dispatching a `spawn_agent` told to read poteto-mode first. Pi's `pstack.poteto-agent` already sets `inheritSkills: true`. The pi-subagents `skills` field lists a skill's name and location for the child to read, not its body, so it is not an equivalent preload.
+
 ## 1.7.0 syncs to Cursor pstack 0.15.9
 
 Open Pstack 1.7.0 tracks Cursor pstack 0.15.9 at `e43c7ee26e0038c6c1fa8380dd34ce86ff94cb2a`. It imports three upstream commits, `9511e60`, `a586282`, and `e43c7ee` (#31). The catalog grows from 50 to 51 skills.
