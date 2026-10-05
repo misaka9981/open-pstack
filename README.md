@@ -119,7 +119,7 @@ That is the main workflow. The other skills are there when poteto-mode needs the
 
 | Skill | Use it when |
 | --- | --- |
-| `poteto-help` | You are new to pstack or unsure which skill fits. It answers your question and gives you a prompt to send. |
+| `poteto-help` | You are new to pstack or unsure which skill fits. It answers your question and gives you a prompt to send. It runs only when you type it. |
 | `how` | You want a clear explanation of how part of the system works. |
 | `why` | You want evidence for why the system was built that way. |
 | `architect` | A change crosses a function or module boundary and the design needs to be settled first. |

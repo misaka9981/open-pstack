@@ -121,7 +121,7 @@ The table uses the short upstream names. Claude Code exposes each native skill w
 | skill | use it when |
 | --- | --- |
 | `/poteto-mode` | default entry point for any non-trivial task |
-| `/poteto-help` | learn how to set up and use pstack, or find which skill, playbook, or principle fits a task |
+| `/poteto-help` | learn how to set up and use pstack, or find which skill, playbook, or principle fits a task (user-invoked only) |
 | `/how` | walk through how a subsystem works |
 | `/why` | investigate why something was built this way (parallel multi-MCP evidence) |
 | `/architect` | settle types and module shape before writing code that crosses a function boundary |
