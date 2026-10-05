@@ -45,6 +45,8 @@ pstack ships its Pi agents under the `pstack` package namespace, so same-named a
 | `poteto-agent` | `pstack.poteto-agent` |
 | `comment-sicko` (the **no-comments** skill) | `pstack.comment-sicko` |
 
+`pstack.poteto-agent` loads `preload-poteto-mode.ts` through `subagentOnlyExtensions`, so its first prompt becomes `/skill:poteto-mode` and the child starts with that skill's body.
+
 Pass the complete task, grounding paths, access mode, and output location in `task`. Children never choose a model or launch subagents.
 
 ## Completion evidence
