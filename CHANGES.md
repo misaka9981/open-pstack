@@ -2,6 +2,25 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.8.0 syncs to Cursor pstack 0.15.10
+
+Open Pstack 1.8.0 tracks Cursor pstack 0.15.10 at `4e5b1cf2ccb0ea3716f08c8ee0a5856b5ab93536`. It imports one upstream commit, `4e5b1cf` (#33). The catalog grows from 51 to 52 skills.
+
+**New skill.** `poteto-help` answers questions about installing, setting up, and using pstack. It finds out what the user needs, routes them to the skill, playbook, or principle that fits, and hands them a prompt to send instead of starting the work. Upstream gives it no `disable-model-invocation` flag, so it also loads when a user asks how to use pstack. The SessionStart mandate does not name it, because its description already covers that route.
+
+**Help skill adaptations.** A help skill tells users what to type, so its Cursor instructions are rewritten to the port's documented substitutions instead of left for a tool map:
+
+- Install steps name the Claude Code, Codex, and Pi commands from the README instead of `/add-plugin pstack`.
+- The model state check reads the sheet locations in `provider-dispatch.md` instead of `~/.cursor/rules/pstack-models.mdc`. On Claude Code, the shipped `pstack-models.md` sets the models and `/setup-pstack` stops without writing, so the cost and model-change advice points at that file there.
+- Custom Mode and Option+Enter become the SessionStart hook, the port's documented analog of sticky mode. Pi has no hook, so a Pi user starts each task with `/skill:poteto-mode`.
+- Upstream's statement that only `/setup-pstack` and `/poteto-help` load from the user's words is replaced. In the port, every skill except `automate-me` and `correct` stays model-invocable, and the hook routes non-trivial work into poteto-mode.
+- The paragraph that says pstack is built for Cursor now describes the three-harness port and its tool maps. A Platform note gives each harness's skill invocation form.
+- The public-copy URL names `misaka9981/open-pstack`. Guide links go to Cursor's published guide, which stays outside the port, and the README link goes to this repository's README.
+- The skill table drops `make-bot-ui`, which stays excluded, and adds `deslop` and `babysit`, which ship here. The "Not in pstack" list maps `control-cli` and `control-ui` to `run` and `verify`, `/loop` to Claude Code's built-in, and `/create-skill` to `plugin-dev:skill-development`. "Babysit this pr" outside poteto-mode starts the bundled `babysit` skill, cloud agents become worktree-isolated subagents, and Cursor's Plan Mode becomes a harness plan mode.
+- Principle leaves carry `user-invocable: false`, so the skill says to ask for one by name instead of typing `/principle-<name>`.
+
+**Guide edits.** Upstream also edits `docs/guide/{README,01-setup,02-poteto-mode,05-build-and-clean}.md`. The guide stays outside the port, so those edits have no local target. Guide page 5 now says `typescript-best-practices` does not load on its own. That does not hold here: the port's copy keeps `paths` frontmatter, which loads it for `.ts` and `.tsx` files on Claude Code. `README-UPSTREAM.md` takes the upstream README verbatim. `docs/reference.md` named 1.6.3 and 0.15.6 as the current sync after 1.7.0; it now names this sync.
+
 ## 1.7.0 syncs to Cursor pstack 0.15.9
 
 Open Pstack 1.7.0 tracks Cursor pstack 0.15.9 at `e43c7ee26e0038c6c1fa8380dd34ce86ff94cb2a`. It imports three upstream commits, `9511e60`, `a586282`, and `e43c7ee` (#31). The catalog grows from 50 to 51 skills.
