@@ -119,6 +119,7 @@ That is the main workflow. The other skills are there when poteto-mode needs the
 
 | Skill | Use it when |
 | --- | --- |
+| `poteto-help` | You are new to pstack or unsure which skill fits. It answers your question and gives you a prompt to send. |
 | `how` | You want a clear explanation of how part of the system works. |
 | `why` | You want evidence for why the system was built that way. |
 | `architect` | A change crosses a function or module boundary and the design needs to be settled first. |
@@ -166,7 +167,7 @@ This repository also keeps:
 
 ## Staying close to Lauren's pstack
 
-Open Pstack 1.7.0 tracks pstack 0.15.9 at Cursor commit [`e43c7ee26e0038c6c1fa8380dd34ce86ff94cb2a`](https://github.com/cursor/plugins/commit/e43c7ee26e0038c6c1fa8380dd34ce86ff94cb2a).
+Open Pstack 1.8.0 tracks pstack 0.15.10 at Cursor commit [`4e5b1cf2ccb0ea3716f08c8ee0a5856b5ab93536`](https://github.com/cursor/plugins/commit/4e5b1cf2ccb0ea3716f08c8ee0a5856b5ab93536).
 
 The two projects have separate version numbers. The pstack version identifies Lauren's upstream content. The Open Pstack version identifies the Claude Code and Codex package built from it.
 

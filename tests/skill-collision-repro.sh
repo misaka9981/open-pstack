@@ -132,6 +132,45 @@ else
 fi
 
 plugin="$repo/plugins/pstack"
+
+# Claude subagents start with isolated context, so poteto-agent must preload
+# the poteto-mode body through its skills frontmatter instead of only naming it.
+poteto_agent="$plugin/agents/poteto-agent.md"
+poteto_agent_front="$(sed -n '2,/^---$/p' "$poteto_agent")"
+poteto_preload_bad=""
+if [ "$(printf '%s\n' "$poteto_agent_front" | grep -cx 'skills:' || true)" != "1" ]; then
+  poteto_preload_bad="${poteto_agent} must declare one skills list"$'\n'
+fi
+if [ "$(printf '%s\n' "$poteto_agent_front" | grep -cx '  - pstack:poteto-mode' || true)" != "1" ]; then
+  poteto_preload_bad="${poteto_preload_bad}${poteto_agent} must preload pstack:poteto-mode"$'\n'
+fi
+if [ -n "$poteto_preload_bad" ]; then
+  note "FAIL: Claude poteto-agent does not preload poteto-mode:"
+  note "$poteto_preload_bad"
+  fail=1
+else
+  note "ok: Claude poteto-agent preloads poteto-mode"
+fi
+
+# pi-subagents never inlines a skill body, so the Pi poteto-agent loads an
+# extension that turns its first prompt into Pi's `/skill:poteto-mode` command.
+pi_poteto_agent="$plugin/pi-agents/poteto-agent.md"
+pi_preload="$plugin/pi-agents/preload-poteto-mode.ts"
+pi_preload_bad=""
+if [ "$(sed -n '2,/^---$/p' "$pi_poteto_agent" | grep -cx 'subagentOnlyExtensions: ./preload-poteto-mode.ts' || true)" != "1" ]; then
+  pi_preload_bad="${pi_poteto_agent} must load ./preload-poteto-mode.ts through subagentOnlyExtensions"$'\n'
+fi
+if [ ! -f "$pi_preload" ] || ! grep -q '/skill:poteto-mode ' "$pi_preload"; then
+  pi_preload_bad="${pi_preload_bad}${pi_preload} must exist and send /skill:poteto-mode"$'\n'
+fi
+if [ -n "$pi_preload_bad" ]; then
+  note "FAIL: Pi poteto-agent does not preload poteto-mode:"
+  note "$pi_preload_bad"
+  fail=1
+else
+  note "ok: Pi poteto-agent preloads poteto-mode"
+fi
+
 canon="$plugin/skills/poteto-mode/references/bugbot-triage.md"
 skill="$plugin/skills/babysit/SKILL.md"
 playbook="$plugin/skills/poteto-mode/playbooks/babysit.md"
