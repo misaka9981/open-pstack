@@ -1,6 +1,7 @@
 ---
 name: poteto-help
-description: Guides users through pstack setup, /poteto-mode, and picking the skill, playbook, or principle for a task. Use for /poteto-help, or when the user asks how to install, set up, or use pstack, or which pstack skill fits. Not for requests to do work, even ones that name pstack.
+description: Guides users through pstack setup, /poteto-mode, and picking the skill, playbook, or principle for a task. Type /poteto-help with a question.
+disable-model-invocation: true
 ---
 
 # Poteto help
@@ -34,7 +35,7 @@ Check the state that changes the answer, and mention it only when it does:
 2. Set the models. On Codex and Pi, run [`/setup-pstack`](../setup-pstack/SKILL.md). It asks for a reasoning budget, maps a model to each role, and writes a model sheet. The sheet applies to new sessions. On Claude Code, the plugin ships its own sheet, so `/setup-pstack` reports it and stops. Change models there by editing `plugins/pstack/pstack-models.md` in the repository and updating the plugin.
 3. Start a real task with `/poteto-mode`, a goal, and a check that can pass or fail.
 
-On Claude Code and Codex, a SessionStart hook adds a short instruction to each new session that routes non-trivial engineering work into `/poteto-mode`. Codex runs the hook only after the user trusts it. Pi has no hook, so nothing runs there until the user invokes a skill. Any pstack skill can also load when a request matches its description. On Claude Code, `/automate-me` and `/correct` start only when the user types them. The [README](https://github.com/misaka9981/open-pstack/blob/main/README.md) and [guide page 1](https://github.com/cursor/plugins/blob/main/pstack/docs/guide/01-setup.md) have the details. The guide is written for Cursor's interface, but its ideas carry over. Offer to word their first prompt with them.
+On Claude Code and Codex, a SessionStart hook adds a short instruction to each new session that routes non-trivial engineering work into `/poteto-mode`. Codex runs the hook only after the user trusts it. Pi has no hook, so nothing runs there until the user invokes a skill. Most pstack skills can also load when a request matches their description. On Claude Code and Pi, `/correct` and `/poteto-help` start only when the user types them. Codex ignores that flag and can load them on its own. The [README](https://github.com/misaka9981/open-pstack/blob/main/README.md) and [guide page 1](https://github.com/cursor/plugins/blob/main/pstack/docs/guide/01-setup.md) have the details. The guide is written for Cursor's interface, but its ideas carry over. Offer to word their first prompt with them, per [`references/prompting.md`](references/prompting.md).
 
 If cost is the worry, say where the tokens go and how to spend fewer. pstack spends extra tokens on subagents and review panels. Pick a smaller budget or cheaper models: rerun `/setup-pstack` on Codex and Pi, or edit the shipped sheet on Claude Code. A role set to `auto` or `inherit-parent` runs on the parent session's model, which saves tokens when that model is cheaper. A shorter panel list runs fewer subagents, one for each entry. Save `/poteto-mode` for work that needs rigor.
 
@@ -42,7 +43,7 @@ Open Pstack ports Cursor's pstack to Claude Code, Codex, and Pi. All three read 
 
 ## Start a task with `/poteto-mode`
 
-`/poteto-mode` matches the task to a playbook, copies the playbook's steps into the todo list, and runs the other skills as the steps need them. A step it skips stays in the list as `skip: <reason>`. A good prompt states the goal and how to tell it's done. It doesn't list skills, because a hand-written sequence tends to drop or reorder steps the playbook would keep. [Guide page 2](https://github.com/cursor/plugins/blob/main/pstack/docs/guide/02-poteto-mode.md) has examples.
+`/poteto-mode` matches the task to a playbook, copies the playbook's steps into the todo list, and runs the other skills as the steps need them. A step it skips stays in the list as `skip: <reason>`. A good prompt states the goal and how to tell it's done. It doesn't list skills, because a hand-written sequence tends to drop or reorder steps the playbook would keep. Read [`references/prompting.md`](references/prompting.md) before you help word one. [Guide page 2](https://github.com/cursor/plugins/blob/main/pstack/docs/guide/02-poteto-mode.md) has examples.
 
 Whether `/poteto-mode` stays on depends on the harness:
 
@@ -129,12 +130,12 @@ Principles are one-rule skills that `/poteto-mode` reads and cites in its replie
 | A question got treated as the next step of the last task | Say "new task", or say the turn doesn't need the mode. |
 | A new model choice had no effect | The model sheet loads when a session starts. Start a new one. On Claude Code, the shipped `pstack-models.md` replaces `~/.claude/pstack-models.md`, so edit the shipped file and update the plugin. |
 | Runs cost more than expected | See the cost paragraph under Get set up. |
-| A skill didn't load on its own | A skill loads on its own only when the request matches its description, and on Claude Code `/automate-me` and `/correct` never do. Otherwise it loads when the user types it or when `/poteto-mode` runs it, and it doesn't run every skill. |
+| A skill didn't load on its own | A skill loads on its own only when the request matches its description, and on Claude Code and Pi `/correct` and `/poteto-help` never do. Otherwise it loads when the user types it or when `/poteto-mode` runs it, and it doesn't run every skill. |
 | Parallel agents overwrote each other | Give each writer its own worktree. |
 | An overnight run moved but finished nothing | `/loop` needs a check that can pass or fail, not a duration. See [guide page 7](https://github.com/cursor/plugins/blob/main/pstack/docs/guide/07-overnight.md). |
 | The reply claims success from a green build | Ask for the real command, flow, stored value, or profile. That's the prove-it-works principle. |
 
-[Guide page 10](https://github.com/cursor/plugins/blob/main/pstack/docs/guide/10-recipes-and-pitfalls.md) has more pitfalls and the recipes worth copying.
+For a run that drifts, [`references/prompting.md`](references/prompting.md) has one-line steers. [Guide page 10](https://github.com/cursor/plugins/blob/main/pstack/docs/guide/10-recipes-and-pitfalls.md) has more pitfalls and the recipes worth copying.
 
 ## Make pstack my own
 
@@ -147,4 +148,4 @@ Principles are one-rule skills that `/poteto-mode` reads and cites in its replie
 
 ## Reply
 
-Lead with the answer. Give at most one example prompt in a code block, then the link to that file. Keep it short unless the user asked for the whole map.
+Lead with the answer. Give at most one example prompt in a code block, adapted from [`references/recipes.md`](references/recipes.md) when one fits, then the link to that file. Keep it short unless the user asked for the whole map.

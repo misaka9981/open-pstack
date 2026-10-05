@@ -2,7 +2,7 @@
 
 This page contains the full skill, dependency, runtime, and porting reference. For the plain-English introduction and quick start, see the [main README](../README.md).
 
-[Poteto](https://x.com/poteto)'s [pstack](https://github.com/cursor/plugins/tree/main/pstack), adapted to run in Claude Code and Codex without Cursor. One shared skill tree serves both harnesses; Grok remains available as a model-provider lane. Version 1.8.0 is synced to Cursor pstack v0.15.10 at `4e5b1cf2ccb0ea3716f08c8ee0a5856b5ab93536`. See [UPSTREAM.md](../UPSTREAM.md) for the exact sync contract.
+[Poteto](https://x.com/poteto)'s [pstack](https://github.com/cursor/plugins/tree/main/pstack), adapted to run in Claude Code and Codex without Cursor. One shared skill tree serves both harnesses; Grok remains available as a model-provider lane. Version 1.9.0 is synced to Cursor pstack v0.15.13 at `2cbf58508f40de470d7490b55c51d71241928fa2`. See [UPSTREAM.md](../UPSTREAM.md) for the exact sync contract.
 
 Original by Lauren Tan. This distribution builds on Michael Denyer's [pstack-claude](https://github.com/michael-denyer/pstack-claude) port and retains its history and MIT attribution. It imports one MIT-licensed skill, `deslop`, from [cursor-team-kit](https://github.com/cursor/plugins/tree/main/cursor-team-kit), because pstack routes to it.
 
@@ -121,7 +121,7 @@ The table uses the short upstream names. Claude Code exposes each native skill w
 | skill | use it when |
 | --- | --- |
 | `/poteto-mode` | default entry point for any non-trivial task |
-| `/poteto-help` | learn how to set up and use pstack, or find which skill, playbook, or principle fits a task |
+| `/poteto-help` | learn how to set up and use pstack, or find which skill, playbook, or principle fits a task (user-invoked only on Claude Code and Pi) |
 | `/how` | walk through how a subsystem works |
 | `/why` | investigate why something was built this way (parallel multi-MCP evidence) |
 | `/architect` | settle types and module shape before writing code that crosses a function boundary |
@@ -129,7 +129,7 @@ The table uses the short upstream names. Claude Code exposes each native skill w
 | `/interrogate` | have four different models try to break a diff |
 | `/automate-me` | draft your own personal -mode skill from recent transcripts |
 | `/reflect` | capture a long task's lessons as a skill edit |
-| `/correct` | make a mistake agents keep repeating in this repo impossible, enforced by architecture, types, lint, or tests before docs (user-invoked only) |
+| `/correct` | make a mistake agents keep repeating in this repo impossible, enforced by architecture, types, lint, or tests before docs (user-invoked only on Claude Code and Pi) |
 | `/tdd` | fix a bug by writing the failing test first, then the fix |
 | `/benchmark-checklist` | vet a benchmark, speedup, or regression you measured before you report or act on it |
 | `/typescript-best-practices` | ground type-system discipline in TypeScript syntax |
