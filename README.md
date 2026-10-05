@@ -167,7 +167,7 @@ This repository also keeps:
 
 ## Staying close to Lauren's pstack
 
-Open Pstack 1.8.0 tracks pstack 0.15.10 at Cursor commit [`4e5b1cf2ccb0ea3716f08c8ee0a5856b5ab93536`](https://github.com/cursor/plugins/commit/4e5b1cf2ccb0ea3716f08c8ee0a5856b5ab93536).
+Open Pstack 1.9.0 tracks pstack 0.15.13 at Cursor commit [`2cbf58508f40de470d7490b55c51d71241928fa2`](https://github.com/cursor/plugins/commit/2cbf58508f40de470d7490b55c51d71241928fa2).
 
 The two projects have separate version numbers. The pstack version identifies Lauren's upstream content. The Open Pstack version identifies the Claude Code and Codex package built from it.
 
