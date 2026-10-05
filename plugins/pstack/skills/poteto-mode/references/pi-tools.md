@@ -13,6 +13,7 @@ pstack skills keep Claude Code tool language (`Skill`, `Agent`, `AskUserQuestion
 | Fetch a URL / search the web | The web tools the session has loaded; otherwise `bash` with `curl` |
 | Invoke a skill (the `Skill` tool, `/command`) | Read the named skill's `SKILL.md` from the catalog and follow it. The user invokes one with `/skill:<name>`. |
 | `paths` frontmatter scopes automatic loading | Claude Code only. On Pi, invoke `typescript-best-practices` by name. |
+| `disable-model-invocation: true` frontmatter makes a skill typed-only | Pi hides `correct` and `poteto-help` from the model. The user runs one with `/skill:<name>`. |
 | Dispatch subagents (the `Agent`/`Task` tool) | One async workflow; see Dispatch below |
 | Wait for subagent results | `await` inside the workflow; the async run notifies on completion |
 | Track tasks (the todolist / `TodoWrite`) | Keep the checklist in the reply or in a working file. Pi has no todo tool. |
