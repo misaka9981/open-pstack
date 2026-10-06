@@ -36,6 +36,21 @@ Each selectable effort passed a one-turn runner probe through the relay. That pr
 
 On Claude Code, a `pstack-models.md` at the plugin root is the model sheet. The SessionStart hook injects it inside a `<pstack-model-sheet>` block. It replaces `~/.claude/pstack-models.md`, so ignore a user sheet while the plugin ships one. Without a plugin sheet, Claude Code uses `~/.claude/pstack-models.md` from its `CLAUDE.md` include. Codex always uses `~/.codex/pstack-models.md` from its `AGENTS.md` block. Codex runs the plugin's SessionStart hook, but the Codex manifest passes `codex` to it, so the hook injects the poteto-mode mandate without the Claude Code sheet. Pi uses `~/.pi/agent/pstack-models.md`, mirrored into one bounded `<!-- pstack:models:begin -->` / `<!-- pstack:models:end -->` block in `~/.pi/agent/AGENTS.md` the same way.
 
+### Mirror state
+
+On Codex and Pi, a session loads the global `AGENTS.md`, not the sheet file. The mirror block is therefore the configuration in effect, and the sheet file is the copy that `/setup-pstack` reads and rewrites with it. Every reader classifies the two by this table and reports the state it found. A confirmed setup write puts the same render into both, which repairs every inconsistent row. Nothing repairs a row silently.
+
+| Sheet file | Mirror block | In effect | Setup | poteto-help |
+|---|---|---|---|---|
+| present | same bytes | the block | Load the block. | Configured. |
+| present | different bytes | the block | Load the block. Report that the file holds edits no session uses, and show the file's rows that differ. The operator can adopt them in steps 5 and 6. | Configured. When a model change had no effect, say that the file's edits wait for a setup run. |
+| present | none | role defaults | Load the file as the seed. Report that no session uses it, its budget included, until setup adds the block. | Not configured. |
+| missing | present | the block | Load the block. Report that the file is missing and that the next write recreates it. | Configured. |
+| missing | none | role defaults | First run. | Not configured. |
+| any | malformed markers | unknown | Report inconsistent state and stop before probing. The operator fixes the markers by hand. | Say that the block's markers are damaged and setup will not run until they are fixed. |
+
+The block holds the same bytes when the text between its markers equals the file. Malformed markers are a begin or end marker without its pair, a duplicated marker, or an end marker before its begin marker. Role defaults are the first-run role map in `/setup-pstack`. Claude Code has no mirror block, because it loads the plugin sheet or the `@` include directly, so this table does not apply there.
+
 ## Read-time normalization
 
 Normalize configured descriptors before matching them to the matrix or choosing a route. If a provider-qualified Claude model starts with `claude-fable-` or `claude-opus-` and its remaining revision contains only digits and hyphens, replace that model component in memory with `fable` or `opus`. Preserve provider, effort, role, and lane order. Use only the normalized descriptor for native dispatch or runner argv. Never pass the versioned predecessor to Claude.

@@ -13,7 +13,7 @@ Claude Code writes `~/.claude/pstack-models.md` and loads it from `~/.claude/CLA
 @~/.claude/pstack-models.md
 ```
 
-Codex writes `~/.codex/pstack-models.md`. Codex has no `@` include, so mirror the sheet's exact bytes inside one bounded block in `~/.codex/AGENTS.md` and retain the sheet as the editable source of truth:
+Codex writes `~/.codex/pstack-models.md`. Codex has no `@` include, so mirror the sheet's exact bytes inside one bounded block in `~/.codex/AGENTS.md`. Sessions load only that block, so the block is the configuration in effect and the sheet file is setup's copy of it:
 
 ```text
 <!-- pstack:models:begin -->
@@ -33,9 +33,9 @@ Use the harness and tool surface running this skill: Claude Code, Codex, or Pi. 
 
 ### 2. Load current state
 
-Read the current parent-specific sheet when it exists. Before matrix validation, normalize only the rolling-alias predecessors that earlier pstack releases generated. A provider-qualified Claude model is migratable when its model component starts with `claude-fable-` or `claude-opus-` and the remaining revision contains only digits and hyphens. Replace that component in memory with `fable` or `opus`, preserving the provider, effort, role, and lane order. Record each original and normalized descriptor for the confirmation in step 9. This migration is valid loaded state and does not require a separate operator choice.
+On Claude Code, read `~/.claude/pstack-models.md` when it exists. On Codex and Pi, read both the sheet file and the mirror block in the global `AGENTS.md`. Classify them by the [mirror state table](../poteto-mode/references/provider-dispatch.md#mirror-state), tell the operator which row applies, and load what that row's Setup cell names. Load the block when it exists, because sessions use it. Repair an inconsistent row only through the confirmed write in step 10. Before matrix validation, normalize only the rolling-alias predecessors that earlier pstack releases generated. A provider-qualified Claude model is migratable when its model component starts with `claude-fable-` or `claude-opus-` and the remaining revision contains only digits and hyphens. Replace that component in memory with `fable` or `opus`, preserving the provider, effort, role, and lane order. Record each original and normalized descriptor for the confirmation in step 9. This migration is valid loaded state and does not require a separate operator choice.
 
-Treat the normalized values as current role-to-family assignments. Overlay those rows on the complete first-run role map in step 9. Materialize any missing documented role row from that map on the next successful write. A row for a retired role, such as `how critics`, has no consumer. Drop it and list it in the confirmation in step 9. A duplicate row or a row for any other unknown role is inconsistent state; report it and resolve it before probing. A bare host-native slug from an older sheet is also invalid because it does not say which provider owns it. A versioned Claude model outside the two migration families remains inconsistent state. If the sheet is missing, use the complete first-run role map and the model matrix's Default effort cells. A `<!-- budget: ... -->` comment in the sheet records the budget chosen on the last run. Use it only to name the current budget in step 4. The role descriptors remain the only source of effort.
+Treat the normalized values as current role-to-family assignments. Overlay those rows on the complete first-run role map in step 9. Materialize any missing documented role row from that map on the next successful write. A row for a retired role, such as `how critics`, has no consumer. Drop it and list it in the confirmation in step 9. A duplicate row or a row for any other unknown role is inconsistent state; report it and resolve it before probing. A bare host-native slug from an older sheet is also invalid because it does not say which provider owns it. A versioned Claude model outside the two migration families remains inconsistent state. If the row loads nothing, use the complete first-run role map and the model matrix's Default effort cells. A `<!-- budget: ... -->` comment in the loaded sheet records the budget chosen on the last run. Use it only to name the current budget in step 4. The role descriptors remain the only source of effort.
 
 ### 3. Parse per-family efforts
 
@@ -96,7 +96,7 @@ Add one `<!-- budget: <label> (<target effort>) -->` comment line with the step 
 
 ### 9. Confirm and commit
 
-Show any rolling-alias migrations as original and normalized descriptors, and any retired role rows step 2 dropped. Then show the route table for this parent and every rendered role and descriptor. Ask for confirmation before writing.
+Show any rolling-alias migrations as original and normalized descriptors, any retired role rows step 2 dropped, and the mirror state row step 2 found with the repair this write makes. Then show the route table for this parent and every rendered role and descriptor. Ask for confirmation before writing.
 
 Why and Reflect require the parent's live MCP surface. Keep their investigator, reviewer, and synthesizer roles on `inherit-parent` or `auto`; the bounded external runner deliberately omits ambient MCPs. `inherit-parent` and `auto` always validate, but say when they reduce a panel's provider diversity. For panel roles, one lane runs per entry. The list length is the fan-out count. `arena cross-judge pool` is a list from which Arena chooses a provider different from the parent and base candidate when possible. `swarm workers` is the default for every worker unless a race explicitly assigns another descriptor.
 
@@ -129,7 +129,7 @@ interrogate reviewers: claude:fable@xhigh, codex:gpt-6.1-sol@xhigh, grok:grok-4.
 
 ### 10. Wire it in
 
-Render the parent integration in memory before either write. On Claude, the integration is the single `@~/.claude/pstack-models.md` include in `~/.claude/CLAUDE.md`. On Codex, it is the exact sheet bytes between one `<!-- pstack:models:begin -->` and `<!-- pstack:models:end -->` pair in `~/.codex/AGENTS.md`. On Pi, it is the same bounded block in `~/.pi/agent/AGENTS.md`. Replace that whole bounded block on a rerun. Insert one block at the end on first run. If either marker is missing, duplicated, or reversed, stop and report inconsistent state instead of guessing a boundary.
+Render the parent integration in memory before either write. On Claude, the integration is the single `@~/.claude/pstack-models.md` include in `~/.claude/CLAUDE.md`. On Codex, it is the exact sheet bytes between one `<!-- pstack:models:begin -->` and `<!-- pstack:models:end -->` pair in `~/.codex/AGENTS.md`. On Pi, it is the same bounded block in `~/.pi/agent/AGENTS.md`. Replace that whole bounded block when it exists. With no marker at all, insert one block at the end. If only one marker exists, or a marker is duplicated or reversed, stop and report inconsistent state instead of guessing a boundary. Writing both targets from one render repairs each inconsistent row of the [mirror state table](../poteto-mode/references/provider-dispatch.md#mirror-state).
 
 Snapshot every target's current bytes. Write the sheet and parent integration only after every step 7 probe passes and the operator confirms. Read both targets back and compare them with the in-memory render. If either write or readback fails, restore every snapshot and report the failure. An unchanged rerun must produce byte-identical sheet and integration content after normalization.
 
