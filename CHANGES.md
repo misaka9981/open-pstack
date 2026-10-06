@@ -2,6 +2,20 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.10.1 classifies the sheet file and the mirror block by one table
+
+On Codex and Pi, setup writes the model sheet to a file and mirrors its bytes into a `pstack:models` block in the global `AGENTS.md`. Sessions load only the block, so the block is the configuration in effect. Setup step 2 had no rule for a block without a file, and `poteto-help` checked only the file (#48). In the 1.10.0 live gate on Codex 0.160.1, with only the file renamed away, setup chose on its own to treat the block as the current configuration and named its `medium (high)` budget. No rule said whether the block or the file was stale, or how setup would repair the state. In the same state, `poteto-help` would have told the user that every role uses its default model while every session ran the block.
+
+**One state table.** `provider-dispatch.md` now has a mirror state table under "Where the sheet lives". It has one row per state: file and block equal, file and block different, file without block, block without file, neither, and malformed markers. Each row names what is in effect, what setup loads, and what `poteto-help` says. Setup step 2 and `poteto-help` classify by that table and report the row they found. The block wins when it exists, because sessions use it. A file without a block seeds setup, but no session uses it or its budget, so `poteto-help` treats that state as not configured.
+
+**Repair on write.** Setup repairs an inconsistent row only through its confirmed write, which puts one render into both the file and the block. The confirmation names the row and the repair. Step 10 now inserts a block when no marker exists and stops only on one unpaired, duplicated, or reversed marker. Before, its "either marker is missing" rule could stop the write that repairs a file without a block.
+
+**Why the block, not the file.** The issue suggested that the file is the source and a block without a file is stale. Runtime dispatch never reads the file, so that rule would tell the user defaults are in effect while sessions run the block's models. The setup text that called the file the editable source of truth now calls it setup's copy. An edit to the file alone takes effect only after a setup run, and the help skill's "new model choice had no effect" row says so.
+
+**Claude Code.** Claude Code has no mirror block. It loads the shipped sheet, or the `@` include of `~/.claude/pstack-models.md` without one, so the table does not apply there, and setup still stops when the plugin ships a sheet.
+
+**Test.** A `model-matrix.test.ts` case requires each table row and requires setup steps 2 and 10 and `poteto-help` to link the table. It failed before the doc change.
+
 ## 1.10.0 syncs to Cursor pstack 0.15.15
 
 Open Pstack 1.10.0 tracks Cursor pstack 0.15.15 at `df581122cde17e6e27686b5a448bde23e4ad4318`. It imports two upstream commits, `1e56b29` and `df58112` (#46). The catalog stays at 52 skills.
