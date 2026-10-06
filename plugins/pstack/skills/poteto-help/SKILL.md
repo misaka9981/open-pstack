@@ -26,10 +26,10 @@ Infer the need from the message and the conversation. A named situation, such as
 
 Check the state that changes the answer, and mention it only when it does:
 
-- On Codex, no `~/.codex/pstack-models.md`, and on Pi, no `~/.pi/agent/pstack-models.md`, means `/setup-pstack` hasn't run for this user, so every role uses its default model. On Claude Code, the `pstack-models.md` that ships at the plugin root sets the models.
+- On Codex and Pi, sessions load the model sheet from a `pstack:models` block in the global `AGENTS.md`, not from the sheet file. Classify the sheet file and that block by the [mirror state table](../poteto-mode/references/provider-dispatch.md#mirror-state), and answer from that row's poteto-help cell. With no block, every role uses its default model, even when the sheet file exists. On Claude Code, the `pstack-models.md` that ships at the plugin root sets the models.
 - No `verify-*` skill or other app harness in the project means agents have no scripted way to drive the app. Mention `/create-verification-skill` when the question is about proving a change works.
 
-On Codex or Pi, when the model sheet is missing and it matters, ask whether the user wants to pick a model for each role and a reasoning budget now. It matters when the user is new, the question is about setup or cost, or the answer depends on which models run. Ask at most once per chat. If the need is also unclear, ask both questions together. Offer two choices:
+On Codex or Pi, when the mirror state row says not configured and it matters, ask whether the user wants to pick a model for each role and a reasoning budget now. It matters when the user is new, the question is about setup or cost, or the answer depends on which models run. Ask at most once per chat. If the need is also unclear, ask both questions together. Offer two choices:
 
 - Now: give them `/setup-pstack` to type, and answer their question too.
 - Later: answer their question, and add one line saying every role keeps its default model until they run `/setup-pstack`.
@@ -133,7 +133,7 @@ Principles are one-rule skills that `/poteto-mode` reads and cites in its replie
 |---|---|
 | The mode stopped applying after a few turns | Start each task with `/poteto-mode`. On Claude Code and Codex, check that the plugin's SessionStart hook still runs. Codex runs it only after the user trusts it. |
 | A question got treated as the next step of the last task | Say "new task", or say the turn doesn't need the mode. |
-| A new model choice had no effect | The model sheet loads when a session starts. Start a new one. On Claude Code, the shipped `pstack-models.md` replaces `~/.claude/pstack-models.md`, so edit the shipped file and update the plugin. |
+| A new model choice had no effect | The model sheet loads when a session starts. Start a new one. On Codex and Pi, sessions load the `AGENTS.md` block, so an edit to the sheet file alone waits for a `/setup-pstack` run. On Claude Code, the shipped `pstack-models.md` replaces `~/.claude/pstack-models.md`, so edit the shipped file and update the plugin. |
 | Runs cost more than expected | See the cost paragraph under Get set up. |
 | A skill didn't load on its own | A skill loads on its own only when the request matches its description, and on Claude Code and Pi `/correct` and `/poteto-help` never do. Otherwise it loads when the user types it or when `/poteto-mode` runs it, and it doesn't run every skill. |
 | Parallel agents overwrote each other | Give each writer its own worktree. |

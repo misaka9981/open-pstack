@@ -9,6 +9,24 @@ const DISPATCH_PATH = join(
   "skills/poteto-mode/references/provider-dispatch.md"
 );
 const SETUP_PATH = join(PLUGIN_ROOT, "skills/setup-pstack/SKILL.md");
+const HELP_PATH = join(PLUGIN_ROOT, "skills/poteto-help/SKILL.md");
+const MIRROR_STATE_LINK =
+  "../poteto-mode/references/provider-dispatch.md#mirror-state";
+const MIRROR_STATE_HEADER = [
+  "Sheet file",
+  "Mirror block",
+  "In effect",
+  "Setup",
+  "poteto-help",
+] as const;
+const MIRROR_STATES = [
+  ["present", "same bytes", "the block"],
+  ["present", "different bytes", "the block"],
+  ["present", "none", "role defaults"],
+  ["missing", "present", "the block"],
+  ["missing", "none", "role defaults"],
+  ["any", "malformed markers", "unknown"],
+] as const;
 const AGENTS_DIR = join(PLUGIN_ROOT, "agents");
 
 const MATRIX_HEADER = [
@@ -461,5 +479,40 @@ describe("model matrix", () => {
     expect(normalization).toContain("without writing user files");
     expect(normalization).toContain("`/setup-pstack` will rewrite it");
     expect(normalization).toContain("runner rejects a missed Fable or Opus version pin");
+  });
+});
+
+// Codex and Pi sessions load only the AGENTS.md mirror block, so setup and
+// poteto-help must classify the sheet file and the block by one shared table.
+describe("mirror state table", () => {
+  const dispatch = readFileSync(DISPATCH_PATH, "utf8");
+  const setup = readFileSync(SETUP_PATH, "utf8");
+  const help = readFileSync(HELP_PATH, "utf8");
+  const sheetSection = dispatch.slice(
+    dispatch.indexOf("## Where the sheet lives"),
+    dispatch.indexOf("## Read-time normalization")
+  );
+  const tableLines = sheetSection
+    .split("\n")
+    .filter((line) => line.startsWith("|"));
+
+  it("defines one row per sheet-file and mirror-block state", () => {
+    expect(tableLines.length).toBeGreaterThan(2);
+    expect(splitRow(tableLines[0])).toEqual([...MIRROR_STATE_HEADER]);
+    const states = tableLines.slice(2).map((line) => splitRow(line).slice(0, 3));
+    expect(states).toEqual(MIRROR_STATES.map((state) => [...state]));
+  });
+
+  it("points setup step 2, setup step 10, and poteto-help at the table", () => {
+    const stepTwo = setup.slice(
+      setup.indexOf("### 2. Load current state"),
+      setup.indexOf("### 3. Parse per-family efforts")
+    );
+    const stepTen = setup.slice(setup.indexOf("### 10. Wire it in"));
+    for (const text of [stepTwo, stepTen, help]) {
+      expect(text).toContain(MIRROR_STATE_LINK);
+    }
+    expect(stepTen).toContain("With no marker at all, insert one block at the end.");
+    expect(help).not.toContain("no `~/.codex/pstack-models.md`");
   });
 });
