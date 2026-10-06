@@ -29,6 +29,11 @@ Check the state that changes the answer, and mention it only when it does:
 - On Codex, no `~/.codex/pstack-models.md`, and on Pi, no `~/.pi/agent/pstack-models.md`, means `/setup-pstack` hasn't run for this user, so every role uses its default model. On Claude Code, the `pstack-models.md` that ships at the plugin root sets the models.
 - No `verify-*` skill or other app harness in the project means agents have no scripted way to drive the app. Mention `/create-verification-skill` when the question is about proving a change works.
 
+On Codex or Pi, when the model sheet is missing and it matters, ask whether the user wants to pick a model for each role and a reasoning budget now. It matters when the user is new, the question is about setup or cost, or the answer depends on which models run. Ask at most once per chat. If the need is also unclear, ask both questions together. Offer two choices:
+
+- Now: give them `/setup-pstack` to type, and answer their question too.
+- Later: answer their question, and add one line saying every role keeps its default model until they run `/setup-pstack`.
+
 ## Get set up
 
 1. Install with the commands in the [README](https://github.com/misaka9981/open-pstack/blob/main/README.md#install) for the user's harness. Claude Code runs `/plugin marketplace add misaka9981/open-pstack`, then `/plugin install pstack@open-pstack`. Codex runs `codex plugin marketplace add misaka9981/open-pstack --ref main`, then `codex plugin add pstack@open-pstack`, and needs `multi_agent = true` under `[features]` in `~/.codex/config.toml`. Pi installs `pi-subagents`, then the Open Pstack checkout.
@@ -68,7 +73,7 @@ The default answer is `/poteto-mode`, which runs most of the others when its ste
 | Settle types and module shape before code that crosses a function boundary | [`/architect`](../architect/SKILL.md) |
 | Get several attempts at one brief, merged into the best one | [`/arena`](../arena/SKILL.md) |
 | Run parallel checks over slices, or race workers, as background subagents in their own worktrees | [`/swarm`](../swarm/SKILL.md) |
-| Have several models review a diff and try to break it | [`/interrogate`](../interrogate/SKILL.md) |
+| Have different models review a diff and try to break it | [`/interrogate`](../interrogate/SKILL.md) |
 | Fix a bug test-first when a cheap local test exists | [`/tdd`](../tdd/SKILL.md) |
 | Apply TypeScript rules to `.ts` or `.tsx` work | [`/typescript-best-practices`](../typescript-best-practices/SKILL.md) |
 | Strip comments before review, using a reviewer that didn't write them | [`/no-comments`](../no-comments/SKILL.md) |

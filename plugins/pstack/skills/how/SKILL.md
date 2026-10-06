@@ -26,13 +26,13 @@ Each explorer gets the prompt in `references/explorer-prompt.md` with its angle 
 
 ## Step 2b. Direct Explain (simple questions)
 
-Dispatch one read-only lane that explores and explains in one pass using the `how explainer` line from the current harness's pstack model sheet (default `claude:opus@max`).
+Dispatch one read-only lane that explores and explains in one pass using the `how explainer` line from the current harness's pstack model sheet (default `claude:opus@xhigh`).
 
 Build its prompt from `references/explainer-prompt.md` without the explorer-findings section. Go to Step 4.
 
 ## Step 3. Synthesize (complex questions only)
 
-Once all explorers have returned, dispatch one read-only lane to synthesize their findings into one explanation using the `how explainer` line from the current harness's pstack model sheet (default `claude:opus@max`).
+Once all explorers have returned, dispatch one read-only lane to synthesize their findings into one explanation using the `how explainer` line from the current harness's pstack model sheet (default `claude:opus@xhigh`).
 
 Build its prompt from `references/explainer-prompt.md` with every explorer's findings filled in.
 

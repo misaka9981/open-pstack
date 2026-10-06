@@ -2,6 +2,30 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.10.0 syncs to Cursor pstack 0.15.15
+
+Open Pstack 1.10.0 tracks Cursor pstack 0.15.15 at `df581122cde17e6e27686b5a448bde23e4ad4318`. It imports two upstream commits, `1e56b29` and `df58112` (#46). The catalog stays at 52 skills.
+
+**Effort defaults.** Every model-matrix family now defaults to `xhigh`. Fable, Sol, and Opus drop from `max`, and Grok was already at `xhigh`. The default panel quad is `claude:fable@xhigh`, `codex:gpt-6.1-sol@xhigh`, `grok:grok-4.6@xhigh`, `claude:opus@xhigh`. The judgment, hardest-task, and `how explainer` roles use `claude:opus@xhigh`. Arena, Architect, Interrogate, How, poteto-mode, setup's first-run sheet, the `codex-tools.md` example, and the technical reference follow. Upstream lowers only Opus, because its defaults no longer include Fable or Sol. The port lowers all four, so `large` matches every first-run default, as upstream's setup now says.
+
+**Shipped Claude Code sheet.** `plugins/pstack/pstack-models.md` does not change. Its `medium (high)` budget is a maintainer choice, not a default, so the new defaults do not apply to it.
+
+**Setup budget.** The `unlimited` label becomes `unlimited — max reasoning`. `unlimited`, `large`, `medium`, and `small` now propose `max`, `xhigh`, `high`, and `medium` for every family. Before, `unlimited` proposed each family's Default effort. With no sheet, setup says that `large` matches the first-run defaults, and the example sheet's budget comment becomes `large (xhigh)`. The operator still answers one effort question per used family.
+
+**Grok under unlimited.** Upstream keeps Grok at `xhigh` under `unlimited`, because Cursor's Grok slugs have no `max` variant. That cap is a fact about Cursor's slugs. Here the matrix lists `max` as a Selectable effort for `grok:grok-4.6`, so `unlimited` now proposes `grok:grok-4.6@max`. No recorded probe shows that the Grok CLI accepts `max`, so that is unverified. Setup step 7 probes the selected pair before it writes, so a rejected effort stops setup and writes nothing. A new test requires every matrix and relay family's Selectable cell to hold all four budget targets. A later cell that drops one fails that test until setup gains a rule for it.
+
+**Relay families.** The relay table loses its Default effort column. Its only reader was the old `unlimited` rule, so nothing reads it now. The test assertion that tied it to the Selectable cell is removed with it.
+
+**Existing sheets.** A Codex or Pi sheet written by 1.9.0 keeps the efforts it wrote, including `@max` where the operator accepted the old `unlimited` proposal, because the descriptors are the only source of effort. To move to the new defaults, rerun `/setup-pstack` and accept the `large` proposals, or edit the descriptors. This is the port's form of upstream's README note that a rule written before a default change still pins the old default.
+
+**Sol stays.** `df58112` drops Sol from every default. Its panels shrink to Opus and Grok, Interrogate loses Reviewer C, `reflect tooling` moves from Sol to Grok, and Arena and Interrogate drop the `gpt-*` fallback prefix. Upstream PR cursor/plugins#511 gives a judgment reason, two default model families, and does not retire the Sol model. Open Pstack keeps Sol and the four-lane panel. Sol is the Codex parent's native family and the only matrix family a Pi parent reaches. Reflect roles stay on `inherit-parent`, because Reflect needs the parent's MCP surface, so the tooling move has no target. The port has no family-prefix or rejected-slug fallback lines, so the fallback edits have no target either. `UPSTREAM.md` and the technical reference list this exclusion. The `orch.test.ts` fixture changes its free-form `verifier` string from `sol` to `opus`. That string is not a routing default.
+
+**Setup prompt in help.** When the model sheet is missing and it matters, `poteto-help` now asks once per chat whether the user wants to run `/setup-pstack` now or later (`1e56b29`). The paragraph names Codex and Pi only. Claude Code always ships its sheet, and setup stops there, so the question never applies.
+
+**Wording.** The help skill's interrogate row says "different models", and Blast-radius says "Ask more than one model". `README-UPSTREAM.md`, the architect runner prompt, and `orch.test.ts` take the upstream text verbatim.
+
+**Guide edits.** `df58112` also edits guide pages 1 and 4. The guide and the Cursor manifest stay outside the port. Page 1's new budget paragraph is carried into the setup skill and the technical reference.
+
 ## 1.9.0 syncs to Cursor pstack 0.15.13
 
 Open Pstack 1.9.0 tracks Cursor pstack 0.15.13 at `2cbf58508f40de470d7490b55c51d71241928fa2`. It imports three upstream commits, `00b52d9`, `807c031`, and `2cbf585` (#43). The catalog stays at 52 skills.

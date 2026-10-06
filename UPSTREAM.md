@@ -8,11 +8,11 @@ open-pstack tracks [Cursor's pstack](https://github.com/cursor/plugins/tree/main
 | --- | --- |
 | Repository | `https://github.com/cursor/plugins.git` |
 | Path | `pstack/` |
-| Commit | `2cbf58508f40de470d7490b55c51d71241928fa2` |
-| Upstream version | `0.15.13` |
-| open-pstack version | `1.9.0` |
+| Commit | `df581122cde17e6e27686b5a448bde23e4ad4318` |
+| Upstream version | `0.15.15` |
+| open-pstack version | `1.10.0` |
 
-The table above is the current Cursor sync point. Open Pstack 1.9.0 imports this 0.15.13 sync. `README-UPSTREAM.md` preserves the upstream pstack README verbatim. `CHANGES.md` and `NOTICE.md` describe the adaptations and provenance.
+The table above is the current Cursor sync point. Open Pstack 1.10.0 imports this 0.15.15 sync. `README-UPSTREAM.md` preserves the upstream pstack README verbatim. `CHANGES.md` and `NOTICE.md` describe the adaptations and provenance.
 
 ## Upstream-only exclusions
 
@@ -21,7 +21,8 @@ The table above is the current Cursor sync point. Open Pstack 1.9.0 imports this
 - The `23a56e2` Fable defaults for `bug-fix`, `perf-issue`, and `hillclimb` were never applied. `889ec4b` and `70b2dc8` superseded them with Grok, and Open Pstack now follows that default.
 - The Sol family runs `gpt-6.1-sol` instead of upstream's `gpt-5.6-sol` (`gpt-5.6-sol-max`). The maintainer chose the newer model, and it is the Codex model the magpie relay exposes to Pi (#21).
 - The Grok 4.7 slug from `70b2dc8` is not applied. The Grok route keeps `grok:grok-4.6` until a maintainer with the Grok CLI probes `grok-4.7` through the runner.
-- `70b2dc8` shrinks the default panels to Opus 5.5, Sol, and Grok. Open Pstack moves judgment roles to `claude:opus@max` but keeps Fable as the fourth panel lane, so the panel default stays the model-matrix quad.
+- `70b2dc8` shrinks the default panels to Opus 5.5, Sol, and Grok. Open Pstack moves judgment roles to Opus but keeps Fable as the fourth panel lane, so the panel default stays the model-matrix quad.
+- `df58112` drops the Sol family from every default. Its panels shrink to Opus 5.5 and Grok, the interrogate table loses Reviewer C, `reflect tooling` moves from Sol to Grok, and arena and interrogate drop the `gpt-*` fallback prefix. Open Pstack keeps Sol and the four-lane model-matrix quad, now at `xhigh`. Upstream PR cursor/plugins#511 gives a judgment reason, two model families by default, and does not retire the Sol model. Here Sol is the Codex parent's native family and the only matrix family a Pi parent reaches. `reflect tooling` keeps its Open Pstack value, `inherit-parent`, because Reflect needs the parent's MCP surface. The fallback edits that drop the `gpt-*` prefix and prefer the same reasoning tier change lines that the no-fallback exclusion below already leaves out.
 - The `70b2dc8` and `12d587d` lines that rerun a rejected model on its family default or the closest valid slug are not applied. They conflict with the no-fallback contract in `provider-dispatch.md`.
 - The `23e4138` built-in PR tool rule is not applied. Claude Code, Codex, and Pi have no built-in PR tool, so Opening a PR and the plan skeleton keep the resolved forge CLI.
 - The Claude manifest does not take the logo field from `efa2a53` because Claude Code has no schema for it. The shared asset is exposed through the Codex manifest instead.
@@ -38,8 +39,8 @@ Fetch and inspect only commits that touched pstack after the recorded sync point
 
 ```shell
 git fetch cursor main
-git log --oneline 2cbf58508f40de470d7490b55c51d71241928fa2..cursor/main -- pstack
-git diff --stat 2cbf58508f40de470d7490b55c51d71241928fa2..cursor/main -- pstack
+git log --oneline df581122cde17e6e27686b5a448bde23e4ad4318..cursor/main -- pstack
+git diff --stat df581122cde17e6e27686b5a448bde23e4ad4318..cursor/main -- pstack
 ```
 
 No output means the tracked pstack tree has not changed. This comparison does not need a polling service or generated mirror branch.

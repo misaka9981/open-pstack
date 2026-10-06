@@ -38,10 +38,10 @@ Start all reviewers in one fan-out phase. Use `interrogate reviewers` from the c
 
 | Subagent | Default model |
 |----------|---------------|
-| Reviewer A | `claude:fable@max` |
-| Reviewer B | `codex:gpt-6.1-sol@max` |
+| Reviewer A | `claude:fable@xhigh` |
+| Reviewer B | `codex:gpt-6.1-sol@xhigh` |
 | Reviewer C | `grok:grok-4.6@xhigh` |
-| Reviewer D | `claude:opus@max` |
+| Reviewer D | `claude:opus@xhigh` |
 
 For each reviewer, route the configured descriptor with `read-only` access and a unique output/receipt path. If the descriptor is `inherit-parent` or `auto`, use the parent subagent primitive without a model override. If a provider, login, or model is unavailable, record a dropout and continue with the completed reviewers. Never pick the closest model or silently fall back; that destroys the meaning of cross-provider agreement.
 

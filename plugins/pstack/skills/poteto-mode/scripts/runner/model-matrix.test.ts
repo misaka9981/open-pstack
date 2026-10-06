@@ -25,7 +25,6 @@ const RELAY_HEADER = [
   "Family",
   "Provider",
   "Model",
-  "Default effort",
   "Selectable efforts",
 ] as const;
 
@@ -173,7 +172,6 @@ interface RelayRow {
   family: string;
   provider: string;
   model: string;
-  defaultEffort: Effort;
   selectableEfforts: Effort[];
 }
 
@@ -200,12 +198,11 @@ function parseRelayFamilies(markdown: string): RelayRow[] {
     if (cells.length !== RELAY_HEADER.length) {
       throw new Error(`relay row has ${cells.length} cells: ${line}`);
     }
-    const [family, provider, model, defaultEffortRaw, selectableRaw] = cells;
+    const [family, provider, model, selectableRaw] = cells;
     return {
       family,
       provider,
       model,
-      defaultEffort: asEffort(defaultEffortRaw),
       selectableEfforts: selectableRaw.split(/\s+/).map(asEffort),
     };
   });
@@ -268,10 +265,10 @@ describe("model matrix", () => {
     expect(
       rows.map((row) => [row.family, row.defaultEffort])
     ).toEqual([
-      ["fable", "max"],
-      ["sol", "max"],
+      ["fable", "xhigh"],
+      ["sol", "xhigh"],
       ["grok", "xhigh"],
-      ["opus", "max"],
+      ["opus", "xhigh"],
     ]);
     expect(
       rows
@@ -329,7 +326,7 @@ describe("model matrix", () => {
 
   it("keeps setup's first-run default panel copy aligned with the matrix", () => {
     const sheet = firstRunSheet(setup);
-    expect(sheet).toContain("\n<!-- budget: unlimited (max) -->\n");
+    expect(sheet).toContain("\n<!-- budget: large (xhigh) -->\n");
     const roles = sheet
       .split("\n")
       .filter((line) => line.includes(": ") && !line.startsWith("<!--"))
@@ -375,11 +372,21 @@ describe("model matrix", () => {
       expect(row.selectableEfforts).toEqual(
         EFFORTS.filter((effort) => row.selectableEfforts.includes(effort))
       );
-      expect(row.selectableEfforts).toContain(row.defaultEffort);
       expect(sheet).not.toContain(`${row.provider}:${row.model}@`);
       expect(setup).toContain(
         `| ${row.family} relay row + selected effort | not routed | \`codex exec\` on \`magpie\` | \`subagent\` \`magpie/${row.model}\` |`
       );
+    }
+  });
+
+  // Setup's budget proposes the same effort for every family and has no rule
+  // for an effort a family cannot select, so each target must stay selectable.
+  it("keeps every budget proposal selectable in each family", () => {
+    const relays = parseRelayFamilies(readFileSync(DISPATCH_PATH, "utf8"));
+    for (const row of [...rows, ...relays]) {
+      for (const target of ["max", "xhigh", "high", "medium"] as const) {
+        expect(row.selectableEfforts).toContain(target);
+      }
     }
   });
 
@@ -412,7 +419,7 @@ describe("model matrix", () => {
     expect(setup).toContain("Setup never substitutes a family on its own.");
     expect(setup).toContain("The descriptors keep the only effort values");
     for (const label of [
-      "`unlimited — keep max`",
+      "`unlimited — max reasoning`",
       "`large — xhigh reasoning`",
       "`medium — high reasoning`",
       "`small — medium reasoning`",

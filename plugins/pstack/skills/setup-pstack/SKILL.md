@@ -47,14 +47,14 @@ One distinct effort per family is the current value. A family with no non-alias 
 
 ### 4. Ask for a budget
 
-Ask one budget question with these four labels. Prefer `AskUserQuestion` over free text, and name the current budget when the sheet records one.
+Ask one budget question with these four labels. Prefer `AskUserQuestion` over free text, and name the current budget when the sheet records one. With no sheet, say that `large` matches the first-run defaults.
 
-- `unlimited — keep max`
+- `unlimited — max reasoning`
 - `large — xhigh reasoning`
 - `medium — high reasoning`
 - `small — medium reasoning`
 
-`unlimited` proposes each family's Default effort. `large`, `medium`, and `small` propose `xhigh`, `high`, or `medium` for every family. The budget only sets the proposals in step 6. It never changes a role's family or an alias.
+`unlimited`, `large`, `medium`, and `small` propose `max`, `xhigh`, `high`, or `medium` for every family, so `large` proposes the first-run defaults. The budget only sets the proposals in step 6. It never changes a role's family or an alias.
 
 ### 5. Choose role families
 
@@ -92,7 +92,7 @@ Build the new sheet in memory. Do not write it yet.
 
 Apply the role changes from step 5. Rewrite every matrix- or relay-family descriptor to `provider:model@<requested effort for that family>`. Leave `inherit-parent` and `auto` unchanged. An effort-only rerun cannot change a role's family. Changing Grok's effort updates every Grok occurrence and does not move a Sol role onto Grok. Refuse an unqualified slug, an unavailable route, a model outside the matrix and relay families, a provider/model mismatch, or a family that step 7 did not probe.
 
-Add one `<!-- budget: <label> (<target effort>) -->` comment line with the step 4 answer, using `max` as the target for `unlimited`. It is an HTML comment so that it is neither a heading nor a role row. It records the answer and is not a setting. The descriptors keep the only effort values, so a later hand edit of a descriptor wins.
+Add one `<!-- budget: <label> (<target effort>) -->` comment line with the step 4 answer and the effort that budget proposes. It is an HTML comment so that it is neither a heading nor a role row. It records the answer and is not a setting. The descriptors keep the only effort values, so a later hand edit of a descriptor wins.
 
 ### 9. Confirm and commit
 
@@ -109,22 +109,22 @@ After the operator confirms, write the in-memory render from step 8. Never paste
 
 Provider-qualified per-role choices. Read the installed pstack provider-dispatch reference before dispatching a configured role. Every documented role remains present. `inherit-parent` and `auto` use the parent model natively and still count as one panel lane.
 
-<!-- budget: unlimited (max) -->
+<!-- budget: large (xhigh) -->
 feature, refactoring: grok:grok-4.6@xhigh
 bug-fix: grok:grok-4.6@xhigh
 perf-issue: grok:grok-4.6@xhigh
 hillclimb: grok:grok-4.6@xhigh
-judgment and prose: claude:opus@max
-hardest tasks: claude:opus@max
+judgment and prose: claude:opus@xhigh
+hardest tasks: claude:opus@xhigh
 how explorer: grok:grok-4.6@xhigh
-how explainer: claude:opus@max
+how explainer: claude:opus@xhigh
 why investigators, synthesizer: inherit-parent
 reflect tooling, judgment, divergent, synthesizer: inherit-parent
-arena runners: claude:fable@max, codex:gpt-6.1-sol@max, grok:grok-4.6@xhigh, claude:opus@max
-arena cross-judge pool: claude:fable@max, codex:gpt-6.1-sol@max, grok:grok-4.6@xhigh, claude:opus@max
+arena runners: claude:fable@xhigh, codex:gpt-6.1-sol@xhigh, grok:grok-4.6@xhigh, claude:opus@xhigh
+arena cross-judge pool: claude:fable@xhigh, codex:gpt-6.1-sol@xhigh, grok:grok-4.6@xhigh, claude:opus@xhigh
 swarm workers: grok:grok-4.6@xhigh
-architect runners: claude:fable@max, codex:gpt-6.1-sol@max, grok:grok-4.6@xhigh, claude:opus@max
-interrogate reviewers: claude:fable@max, codex:gpt-6.1-sol@max, grok:grok-4.6@xhigh, claude:opus@max
+architect runners: claude:fable@xhigh, codex:gpt-6.1-sol@xhigh, grok:grok-4.6@xhigh, claude:opus@xhigh
+interrogate reviewers: claude:fable@xhigh, codex:gpt-6.1-sol@xhigh, grok:grok-4.6@xhigh, claude:opus@xhigh
 ```
 
 ### 10. Wire it in
