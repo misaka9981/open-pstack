@@ -10,10 +10,10 @@ pstack model choices are provider-qualified descriptors:
 
 | Family | Upstream pstack choice | Provider | Model | Default effort | Selectable efforts | Claude-native agent stem |
 |---|---|---|---|---|---|---|
-| fable | fable | claude | fable | max | low medium high xhigh max | fable |
-| sol | gpt-5.6-sol-max | codex | gpt-6.1-sol | max | low medium high xhigh max | - |
+| fable | fable | claude | fable | xhigh | low medium high xhigh max | fable |
+| sol | gpt-5.6-sol-max | codex | gpt-6.1-sol | xhigh | low medium high xhigh max | - |
 | grok | grok-4.7-xhigh-fast | grok | grok-4.6 | xhigh | low medium high xhigh max | - |
-| opus | opus | claude | opus | max | low medium high xhigh max | opus |
+| opus | opus | claude | opus | xhigh | low medium high xhigh max | opus |
 
 The allowed effort universe is exactly `low`, `medium`, `high`, `xhigh`, `max`. First-run requested efforts are the Default effort cell of each row. A Claude-native agent stem of `-` means the family has no Claude-native agent. Otherwise the shipped agent name is `pstack-<stem>-<effort>`.
 
@@ -25,10 +25,10 @@ The allowed effort universe is exactly `low`, `medium`, `high`, `xhigh`, `max`. 
 
 Setup offers only the relay families below. They stay outside the model matrix, so they never join the first-run defaults or the default panel. A role uses one only when the operator assigns it. A relay model with the same name as a family model is still a different lane. Never rewrite `claude:opus` to `magpie:wevnal/claude-opus-5-5` or the reverse.
 
-| Family | Provider | Model | Default effort | Selectable efforts |
-|---|---|---|---|---|
-| deepseek-flash | magpie | wevnal/deepseek-v4.1-flash | max | low medium high xhigh max |
-| glm-flash | magpie | wevnal/glm-5.3-flash | max | low medium high xhigh max |
+| Family | Provider | Model | Selectable efforts |
+|---|---|---|---|
+| deepseek-flash | magpie | wevnal/deepseek-v4.1-flash | low medium high xhigh max |
+| glm-flash | magpie | wevnal/glm-5.3-flash | low medium high xhigh max |
 
 Each selectable effort passed a one-turn runner probe through the relay. That proves the relay accepts the effort, not the reasoning depth it applies.
 
