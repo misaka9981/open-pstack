@@ -19,7 +19,7 @@ Before fanning out, find this conversation's transcript in Claude Code's per-pro
 ls -t ~/.claude/projects/<encoded-cwd>/*.jsonl 2>/dev/null | head -10
 ```
 
-That covers the legacy flat (`<id>.jsonl`), current nested (`<id>/<id>.jsonl`), and subagent (`<parent>/subagents/<child>.jsonl`) layouts. For each candidate, read the first JSONL line. Take the file whose `message.content[0].text` contains the conversation's opening user prompt. If none matches, pass a tight digest of the session instead.
+Claude Code writes each main session as a flat `<id>.jsonl`, which this lists. Subagent runs live under `<id>/subagents/` and are not the conversation, so skip them. The first lines of each file are session metadata. For each candidate, find the first record whose `type` is `user`. Its `message.content` is a string or a list of blocks. Take the file whose first user message contains the conversation's opening user prompt. If none matches, pass a tight digest of the session instead.
 
 ## 2. Spawn three reviewers in parallel
 
