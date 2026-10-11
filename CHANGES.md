@@ -2,6 +2,14 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.11.1 finds the reflect transcript in Claude Code's layout
+
+Reflect step 1 lists `~/.claude/projects/<encoded-cwd>/*.jsonl` and picks the file that holds the conversation's opening prompt (#51). Two lines in that step described Cursor's transcripts, not Claude Code's.
+
+**Layouts.** The step claimed the listing covered flat, nested, and subagent layouts. Claude Code writes each main session as a flat `<id>.jsonl` and puts subagent runs under `<id>/subagents/`. It writes no nested `<id>/<id>.jsonl`. In the 1.11.1 live gate, the old sentence led the model to add a `*/*.jsonl` glob, which zsh rejected with "no matches found". The listing already finds every main session, so only the sentence changes. It names the flat layout and says to skip subagent runs.
+
+**Match.** The step compared the opening prompt with the first JSONL line's `message.content[0].text`. In Claude Code transcripts the first lines are metadata records, such as `last-prompt` and `mode` in interactive sessions or `queue-operation` and `attachment` under `claude -p`. That rule cannot match. In the gate's two runs on the old text, the model ignored it and grepped the whole file for the prompt, so it still found the right transcript. The step now names the record that holds the prompt: the first one whose `type` is `user`, with content that is a string or a list of blocks. The run on the new text selected that record with `jq` and passed the matching file to all three reviewers.
+
 ## 1.11.0 syncs to Cursor pstack 0.15.17
 
 Open Pstack 1.11.0 tracks Cursor pstack 0.15.17 at `978ca6e9c0e012047cd5058b8e829240336e704e`. It imports two upstream commits, `00b14f1` and `978ca6e` (#50). The catalog grows from 52 to 53 skills.
