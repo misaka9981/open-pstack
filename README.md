@@ -64,14 +64,13 @@ Start a new Codex task after installation so it can discover the new skills and 
 
 ### Pi
 
-Pi delegates through [pi-subagents](https://pi.dev/packages/pi-subagents). Install it, then install Open Pstack from a local checkout:
+Pi runs inside Lody, an agent IDE that gives each agent its own session and worktree. Install Open Pstack into Pi from a local checkout:
 
 ```shell
-pi install npm:pi-subagents
 pi install /path/to/open-pstack
 ```
 
-Invoke the main entry point with `/skill:poteto-mode`. Pi reaches Codex models and the other relay models through the `magpie` relay; it has no route to Claude or Grok.
+In Lody, use a Pi agent config. Lody can point it at your own `pi`. Start a Lody session with that config and invoke `/skill:poteto-mode`. Pi reaches Codex models and the other relay models through the `magpie` relay; it has no route to Claude or Grok.
 
 ## Get started
 

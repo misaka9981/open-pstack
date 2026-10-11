@@ -2,6 +2,22 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## Unreleased: Pi dispatches through Lody sessions
+
+Every Pi lane is now one Lody session (#54). Lody is an agent IDE that runs each agent in its own session and worktree, and the maintainer runs Pi only inside it.
+
+**Why.** pi-subagents is gone, so the old route had no runtime. Lody injects its own `subagent` tool, but it takes only a task and a description, always runs the parent's model, and starts no worktree. It cannot carry a pstack descriptor, so pstack does not use it.
+
+**The route.** Once per parent run, the parent calls `lody_session_create_options` and takes the machine id, the Pi agent config id, the project id, and that config's model ids and effort values. Each fan-out phase is one `lody_session_create_many` call of up to 20 items, with more calls in the same phase when lanes exceed 20. `codex:<model>@<effort>` maps to `modelId` `magpie/codex/<model>`, `magpie:<model>@<effort>` maps to `magpie/<model>`, and both pass `reasoningEffort` `<effort>`. A descriptor whose model id or effort the config does not list is a named dropout. `inherit-parent` and `auto` omit the model, so the lane runs Pi's configured default, and the synthesis says so. A lane that touches the repository gets a Lody worktree, and a lane that needs no checkout gets a chat work context. Lody delivers the batch result as one continuation. The parent proves each lane's model from the Pi transcript whose directory name contains the Lody session id, and archives the session only after it has taken what it needs. Setup probes on a Pi parent use the same call with a chat work context.
+
+**Lane prompts replace the agents.** The four pi-subagents agents (`pstack.lane`, `pstack.lane-readonly`, `pstack.poteto-agent`, and `pstack.comment-sicko`), the `preload-poteto-mode.ts` extension, and their tests are deleted. The contract each agent carried now travels in the item prompt. The poteto-agent prompt starts with `/skill:poteto-mode `, which a Lody Pi session expands into the skill body. `package.json` lists only the skill tree, and `pi-package.test.ts` fails when a `pi.subagents` entry returns.
+
+**Read-only gap.** Pi under Lody has no permission or read-only mode. The read-only contract in the prompt is the only guard.
+
+**Deadline.** Every call passes `deadlineSeconds: 604800`, Lody's maximum. Lody enforces that bound on every Operation. It is not a pstack timeout, and pstack adds no other limit. At the deadline Lody marks an unfinished item `failed` with `TARGET_TIMEOUT` and does not cancel its session. The parent checks the session with `lody_session_status_many`, cancels a still-running child with `lody_session_cancel`, and records the dropout.
+
+**Claude Code and Codex.** Unchanged. The Claude agents, Codex `spawn_agent` dispatch, and the external runner keep their routes. Only Pi rows, bullets, and sentences in the shared files changed.
+
 ## 1.11.1 finds the reflect transcript in Claude Code's layout
 
 Reflect step 1 lists `~/.claude/projects/<encoded-cwd>/*.jsonl` and picks the file that holds the conversation's opening prompt (#51). Two lines in that step described Cursor's transcripts, not Claude Code's.
