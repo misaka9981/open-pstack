@@ -36,7 +36,7 @@ On Codex or Pi, when the mirror state row says not configured and it matters, as
 
 ## Get set up
 
-1. Install with the commands in the [README](https://github.com/misaka9981/open-pstack/blob/main/README.md#install) for the user's harness. Claude Code runs `/plugin marketplace add misaka9981/open-pstack`, then `/plugin install pstack@open-pstack`. Codex runs `codex plugin marketplace add misaka9981/open-pstack --ref main`, then `codex plugin add pstack@open-pstack`, and needs `multi_agent = true` under `[features]` in `~/.codex/config.toml`. Pi installs `pi-subagents`, then the Open Pstack checkout.
+1. Install with the commands in the [README](https://github.com/misaka9981/open-pstack/blob/main/README.md#install) for the user's harness. Claude Code runs `/plugin marketplace add misaka9981/open-pstack`, then `/plugin install pstack@open-pstack`. Codex runs `codex plugin marketplace add misaka9981/open-pstack --ref main`, then `codex plugin add pstack@open-pstack`, and needs `multi_agent = true` under `[features]` in `~/.codex/config.toml`. Pi installs the Open Pstack checkout and runs inside Lody.
 2. Set the models. On Codex and Pi, run [`/setup-pstack`](../setup-pstack/SKILL.md). It asks for a reasoning budget, maps a model to each role, and writes a model sheet. The sheet applies to new sessions. On Claude Code, the plugin ships its own sheet, so `/setup-pstack` reports it and stops. Change models there by editing `plugins/pstack/pstack-models.md` in the repository and updating the plugin.
 3. Start a real task with `/poteto-mode`, a goal, and a check that can pass or fail.
 

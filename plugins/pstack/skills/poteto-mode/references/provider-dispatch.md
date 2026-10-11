@@ -67,9 +67,9 @@ The top-level harness resolves the route once. A child receives an assigned prov
 |---|---|---|---|---|
 | Claude Code | native `Agent` | external runner | external runner | not routed |
 | Codex | external runner | native `spawn_agent` | external runner | external runner |
-| Pi | not routed | native `subagent` (`magpie/codex/…`) | not routed | native `subagent` (`magpie`) |
+| Pi | not routed | Lody session (`magpie/codex/…`) | not routed | Lody session (`magpie`) |
 
-A `not routed` cell is a named dropout. Claude Code keeps its configured providers and does not use the relay. A Pi parent reaches Codex models as the relay's `codex/` models and the other relay models directly, all through Pi's `magpie` provider; it has no route to Claude or Grok.
+A `not routed` cell is a named dropout. Claude Code keeps its configured providers and does not use the relay. A Pi parent runs inside Lody and creates one Lody session per lane. It reaches Codex models as the relay's `codex/` models and the other relay models directly, all through Pi's `magpie` provider. It has no route to Claude or Grok.
 
 A Codex parent reaches `magpie:*` only through the external runner. `spawn_agent` has no provider parameter, and a spawned child ignores an agent profile's `model_provider`: the child keeps the parent's provider and rejects the relay model id. This table assumes the Codex parent runs on its default provider.
 
@@ -81,7 +81,7 @@ Native dispatch avoids a second CLI startup and its base context.
 
 - Claude Code: match the descriptor's `(provider, model)` to one model-matrix row, then dispatch it through `pstack-<stem>-<effort>` using that row's Claude-native agent stem and the descriptor's effort. Those definitions select the rolling model alias, requested effort, and `background: true`. `pstack-fable-max` and `pstack-opus-xhigh` remain in that set. Pass the complete task, grounding paths, access mode, and unique output location in the `Agent` prompt. Retain the task handle and drain it only after fan-out.
 - Codex: call `spawn_agent` with the descriptor's model and `reasoning_effort`, the complete task, grounding paths, access mode, and unique output location. Use an isolated worktree for a writer. Codex subagents already run concurrently.
-- Pi: launch every lane as a child of one async pi-subagents workflow with the mapped `<pi provider>/<model>:<effort>` and a pstack agent, as [`pi-tools.md`](pi-tools.md) specifies. Never use a foreground or single-agent launch, because those carry pi-subagents' implicit 30-minute deadline.
+- Pi: create every lane as one item of a `lody_session_create_many` call with the mapped `modelId` and `reasoningEffort`, the lane prompt, and a worktree or chat work context, as [`pi-tools.md`](pi-tools.md) specifies.
 
 Do not send a same-provider descriptor to the external runner. It rejects that call because the native route is cheaper and already available.
 
@@ -133,7 +133,7 @@ Success requires all of these:
 3. Either `modelVerified: true` with `modelEvidence: "provider-report"`, or a Codex or magpie receipt with `reportedModel: null`, `modelVerified: false`, and `modelEvidence: "pinned-argv"`. For Claude's `fable` and `opus` aliases, the concrete provider report must belong to the requested family. Codex 0.149.0 accepts the exact `--model` argument but does not report the served model in its JSONL stream.
 4. A non-empty output file.
 
-A Pi lane has no runner receipt. It succeeds when its workflow result has `ok: true` and a non-empty output, and its child transcript's assistant messages report the mapped provider and model. A child that fails, including one whose model is not in Pi's registry, is a dropout.
+A Pi lane has no runner receipt. It succeeds when its Lody item is `succeeded`, its output file is non-empty, and its transcript's assistant messages report the mapped provider and model. An item that fails, including one whose model id is not in the Pi agent config, is a dropout.
 
 The receipt also carries elapsed time, token usage when the CLI exposes it, and cost when available. Keep it with the arena or review artifacts so parent-harness comparisons are evidence-based.
 
