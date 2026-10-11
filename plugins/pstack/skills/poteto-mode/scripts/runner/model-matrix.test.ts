@@ -392,7 +392,7 @@ describe("model matrix", () => {
       );
       expect(sheet).not.toContain(`${row.provider}:${row.model}@`);
       expect(setup).toContain(
-        `| ${row.family} relay row + selected effort | not routed | \`codex exec\` on \`magpie\` | \`subagent\` \`magpie/${row.model}\` |`
+        `| ${row.family} relay row + selected effort | not routed | \`codex exec\` on \`magpie\` | Lody session \`magpie/${row.model}\` |`
       );
     }
   });
@@ -412,7 +412,7 @@ describe("model matrix", () => {
     const sol = rows.find((row) => row.family === "sol");
     expect(sol?.model).toBe("gpt-6.1-sol");
     expect(setup).toContain("Claude Code, Codex, or Pi.");
-    expect(setup).toContain(`| \`subagent\` \`magpie/codex/${sol?.model}\` |`);
+    expect(setup).toContain(`| Lody session \`magpie/codex/${sol?.model}\` |`);
     for (const family of ["Fable", "Grok", "Opus"]) {
       const line = setup.split("\n").find((entry) => entry.startsWith(`| ${family} | `));
       expect(line?.split(" | ")[4]).toBe("not routed");
