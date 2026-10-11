@@ -2,6 +2,32 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.11.0 syncs to Cursor pstack 0.15.17
+
+Open Pstack 1.11.0 tracks Cursor pstack 0.15.17 at `978ca6e9c0e012047cd5058b8e829240336e704e`. It imports two upstream commits, `00b14f1` and `978ca6e` (#50). The catalog grows from 52 to 53 skills.
+
+**Prompt distillation.** `00b14f1` shortens 35 skill prompts to cut tokens. Twenty files take the upstream text or a clean three-way merge. The other fifteen keep their Open Pstack adaptations on top of the shorter prose. Each adaptation below is one the port already documents.
+
+**Dispatch adaptations.** Arena, How, Interrogate, Reflect, and Why keep the dispatch contract and their model sheet lines. Upstream's Task tool, `generalPurpose`, `readonly`, `pstack-models.mdc`, and Cursor slug lines are not applied. Arena and Interrogate keep the four-lane panel and the no-fallback rule, so the closest-slug fallback stays out. Arena takes upstream's one-line todolist. Its dropout note no longer names a synthesis record, because the Outputs section already lists dropouts. How takes upstream's numbered steps and names both role lines in one paragraph.
+
+**Why keeps MCP access.** A clean-merged upstream line told every Why lane to run as `generalPurpose` with `readonly: false` and banned Ask mode. Those are Cursor modes. The line now says that every lane keeps the parent's MCP access, that a mode without it disables the MCP-backed investigators and the synthesizer's citation spot-checks, and that investigators and the synthesizer do not write files.
+
+**Reflect.** Reflect takes upstream's flatter layout and its one-paragraph rule for which skills a reviewer may route to. The transcript step keeps Claude Code's per-project directory. The three reviewer references keep the `.claude/` skill paths and the `Agent` prompt. Skill authoring routes to `plugin-dev:skill-development` instead of Cursor's `create-skill`.
+
+**Poteto-mode.** The principle index and the playbook list take upstream's form. Entries drop their skill names and file paths, and one rule derives each leaf name and playbook path from the title. Every derived name maps to an existing file. The port keeps `AskUserQuestion`, `plugin-dev:skill-development`, the bundled `babysit` skill, the review-bot wording, the autopilot-stack fork text, and "a session restart". The Attack the Premise and Test Behavior lines keep their 1.4.0 corrections.
+
+**Opening a PR.** The playbook takes upstream's shorter Commits, PRs, Titles, and Descriptions text. The `cursor-team-kit` source and the 40-line commit cutoff stay out. Upstream's reworded built-in PR tool paragraph stays out too. The port's forge, fork-stack, readiness, and babysit text does not change.
+
+**Descriptions kept.** `00b14f1` shortens the descriptions of `figure-it-out`, `principle-model-the-domain`, `principle-never-block-on-the-human`, and `principle-redesign-from-first-principles`. Upstream ships these four with `disable-model-invocation: true`, so their descriptions do not trigger them there. Here `figure-it-out` stays model-invocable, and the three leaves carry `user-invocable: false`, so the model can still load all four. The description is what triggers them, so the port keeps its descriptions and frontmatter and takes only the body cuts.
+
+**Test behavior kept.** Upstream distills the original `principle-test-behavior-not-implementation` rule, which rejects any test that would still pass when every import returns `undefined`. The port corrected that rule in 1.4.0, and upstream has no matching correction. The leaf and its poteto-mode index line keep the 1.4.0 text.
+
+**New skill.** `978ca6e` adds `ketchup`. It catches the user up on everything in this chat since their last message, in plain words, and gives each decision that waits on the user a short executive summary. The skill file is the upstream text. `poteto-help` gains its routing row and a close call that separates it from `recall`.
+
+**Typed-only ketchup.** Ketchup ships with `disable-model-invocation: true`, and nothing routes it by name, so it joins `correct` and `poteto-help` as a typed-only skill. The Codex and Pi tool maps, the `poteto-help` setup paragraph and troubleshooting row, and the user-only static invariant now name it. The README and the technical reference gain a row. Codex ignores the flag, so ketchup stays in the model's skill list there. The Codex map says to start it only when the user asks for it by name.
+
+**Upstream README.** `README-UPSTREAM.md` takes the upstream README verbatim. The only change is the `/ketchup` row.
+
 ## 1.10.1 classifies the sheet file and the mirror block by one table
 
 On Codex and Pi, setup writes the model sheet to a file and mirrors its bytes into a `pstack:models` block in the global `AGENTS.md`. Sessions load only the block, so the block is the configuration in effect. Setup step 2 had no rule for a block without a file, and `poteto-help` checked only the file (#48). In the 1.10.0 live gate on Codex 0.160.1, with only the file renamed away, setup chose on its own to treat the block as the current configuration and named its `medium (high)` budget. No rule said whether the block or the file was stale, or how setup would repair the state. In the same state, `poteto-help` would have told the user that every role uses its default model while every session ran the block.

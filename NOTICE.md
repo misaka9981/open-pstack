@@ -20,6 +20,7 @@ This plugin is a port of upstream MIT-licensed work. All upstream copyright noti
 | `plugins/pstack/skills/poteto-help/` (0.15.10 help skill), `README-UPSTREAM.md` | [cursor/plugins/pstack @ 4e5b1cf](https://github.com/cursor/plugins/tree/4e5b1cf2ccb0ea3716f08c8ee0a5856b5ab93536/pstack) | (c) 2026 Lauren Tan | MIT | [LICENSE](LICENSE) |
 | `plugins/pstack/skills/poteto-help/SKILL.md` (0.15.11 typed-only flag), `plugins/pstack/skills/poteto-help/references/{prompting,recipes}.md` (0.15.12 prompting references), `README-UPSTREAM.md` | [cursor/plugins/pstack @ 2cbf585](https://github.com/cursor/plugins/tree/2cbf58508f40de470d7490b55c51d71241928fa2/pstack) | (c) 2026 Lauren Tan | MIT | [LICENSE](LICENSE) |
 | `plugins/pstack/skills/poteto-help/SKILL.md` (0.15.14 setup prompt), `plugins/pstack/skills/` (0.15.15 changes: `xhigh` defaults, the `unlimited` budget at `max`, and the "different models" wording), `README-UPSTREAM.md` | [cursor/plugins/pstack @ df58112](https://github.com/cursor/plugins/tree/df581122cde17e6e27686b5a448bde23e4ad4318/pstack) | (c) 2026 Lauren Tan | MIT | [LICENSE](LICENSE) |
+| `plugins/pstack/skills/ketchup/` (0.15.17 catch-up skill), `plugins/pstack/skills/` (0.15.16 prompt distillation and the 0.15.17 `poteto-help` ketchup row), `README-UPSTREAM.md` | [cursor/plugins/pstack @ 978ca6e](https://github.com/cursor/plugins/tree/978ca6e9c0e012047cd5058b8e829240336e704e/pstack) | (c) 2026 Lauren Tan | MIT | [LICENSE](LICENSE) |
 
 ## What changed in the port
 
