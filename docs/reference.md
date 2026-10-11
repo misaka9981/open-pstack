@@ -59,7 +59,7 @@ The marketplace install is the normal user path. Direct links are only for testi
 ├── plugins/pstack/                   # the plugin itself
 │   ├── .claude-plugin/plugin.json    # Claude Code manifest
 │   ├── .codex-plugin/plugin.json     # Codex manifest (skills: ./skills/)
-│   ├── skills/                       # 52 skills shared by Claude Code, Codex, and Pi
+│   ├── skills/                       # 53 skills shared by Claude Code, Codex, and Pi
 │   │   ├── poteto-mode/references/{codex-tools,provider-dispatch}.md  # tool + provider routing
 │   │   └── poteto-mode/scripts/      # bun/bash/node tooling: watch-pr, orch, runner, check-plan.mjs, worktree-audit.sh
 │   ├── hooks/                        # SessionStart auto-fire: injects the poteto-mode mandate (the model sheet only on Claude Code)
@@ -141,6 +141,7 @@ The table uses the short upstream names. Claude Code exposes each native skill w
 | `/show-me-your-work` | log decisions to a reviewable tsv decision trail |
 | `/blast-radius` | find what a change could break beyond the diff and prove safety by running code |
 | `/recall` | catch up on recent working context from chat history, live state, and the shared record |
+| `/ketchup` | catch up on everything in this chat since your last message, with a summary of each decision waiting on you (user-invoked only on Claude Code and Pi) |
 | `/setup-pstack` | configure pstack per-role model choices, reasoning budget, and per-family requested effort |
 | `/unslop` | clean up writing by removing AI tells |
 | `/no-comments` | strip comments before review via the `comment-sicko` subagent, then fix what it finds |
