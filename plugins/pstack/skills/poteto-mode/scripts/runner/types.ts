@@ -21,6 +21,15 @@ export interface RunnerOptions {
   readonly timeoutMs: number | null;
 }
 
+// A configured Codex MCP server name that `--config mcp_servers.<key>.enabled=false`
+// can address. Only parseCodexMcpListing produces it.
+export type McpServerKey = string & { readonly __brand: "McpServerKey" };
+
+export type CodexMcpListing =
+  | { readonly kind: "ok"; readonly enabled: readonly McpServerKey[] }
+  | { readonly kind: "malformed"; readonly reason: string }
+  | { readonly kind: "unaddressable"; readonly names: readonly string[] };
+
 export type ReceiptStatus =
   | "complete"
   | "cancelled"

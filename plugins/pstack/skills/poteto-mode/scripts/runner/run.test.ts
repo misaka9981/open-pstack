@@ -19,6 +19,13 @@ import type { Provider, RunnerOptions, RunnerReceipt } from "./types.ts";
 let scratch = "";
 let bin = "";
 let previousPath: string | undefined;
+const FAKE_MCP_ENV = [
+  "FAKE_MCP_LIST_JSON",
+  "FAKE_MCP_LIST_FAIL",
+  "FAKE_MCP_LIST_DELAY_MS",
+  "FAKE_MCP_LIST_LOG_PATH",
+  "FAKE_MODEL_ARGV_PATH",
+] as const;
 
 const fake = `#!/usr/bin/env bun
 import { appendFileSync, existsSync, unlinkSync, writeFileSync } from "node:fs";
@@ -26,7 +33,7 @@ const args = process.argv.slice(2);
 const name = process.argv[1].split("/").at(-1);
 const isPreflight =
   (name === "claude" && args[0] === "auth") ||
-  (name === "codex" && (args[0] === "login" || args[0] === "--version")) ||
+  (name === "codex" && (args[0] === "login" || args[0] === "--version" || args[0] === "mcp")) ||
   (name === "grok" && args[0] === "models");
 const stage = isPreflight ? "preflight" : "model";
 const startedPath = isPreflight
@@ -51,7 +58,7 @@ const delay = Number(
     : process.env.FAKE_MODEL_DELAY_MS ?? 0
 );
 if (delay > 0) await Bun.sleep(delay);
-if (process.env.FAKE_TIMEOUT === "1" && !args.includes("status") && !args.includes("models")) {
+if (process.env.FAKE_TIMEOUT === "1" && stage === "model") {
   await Bun.sleep(5_000);
 }
 if (name === "claude" && args[0] === "auth") {
@@ -68,6 +75,22 @@ if (name === "codex" && args[0] === "login") {
 if (name === "codex" && args[0] === "--version") {
   console.log("codex-cli 0.0.0");
   process.exit(0);
+}
+if (name === "codex" && args[0] === "mcp") {
+  if (process.env.FAKE_MCP_LIST_LOG_PATH) {
+    appendFileSync(process.env.FAKE_MCP_LIST_LOG_PATH, args.join(" ") + "\\n");
+  }
+  const listDelay = Number(process.env.FAKE_MCP_LIST_DELAY_MS ?? 0);
+  if (listDelay > 0) await Bun.sleep(listDelay);
+  if (process.env.FAKE_MCP_LIST_FAIL === "1") {
+    console.error("Error: failed to load configuration");
+    process.exit(1);
+  }
+  console.log(process.env.FAKE_MCP_LIST_JSON ?? "[]");
+  process.exit(0);
+}
+if (stage === "model" && process.env.FAKE_MODEL_ARGV_PATH) {
+  writeFileSync(process.env.FAKE_MODEL_ARGV_PATH, JSON.stringify(args));
 }
 if (name === "grok" && args[0] === "models") {
   if (process.env.FAKE_GROK_PREFLIGHT_LOG_PATH) {
@@ -252,6 +275,7 @@ beforeEach(() => {
   delete process.env.FAKE_DESCENDANT_HOLDS_PIPES_MS;
   delete process.env.FAKE_DESCENDANT_PID_PATH;
   delete process.env.FAKE_SELF_SIGNAL;
+  for (const key of FAKE_MCP_ENV) delete process.env[key];
 });
 
 afterEach(() => {
@@ -276,6 +300,7 @@ afterEach(() => {
   delete process.env.FAKE_DESCENDANT_HOLDS_PIPES_MS;
   delete process.env.FAKE_DESCENDANT_PID_PATH;
   delete process.env.FAKE_SELF_SIGNAL;
+  for (const key of FAKE_MCP_ENV) delete process.env[key];
   rmSync(scratch, { recursive: true, force: true });
 });
 
@@ -353,6 +378,106 @@ describe("runLane", () => {
       model: "wevnal/glm-5.3",
       preflight: { status: "passed" },
     });
+  });
+
+  for (const provider of ["codex", "magpie"] as const) {
+    it(`runs a ${provider} child without apps and with each enabled MCP server off`, async () => {
+      const argvPath = join(scratch, `${provider}-mcp.argv.json`);
+      process.env.FAKE_MODEL_ARGV_PATH = argvPath;
+      process.env.FAKE_MCP_LIST_JSON = JSON.stringify([
+        { name: "notion", enabled: true },
+        { name: "code-review", enabled: false },
+        { name: "incident-io", enabled: true },
+      ]);
+      const input = options(provider, `${provider}-mcp`);
+      expect((await runLane(input)).exitCode).toBe(0);
+
+      const args = JSON.parse(readFileSync(argvPath, "utf8")) as string[];
+      const disabled = args.flatMap((arg, index) =>
+        args[index - 1] === "--disable" ? [arg] : []
+      );
+      expect(disabled).toContain("apps");
+      const configs = args.filter((arg) => arg.startsWith("mcp_servers."));
+      expect(configs).toEqual([
+        "mcp_servers.notion.enabled=false",
+        "mcp_servers.incident-io.enabled=false",
+      ]);
+      const recorded = receipt(input.receiptPath);
+      expect(recorded.argv.slice(1)).toEqual(args);
+      expect(recorded.preflight).toMatchObject({ status: "passed" });
+      expect(recorded.preflight.evidence).toContain(
+        "MCP servers disabled: notion, incident-io"
+      );
+      expect(recorded.preflight.evidence).not.toContain("code-review");
+    });
+  }
+
+  it("drops out before the model when an enabled MCP server name cannot be disabled", async () => {
+    const modelStarted = join(scratch, "mcp-unaddressable-model.started");
+    process.env.FAKE_MODEL_STARTED_PATH = modelStarted;
+    process.env.FAKE_MCP_LIST_JSON = JSON.stringify([
+      { name: "notion", enabled: true },
+      { name: "my.server", enabled: true },
+    ]);
+    const input = options("magpie", "mcp-unaddressable");
+    const result = await runLane(input);
+
+    expect(result.exitCode).toBe(69);
+    expect(existsSync(modelStarted)).toBe(false);
+    expect(existsSync(input.outputPath)).toBe(false);
+    const recorded = receipt(input.receiptPath);
+    expect(recorded).toMatchObject({
+      status: "unavailable-cli",
+      preflight: { status: "failed" },
+    });
+    expect(recorded.preflight.argv.slice(1)).toEqual(["mcp", "list", "--json"]);
+    expect(recorded.error?.message).toContain('"my.server"');
+    expect(recorded.error?.message).toContain("model was not launched");
+  });
+
+  for (const [label, env, status, exitCode] of [
+    ["fails", { FAKE_MCP_LIST_FAIL: "1" }, "child-failed", 70],
+    ["is not JSON", { FAKE_MCP_LIST_JSON: "MCP servers: notion" }, "malformed-output", 65],
+    ["has the wrong shape", { FAKE_MCP_LIST_JSON: JSON.stringify({ servers: [] }) }, "malformed-output", 65],
+  ] as const) {
+    it(`drops out before the model when the MCP listing ${label}`, async () => {
+      const modelStarted = join(scratch, "mcp-listing-model.started");
+      process.env.FAKE_MODEL_STARTED_PATH = modelStarted;
+      Object.assign(process.env, env);
+      const input = options("codex", "mcp-listing-dropout");
+      const result = await runLane(input);
+
+      expect(result.exitCode).toBe(exitCode);
+      expect(existsSync(modelStarted)).toBe(false);
+      expect(existsSync(input.outputPath)).toBe(false);
+      const recorded = receipt(input.receiptPath);
+      expect(recorded).toMatchObject({
+        status,
+        preflight: { status: "failed" },
+      });
+      expect(recorded.preflight.argv.slice(1)).toEqual(["mcp", "list", "--json"]);
+      expect(recorded.error?.message).toContain("model was not launched");
+    });
+  }
+
+  it("spends the explicit deadline across the MCP listing without retrying it", async () => {
+    const listLog = join(scratch, "mcp-deadline.log");
+    const modelStarted = join(scratch, "mcp-deadline-model.started");
+    process.env.FAKE_MCP_LIST_LOG_PATH = listLog;
+    process.env.FAKE_MCP_LIST_DELAY_MS = "2000";
+    process.env.FAKE_MODEL_STARTED_PATH = modelStarted;
+    const input = { ...options("codex", "mcp-deadline"), timeoutMs: 500 };
+    const result = await runLane(input);
+    const recorded = receipt(input.receiptPath);
+
+    expect(result.exitCode).toBe(124);
+    expect(readFileSync(listLog, "utf8")).toBe("mcp list --json\n");
+    expect(existsSync(modelStarted)).toBe(false);
+    expect(recorded).toMatchObject({
+      status: "timed-out",
+      preflight: { status: "timed-out" },
+    });
+    expect(recorded.elapsedMs).toBeLessThan(1_500);
   });
 
   it("classifies an unavailable model without falling back", async () => {

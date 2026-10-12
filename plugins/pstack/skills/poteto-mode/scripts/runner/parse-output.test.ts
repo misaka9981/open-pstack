@@ -1,5 +1,49 @@
 import { describe, expect, it } from "bun:test";
-import { parseProviderOutput, reportedModelMatches } from "./parse-output.ts";
+import {
+  parseCodexMcpListing,
+  parseProviderOutput,
+  reportedModelMatches,
+} from "./parse-output.ts";
+
+describe("parseCodexMcpListing", () => {
+  it("returns only the enabled server names", () => {
+    const listing = parseCodexMcpListing(JSON.stringify([
+      { name: "notion", enabled: true, transport: {} },
+      { name: "code-review", enabled: false },
+      { name: "PlanetScale", enabled: true },
+    ]));
+    expect(listing.kind).toBe("ok");
+    expect(listing.kind === "ok" ? listing.enabled.map(String) : null).toEqual([
+      "notion",
+      "PlanetScale",
+    ]);
+  });
+
+  it("rejects output that is not an array of named entries", () => {
+    for (const stdout of [
+      "not json",
+      JSON.stringify({ servers: [] }),
+      JSON.stringify([{ name: "notion" }]),
+      JSON.stringify([{ name: "", enabled: true }]),
+      JSON.stringify([{ name: "notion", enabled: "true" }]),
+    ]) {
+      expect(parseCodexMcpListing(stdout).kind).toBe("malformed");
+    }
+  });
+
+  it("reports enabled names that Codex --config cannot address", () => {
+    const listing = parseCodexMcpListing(JSON.stringify([
+      { name: "my.server", enabled: true },
+      { name: "has space", enabled: true },
+      { name: "off.server", enabled: false },
+      { name: "notion", enabled: true },
+    ]));
+    expect(listing).toEqual({
+      kind: "unaddressable",
+      names: ["my.server", "has space"],
+    });
+  });
+});
 
 describe("parseProviderOutput", () => {
   it("extracts Claude text, model, usage, cost, and session", () => {

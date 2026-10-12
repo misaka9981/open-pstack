@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { invocationCommand } from "./commands.ts";
-import type { RunnerOptions } from "./types.ts";
+import { invocationCommand, mcpListCommand } from "./commands.ts";
+import type { McpServerKey, RunnerOptions } from "./types.ts";
 
 function options(overrides: Partial<RunnerOptions> = {}): RunnerOptions {
   return {
@@ -20,7 +20,7 @@ function options(overrides: Partial<RunnerOptions> = {}): RunnerOptions {
 
 describe("invocationCommand", () => {
   it("pins Codex model, effort, sandbox, cwd, and JSONL output", () => {
-    const spec = invocationCommand(options());
+    const spec = invocationCommand(options(), []);
     expect(spec.command).toBe("codex");
     expect(spec.stdin).toBe("prompt");
     expect(spec.args).toEqual([
@@ -43,6 +43,8 @@ describe("invocationCommand", () => {
       "hooks",
       "--disable",
       "memories",
+      "--disable",
+      "apps",
       "--json",
       "-",
     ]);
@@ -56,7 +58,8 @@ describe("invocationCommand", () => {
         provider: "magpie",
         model: "wevnal/glm-5.3",
         effort: "high",
-      })
+      }),
+      []
     );
     expect(spec.command).toBe("codex");
     expect(spec.stdin).toBe("prompt");
@@ -82,6 +85,8 @@ describe("invocationCommand", () => {
       "hooks",
       "--disable",
       "memories",
+      "--disable",
+      "apps",
       "--json",
       "-",
     ]);
@@ -93,7 +98,8 @@ describe("invocationCommand", () => {
         parent: "codex",
         provider: "claude",
         model: "fable",
-      })
+      }),
+      []
     );
     expect(spec.command).toBe("claude");
     expect(spec.stdin).toBe("prompt");
@@ -122,7 +128,8 @@ describe("invocationCommand", () => {
 
   it("limits Grok to the assigned cwd and disables recursive agents", () => {
     const spec = invocationCommand(
-      options({ provider: "grok", model: "grok-4.6", effort: "xhigh" })
+      options({ provider: "grok", model: "grok-4.6", effort: "xhigh" }),
+      []
     );
     expect(spec.command).toBe("grok");
     expect(spec.stdin).toBe("none");
@@ -152,12 +159,13 @@ describe("invocationCommand", () => {
   });
 
   it("uses bounded write modes without blanket bypasses", () => {
-    const codex = invocationCommand(options({ mode: "isolated-write" }));
+    const codex = invocationCommand(options({ mode: "isolated-write" }), []);
     expect(codex.args).toEqual(
       expect.arrayContaining(["--sandbox", "workspace-write"])
     );
     const grok = invocationCommand(
-      options({ provider: "grok", model: "grok-4.6", mode: "isolated-write" })
+      options({ provider: "grok", model: "grok-4.6", mode: "isolated-write" }),
+      []
     );
     expect(grok.args).toEqual(
       expect.arrayContaining([
@@ -172,7 +180,8 @@ describe("invocationCommand", () => {
     expect(grok.args).not.toContain("--always-approve");
 
     const claude = invocationCommand(
-      options({ provider: "claude", model: "fable", mode: "isolated-write" })
+      options({ provider: "claude", model: "fable", mode: "isolated-write" }),
+      []
     );
     expect(claude.args).toEqual(
       expect.arrayContaining([
@@ -218,9 +227,42 @@ describe("invocationCommand", () => {
     ];
     for (const { provider, model, flag } of cases) {
       for (const effort of ["low", "medium", "high"] as const) {
-        const spec = invocationCommand(options({ provider, model, effort }));
+        const spec = invocationCommand(options({ provider, model, effort }), []);
         expect(spec.args).toEqual(expect.arrayContaining(flag(effort)));
       }
     }
   });
+});
+
+describe("Codex tool surface", () => {
+  const servers = ["notion", "incident-io"] as McpServerKey[];
+
+  for (const provider of ["codex", "magpie"] as const) {
+    it(`disables apps and each listed MCP server for a ${provider} lane`, () => {
+      const spec = invocationCommand(options({ provider }), servers);
+      expect(spec.args).toEqual(expect.arrayContaining(["--disable", "apps"]));
+      const configs = spec.args.filter((arg) => arg.startsWith("mcp_servers."));
+      expect(configs).toEqual([
+        "mcp_servers.notion.enabled=false",
+        "mcp_servers.incident-io.enabled=false",
+      ]);
+      for (const config of configs) {
+        expect(spec.args[spec.args.indexOf(config) - 1]).toBe("--config");
+      }
+      expect(mcpListCommand(provider)).toEqual({
+        command: "codex",
+        args: ["mcp", "list", "--json"],
+        stdin: "none",
+      });
+    });
+  }
+
+  for (const provider of ["claude", "grok"] as const) {
+    it(`leaves the ${provider} lane without a Codex MCP listing`, () => {
+      expect(mcpListCommand(provider)).toBeNull();
+      const spec = invocationCommand(options({ provider, model: "opus" }), servers);
+      expect(spec.args.some((arg) => arg.includes("mcp_servers"))).toBe(false);
+      expect(spec.args).not.toContain("apps");
+    });
+  }
 });

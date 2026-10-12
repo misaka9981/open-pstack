@@ -1,6 +1,7 @@
 import type {
   AccessMode,
   Effort,
+  McpServerKey,
   Provider,
   RunnerOptions,
 } from "./types.ts";
@@ -31,6 +32,19 @@ export function preflightCommand(provider: Provider): CommandSpec {
       // Codex cannot list a custom provider's catalog, so the relay and model
       // are proven by the invocation itself.
       return { command: "codex", args: ["--version"], stdin: "none" };
+  }
+}
+
+// Codex children load ChatGPT apps and every MCP server from the user's config.
+// The runner lists the servers first so the invocation can disable each one.
+export function mcpListCommand(provider: Provider): CommandSpec | null {
+  switch (provider) {
+    case "codex":
+    case "magpie":
+      return { command: "codex", args: ["mcp", "list", "--json"], stdin: "none" };
+    case "claude":
+    case "grok":
+      return null;
   }
 }
 
@@ -67,7 +81,11 @@ function effortOverride(effort: Effort): string {
   return `model_reasoning_effort=${JSON.stringify(effort)}`;
 }
 
-function codexExec(options: RunnerOptions, config: readonly string[]): CommandSpec {
+function codexExec(
+  options: RunnerOptions,
+  config: readonly string[],
+  enabledMcpServers: readonly McpServerKey[]
+): CommandSpec {
   return {
     command: "codex",
     args: [
@@ -77,6 +95,10 @@ function codexExec(options: RunnerOptions, config: readonly string[]): CommandSp
       "--config",
       effortOverride(options.effort),
       ...config,
+      ...enabledMcpServers.flatMap((name) => [
+        "--config",
+        `mcp_servers.${name}.enabled=false`,
+      ]),
       "--sandbox",
       codexSandbox(options.mode),
       "--cd",
@@ -91,6 +113,8 @@ function codexExec(options: RunnerOptions, config: readonly string[]): CommandSp
       "hooks",
       "--disable",
       "memories",
+      "--disable",
+      "apps",
       "--json",
       "-",
     ],
@@ -98,7 +122,10 @@ function codexExec(options: RunnerOptions, config: readonly string[]): CommandSp
   };
 }
 
-export function invocationCommand(options: RunnerOptions): CommandSpec {
+export function invocationCommand(
+  options: RunnerOptions,
+  enabledMcpServers: readonly McpServerKey[]
+): CommandSpec {
   switch (options.provider) {
     case "claude":
       return {
@@ -126,9 +153,13 @@ export function invocationCommand(options: RunnerOptions): CommandSpec {
         stdin: "prompt",
       };
     case "codex":
-      return codexExec(options, []);
+      return codexExec(options, [], enabledMcpServers);
     case "magpie":
-      return codexExec(options, ["--config", 'model_provider="magpie"']);
+      return codexExec(
+        options,
+        ["--config", 'model_provider="magpie"'],
+        enabledMcpServers
+      );
     case "grok":
       return {
         command: "grok",

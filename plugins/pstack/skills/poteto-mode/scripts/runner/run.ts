@@ -9,9 +9,18 @@ import {
   writeFileSync,
 } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { invocationCommand, preflightCommand, type CommandSpec } from "./commands.ts";
+import {
+  invocationCommand,
+  mcpListCommand,
+  preflightCommand,
+  type CommandSpec,
+} from "./commands.ts";
 import { versionedClaudeAlias } from "./model-aliases.ts";
-import { parseProviderOutput, reportedModelMatches } from "./parse-output.ts";
+import {
+  parseCodexMcpListing,
+  parseProviderOutput,
+  reportedModelMatches,
+} from "./parse-output.ts";
 import type {
   Provider,
   ReceiptStatus,
@@ -745,6 +754,94 @@ async function executeLane(
     return { exitCode: statusExitCode(status), receipt };
   }
 
+  const mcpList = mcpListCommand(options.provider);
+  if (mcpList !== null) {
+    if (cancellation.signal !== null) {
+      return finishWithoutChild("cancelled", "before MCP server listing");
+    }
+    if (deadlineAt !== null && Date.now() >= deadlineAt) {
+      return finishWithoutChild("timed-out", "before MCP server listing");
+    }
+    const listing = await runProcess(
+      executable,
+      mcpList,
+      options.cwd,
+      env,
+      "",
+      deadlineAt,
+      cancellation
+    );
+    const rawListingEvidence = evidence(`${listing.stdout}\n${listing.stderr}`);
+    const parsedListing =
+      listing.cancelledBy === null && !listing.timedOut && listing.exitCode === 0
+        ? parseCodexMcpListing(listing.stdout)
+        : null;
+
+    if (parsedListing === null || parsedListing.kind !== "ok") {
+      const completed = Date.now();
+      const notLaunched = "the model was not launched because its MCP servers could not be disabled";
+      const status: ReceiptStatus = listing.cancelledBy !== null
+        ? "cancelled"
+        : listing.timedOut
+          ? "timed-out"
+          : parsedListing === null
+            ? unavailableStatus(rawListingEvidence)
+            : parsedListing.kind === "malformed"
+              ? "malformed-output"
+              : "unavailable-cli";
+      const message = listing.cancelledBy !== null
+        ? `launcher received ${listing.cancelledBy} during MCP server listing`
+        : listing.timedOut
+          ? "MCP server listing timed out"
+          : parsedListing === null
+            ? `codex mcp list exited with status ${listing.exitCode}; ${notLaunched}`
+            : parsedListing.kind === "malformed"
+              ? `${parsedListing.reason}; ${notLaunched}`
+              : `Codex --config cannot address MCP server ${parsedListing.names.map((name) => JSON.stringify(name)).join(", ")}; ${notLaunched}. Rename it to letters, digits, "_", or "-", or set enabled = false for it in the Codex config`;
+      preflightState = {
+        argv: [executable, ...mcpList.args],
+        status: listing.cancelledBy !== null
+          ? "cancelled"
+          : listing.timedOut
+            ? "timed-out"
+            : "failed",
+        evidence: rawListingEvidence,
+      };
+      progress.preflight = preflightState;
+      receipt = completeReceipt(options, {
+        status,
+        startedAt,
+        completedAt: new Date(completed).toISOString(),
+        elapsedMs: completed - started,
+        executable,
+        preflight: preflightState,
+        argv: [executable, ...invocation.args],
+        exitCode: listing.exitCode,
+        signal: listing.signal,
+        reportedModel: null,
+        modelVerified: false,
+        modelEvidence: null,
+        sessionId: null,
+        usage: null,
+        costUsd: null,
+        error: { message, evidence: rawListingEvidence },
+      });
+      removeIfExists(options.outputPath);
+      writeReceipt(options.receiptPath, receipt);
+      return { exitCode: statusExitCode(status), receipt };
+    }
+
+    invocation = invocationCommand(options, parsedListing.enabled);
+    progress.argv = [executable, ...invocation.args];
+    preflightState = {
+      ...preflightState,
+      evidence: `${preflightState.evidence}; MCP servers disabled: ${
+        parsedListing.enabled.length === 0 ? "none" : parsedListing.enabled.join(", ")
+      }`,
+    };
+    progress.preflight = preflightState;
+  }
+
   if (cancellation.signal !== null) {
     return finishWithoutChild("cancelled", "before model execution");
   }
@@ -862,7 +959,9 @@ export async function runLane(
 ): Promise<RunResult> {
   validateOptions(options);
   const deadlineAt = options.timeoutMs === null ? null : started + options.timeoutMs;
-  const invocation = invocationCommand(options);
+  // A Codex child's MCP disables are known only after the preflight listing.
+  // A receipt written earlier records this argv, which never starts a model.
+  const invocation = invocationCommand(options, []);
   const preflight = preflightCommand(options.provider);
   const progress: LaneProgress = {
     executable: null,
