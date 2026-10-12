@@ -2,9 +2,9 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
-## Unreleased adds Sonnet and Haiku lanes and routes Claude Code to the magpie relay
+## 1.13.0 adds Sonnet and Haiku lanes and routes Claude Code to the magpie relay
 
-The operator wants cheaper Claude lanes and relay models in Claude Code panels. This change adds both. Claude Code still never calls the relay itself.
+Open Pstack 1.13.0 keeps the Cursor pstack 0.15.20 sync (#58). The operator wants cheaper Claude lanes and relay models in Claude Code panels. This release adds both. Claude Code still never calls the relay itself.
 
 **Sonnet and Haiku.** `claude:sonnet@<effort>` and `claude:haiku@<effort>` are valid descriptors at all five efforts. `provider-dispatch.md` lists them in a new Additional Claude families table beside the model matrix. The four-row matrix stays as is, because it mirrors upstream's families and drives first-run defaults and default panels. The new families never join those defaults; a role uses one only when the operator assigns it. Claude Code dispatches them natively through ten new agents, `pstack-sonnet-<effort>` and `pstack-haiku-<effort>`, shaped like the Opus agents. A Codex parent reaches them through the Claude CLI. Haiku works there only in `isolated-write`: the runner runs read-only lanes in Claude plan mode, which serves `--model haiku` with `claude-sonnet-5-5`, so verification drops the lane. A Pi parent does not route them. `claude -p --model sonnet|haiku --effort low|medium|high|xhigh|max` exited 0 and returned the marker for every pair. Its JSON reported `claude-sonnet-5-5` and `claude-haiku-5-5`.
 
