@@ -14,6 +14,8 @@ The operator wants cheaper Claude lanes and relay models in Claude Code panels. 
 
 **Shipped sheet.** `plugins/pstack/pstack-models.md` moves code roles to Opus at `medium` and keeps judgment roles on Opus at `high`. Haiku takes the how explorer and Sonnet takes swarm workers. The arena panel runs Sonnet, Sol, and both relay families. The cross-judge pool, architect, and interrogate panels pair Opus with Sol.
 
+**Codex child tool surface.** Runner `codex` and `magpie` children now start without ChatGPT apps and with every MCP server from the user's Codex config disabled. Before, they loaded all of them. Relay models have no Codex model metadata, so Codex inlined every tool definition: one `Reply with exactly: X` prompt to `wevnal/glm-5.3-flash` sent an 805 KB request and cost 176,541 input tokens. With apps and servers off, the same prompt sent 56 KB and cost 11,676 tokens. The runner reads `codex mcp list --json` during preflight, then passes `--disable apps` and one `mcp_servers.<name>.enabled=false` override per enabled server. A failed or malformed listing is a preflight dropout. So is an enabled server whose name contains a character outside letters, digits, `_`, and `-`, because Codex's `--config` parser cannot address it.
+
 ## 1.12.0 syncs to Cursor pstack 0.15.20 and dispatches Pi through Lody sessions
 
 Open Pstack 1.12.0 tracks Cursor pstack 0.15.20 at `1b6d44ff26d4e242f4e8f68c391e6d2f7ca16def` (#56). It reviews eleven upstream commits from `ea32d95` through `1b6d44f`. Eight change content here. `de2dba6` was already in place, `1b6d44f` only bumps Cursor's manifest, and `e5a02f8` is excluded. The catalog stays at 53 skills. The same release moves every Pi lane to a Lody session (#54).
