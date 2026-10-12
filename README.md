@@ -136,7 +136,7 @@ Plugin skills include `pstack:` in their name. In Claude Code, invoke a native s
 
 Some pstack workflows use one model. Skills such as `architect`, `arena`, and `interrogate` can run several models in parallel. Each model run uses the subscription and token allowance of its own command-line tool.
 
-This repository ships its model sheet at `plugins/pstack/pstack-models.md`. Claude Code loads it at session start, so no setup is needed there. To change models, edit that file in the repository, then update the plugin. The shipped sheet uses Fable and Opus at `high` effort.
+This repository ships its model sheet at `plugins/pstack/pstack-models.md`. Claude Code loads it at session start, so no setup is needed there. To change models, edit that file in the repository, then update the plugin. The shipped sheet uses Opus for code and judgment roles, Haiku to explore code for `how`, and Sonnet for swarm workers. Its arena panel adds GPT-6.1 Sol and two models from the `magpie` relay, so that panel also needs the Codex command-line tool with the relay configured.
 
 `setup-pstack` lets you choose a reasoning budget, the models, one requested effort per model family, and how many run in parallel. It checks only the model families you assign, so a sheet that assigns every role to Claude models needs no Codex or Grok command-line tool. A model from the app you are using runs inside that app. Other models run through their own command-line tools. Open Pstack does not quietly replace a failed model with a weaker one.
 
@@ -148,7 +148,7 @@ Both apps read the same pstack skills. Only the way they start those skills and 
 | --- | --- | --- |
 | Start poteto-mode | Claude loads a small startup instruction that can route non-trivial work into it. You can also run `/pstack:poteto-mode` yourself. | Ask for `pstack:poteto-mode` by name. Codex does not load the Claude startup instruction. |
 | Runs inside the app | Claude models stay inside Claude Code. | The Sol model stays inside Codex. |
-| Other models | Codex and Grok run through their signed-in command-line tools. | Claude and Grok run through their signed-in command-line tools. |
+| Other models | Codex and Grok run through their signed-in command-line tools. Relay models run through the Codex command-line tool; Claude Code never calls the relay itself. | Claude and Grok run through their signed-in command-line tools. |
 | Skills and workflows | Shared with Codex. | Shared with Claude Code. |
 
 Grok can take part in a multi-model review. You cannot use Grok as the main app running pstack.
