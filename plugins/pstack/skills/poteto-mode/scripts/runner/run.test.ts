@@ -317,6 +317,17 @@ describe("runLane", () => {
     });
   }
 
+  it("routes a magpie lane for a Claude Code parent", async () => {
+    const input = { ...options("magpie", "claude-parent-magpie"), parent: "claude" as const };
+    expect((await runLane(input)).exitCode).toBe(0);
+    expect(receipt(input.receiptPath)).toMatchObject({
+      status: "complete",
+      parent: "claude",
+      provider: "magpie",
+      modelEvidence: "pinned-argv",
+    });
+  });
+
   it("records Codex's exact argv without fabricating a reported model", async () => {
     const input = options("codex");
     const result = await runLane(input);

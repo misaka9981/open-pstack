@@ -76,11 +76,11 @@ The top-level harness resolves the route once. A child receives an assigned prov
 
 | Parent | `claude:*` | `codex:*` | `grok:*` | `magpie:*` |
 |---|---|---|---|---|
-| Claude Code | native `Agent` | external runner | external runner | not routed |
+| Claude Code | native `Agent` | external runner | external runner | external runner |
 | Codex | external runner | native `spawn_agent` | external runner | external runner |
 | Pi | not routed | Lody session (`magpie/codex/…`) | not routed | Lody session (`magpie`) |
 
-A `not routed` cell is a named dropout. Claude Code keeps its configured providers and does not use the relay. A Pi parent runs inside Lody and creates one Lody session per lane. It reaches Codex models as the relay's `codex/` models and the other relay models directly, all through Pi's `magpie` provider. It has no route to Claude or Grok.
+A `not routed` cell is a named dropout. A Claude Code parent reaches relay models only through the external runner's Codex child. Claude Code itself never sends requests to the relay. A Pi parent runs inside Lody and creates one Lody session per lane. It reaches Codex models as the relay's `codex/` models and the other relay models directly, all through Pi's `magpie` provider. It has no route to Claude or Grok.
 
 A Codex parent reaches `magpie:*` only through the external runner. `spawn_agent` has no provider parameter, and a spawned child ignores an agent profile's `model_provider`: the child keeps the parent's provider and rejects the relay model id. This table assumes the Codex parent runs on its default provider.
 

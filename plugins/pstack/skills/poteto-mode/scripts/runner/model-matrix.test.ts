@@ -438,9 +438,15 @@ describe("model matrix", () => {
       );
       expect(sheet).not.toContain(`${row.provider}:${row.model}@`);
       expect(setup).toContain(
-        `| ${row.family} relay row + selected effort | not routed | \`codex exec\` on \`magpie\` | Lody session \`magpie/${row.model}\` |`
+        `| ${row.family} relay row + selected effort | \`codex exec\` on \`magpie\` | \`codex exec\` on \`magpie\` | Lody session \`magpie/${row.model}\` |`
       );
     }
+    const dispatch = readFileSync(DISPATCH_PATH, "utf8");
+    expect(dispatch).toContain(
+      "| Claude Code | native `Agent` | external runner | external runner | external runner |"
+    );
+    expect(dispatch).toContain("Claude Code itself never sends requests to the relay.");
+    expect(setup).not.toContain("A Claude Code parent does not route relay families.");
   });
 
   it("keeps additional Claude families selectable but outside the matrix defaults", () => {
