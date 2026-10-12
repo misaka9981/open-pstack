@@ -29,20 +29,41 @@ function setupRoles(): string[] {
   return roleRows(match[1]).map(([role]) => role);
 }
 
-function matrixEfforts(): Map<string, string[]> {
+// Each family table names the provider, model, and selectable-efforts columns
+// at different positions, so read them by header instead of by index.
+function familyEfforts(heading: string): Map<string, string[]> {
   const dispatch = readFileSync(DISPATCH_PATH, "utf8");
-  const start = dispatch.indexOf("## Model matrix");
+  const start = dispatch.indexOf(`\n${heading}\n`);
+  if (start < 0) throw new Error(`missing ${heading}`);
   const end = dispatch.indexOf("\n## ", start + 1);
+  const rows = dispatch
+    .slice(start, end < 0 ? undefined : end)
+    .split("\n")
+    .filter((line) => line.startsWith("| ") && !line.startsWith("|---"))
+    .map((line) => line.slice(1, -1).split("|").map((cell) => cell.trim()));
+  const [header, ...data] = rows;
+  const column = (name: string): number => {
+    const index = header?.indexOf(name) ?? -1;
+    if (index < 0) throw new Error(`${heading} has no ${name} column`);
+    return index;
+  };
+  const provider = column("Provider");
+  const model = column("Model");
+  const selectable = column("Selectable efforts");
+  if (data.length === 0) throw new Error(`${heading} has no family rows`);
   const efforts = new Map<string, string[]>();
-  for (const line of dispatch.slice(start, end).split("\n")) {
-    if (!line.startsWith("| ") || line.startsWith("| Family") || line.startsWith("|---")) {
-      continue;
-    }
-    const cells = line.slice(1, -1).split("|").map((cell) => cell.trim());
-    const [, , provider, model, , selectable] = cells;
-    efforts.set(`${provider}:${model}`, (selectable ?? "").split(" "));
+  for (const cells of data) {
+    efforts.set(`${cells[provider]}:${cells[model]}`, (cells[selectable] ?? "").split(" "));
   }
   return efforts;
+}
+
+function selectableFamilies(): Map<string, string[]> {
+  return new Map([
+    ...familyEfforts("## Model matrix"),
+    ...familyEfforts("## Additional Claude families"),
+    ...familyEfforts("## Relay providers"),
+  ]);
 }
 
 describe("shipped model sheet", () => {
@@ -52,16 +73,15 @@ describe("shipped model sheet", () => {
     expect(roleRows(sheet).map(([role]) => role)).toEqual(setupRoles());
   });
 
-  it("uses only matrix families at selectable efforts", () => {
-    const efforts = matrixEfforts();
-    expect(efforts.size).toBeGreaterThan(0);
+  it("uses only declared families at selectable efforts", () => {
+    const efforts = selectableFamilies();
     for (const [role, value] of roleRows(sheet)) {
       for (const entry of value.split(", ")) {
         if (ALIASES.has(entry)) continue;
-        const match = entry.match(/^([a-z]+:[a-z0-9.-]+)@([a-z]+)$/);
+        const match = entry.match(/^([a-z]+:[a-z0-9./-]+)@([a-z]+)$/);
         if (!match) throw new Error(`${role}: ${entry} is not a descriptor`);
         const selectable = efforts.get(match[1] ?? "");
-        if (!selectable) throw new Error(`${role}: ${entry} is not a matrix family`);
+        if (!selectable) throw new Error(`${role}: ${entry} is not a declared family`);
         expect(selectable).toContain(match[2] ?? "");
       }
     }
