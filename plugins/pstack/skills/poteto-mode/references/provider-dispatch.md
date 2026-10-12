@@ -17,7 +17,20 @@ pstack model choices are provider-qualified descriptors:
 
 The allowed effort universe is exactly `low`, `medium`, `high`, `xhigh`, `max`. First-run requested efforts are the Default effort cell of each row. A Claude-native agent stem of `-` means the family has no Claude-native agent. Otherwise the shipped agent name is `pstack-<stem>-<effort>`.
 
-`fable` and `opus` are Claude Code's rolling aliases. Claude resolves each alias to the latest available family revision. A runner receipt keeps the requested alias in `model` and the concrete provider-reported revision in `reportedModel`; verification accepts only a numeric `claude-fable-*` or `claude-opus-*` revision from the matching family.
+`fable`, `opus`, `sonnet`, and `haiku` are Claude Code's rolling aliases. Claude resolves each alias to the latest available family revision. A runner receipt keeps the requested alias in `model` and the concrete provider-reported revision in `reportedModel`; verification accepts only a numeric `claude-<alias>-*` revision from the matching family.
+
+## Additional Claude families
+
+Setup also offers the Claude families below. They stay outside the model matrix, so they never join the first-run defaults or the default panels. A role uses one only when the operator assigns it.
+
+| Family | Provider | Model | Selectable efforts | Claude-native agent stem |
+|---|---|---|---|---|
+| sonnet | claude | sonnet | low medium high xhigh max | sonnet |
+| haiku | claude | haiku | low medium high xhigh max | haiku |
+
+Each selectable effort passed a one-turn `claude -p` probe, and the reported models were `claude-sonnet-5-5` and `claude-haiku-5-5`. That proves Claude accepts the effort, not the reasoning depth it applies.
+
+From a Codex parent, run `claude:haiku` only in `isolated-write`. The runner maps read-only to Claude plan mode, and `claude -p --model haiku --permission-mode plan` is served by `claude-sonnet-5-5`, so a read-only Haiku lane always ends as a model-mismatch dropout. Native Claude Code dispatch through `pstack-haiku-<effort>` does not use plan mode and is not affected.
 
 ## Relay providers
 
@@ -53,9 +66,9 @@ The block holds the same bytes when the text between its markers equals the file
 
 ## Read-time normalization
 
-Normalize configured descriptors before matching them to the matrix or choosing a route. If a provider-qualified Claude model starts with `claude-fable-` or `claude-opus-` and its remaining revision contains only digits and hyphens, replace that model component in memory with `fable` or `opus`. Preserve provider, effort, role, and lane order. Use only the normalized descriptor for native dispatch or runner argv. Never pass the versioned predecessor to Claude.
+Normalize configured descriptors before matching them to a family or choosing a route. If a provider-qualified Claude model starts with `claude-fable-`, `claude-opus-`, `claude-sonnet-`, or `claude-haiku-` and its remaining revision contains only digits and hyphens, replace that model component in memory with `fable`, `opus`, `sonnet`, or `haiku`. Preserve provider, effort, role, and lane order. Use only the normalized descriptor for native dispatch or runner argv. Never pass the versioned predecessor to Claude.
 
-This read-time rule makes an older installed sheet use the latest family revision immediately without writing user files. Once per parent run, report that the persisted sheet is stale and that `/setup-pstack` will rewrite it after its normal probes and confirmation. Unknown versioned Claude models remain invalid. The external runner rejects a missed Fable or Opus version pin instead of silently executing it.
+This read-time rule makes an older installed sheet use the latest family revision immediately without writing user files. Once per parent run, report that the persisted sheet is stale and that `/setup-pstack` will rewrite it after its normal probes and confirmation. Unknown versioned Claude models remain invalid. The external runner rejects a missed version pin of any rolling Claude alias instead of silently executing it.
 
 `fast` is part of Cursor's Grok selector, not a Grok Build CLI model or effort flag. The portable Grok route pins the CLI model `grok-4.6`. Upstream moved to Grok 4.7; the port keeps 4.6 until `grok-4.7` passes a live runner probe. The first-run Grok effort is `xhigh`.
 
@@ -65,11 +78,11 @@ The top-level harness resolves the route once. A child receives an assigned prov
 
 | Parent | `claude:*` | `codex:*` | `grok:*` | `magpie:*` |
 |---|---|---|---|---|
-| Claude Code | native `Agent` | external runner | external runner | not routed |
+| Claude Code | native `Agent` | external runner | external runner | external runner |
 | Codex | external runner | native `spawn_agent` | external runner | external runner |
 | Pi | not routed | Lody session (`magpie/codex/…`) | not routed | Lody session (`magpie`) |
 
-A `not routed` cell is a named dropout. Claude Code keeps its configured providers and does not use the relay. A Pi parent runs inside Lody and creates one Lody session per lane. It reaches Codex models as the relay's `codex/` models and the other relay models directly, all through Pi's `magpie` provider. It has no route to Claude or Grok.
+A `not routed` cell is a named dropout. A Claude Code parent reaches relay models only through the external runner's Codex child. Claude Code itself never sends requests to the relay. A Pi parent runs inside Lody and creates one Lody session per lane. It reaches Codex models as the relay's `codex/` models and the other relay models directly, all through Pi's `magpie` provider. It has no route to Claude or Grok.
 
 A Codex parent reaches `magpie:*` only through the external runner. `spawn_agent` has no provider parameter, and a spawned child ignores an agent profile's `model_provider`: the child keeps the parent's provider and rejects the relay model id. This table assumes the Codex parent runs on its default provider.
 
@@ -79,7 +92,7 @@ A Codex parent reaches `magpie:*` only through the external runner. `spawn_agent
 
 Native dispatch avoids a second CLI startup and its base context.
 
-- Claude Code: match the descriptor's `(provider, model)` to one model-matrix row, then dispatch it through `pstack-<stem>-<effort>` using that row's Claude-native agent stem and the descriptor's effort. Those definitions select the rolling model alias, requested effort, and `background: true`. `pstack-fable-max` and `pstack-opus-xhigh` remain in that set. Pass the complete task, grounding paths, access mode, and unique output location in the `Agent` prompt. Retain the task handle and drain it only after fan-out.
+- Claude Code: match the descriptor's `(provider, model)` to one model-matrix row or one additional Claude family row, then dispatch it through `pstack-<stem>-<effort>` using that row's Claude-native agent stem and the descriptor's effort. Those definitions select the rolling model alias, requested effort, and `background: true`. `pstack-fable-max` and `pstack-opus-xhigh` remain in that set. Pass the complete task, grounding paths, access mode, and unique output location in the `Agent` prompt. Retain the task handle and drain it only after fan-out.
 - Codex: call `spawn_agent` with the descriptor's model and `reasoning_effort`, the complete task, grounding paths, access mode, and unique output location. Use an isolated worktree for a writer. Codex subagents already run concurrently.
 - Pi: create every lane as one item of a `lody_session_create_many` call with the mapped `modelId` and `reasoningEffort`, the lane prompt, and a worktree or chat work context, as [`pi-tools.md`](pi-tools.md) specifies.
 
@@ -105,6 +118,8 @@ pstack-runner \
 
 Pass arguments as an argv array or quote every path. Never interpolate prompt text into a shell command. The launcher preflights the assigned CLI and authentication, invokes the model exactly once, disables recursive agents and ambient skill dispatch where the CLI supports it, restricts the built-in tool surface, and records the exact provider/model/effort flags. External lanes do not receive the parent's MCP surface. Keep MCP-dependent Why and Reflect roles on `inherit-parent` or `auto`. The launcher never falls back.
 
+A `codex` or `magpie` child also runs without ChatGPT apps and with every MCP server in the user's Codex config disabled. Relay models have no Codex model metadata, so Codex inlines every app and MCP tool definition into each request; on a one-line magpie prompt, disabling them cut input from 176,541 to 11,676 tokens. During preflight the runner reads `codex mcp list --json` with the child's `--disable` feature flags, because a disabled plugin drops the MCP servers it provides and an override for a server the child lacks stops Codex from starting. It then passes `--disable apps` and one `--config mcp_servers.<name>.enabled=false` for each server the listing reports as enabled. The listing shares the preflight's absolute deadline and cancellation latch and is never retried. The receipt's preflight evidence names the disabled servers. A failed listing, a listing that is not a JSON array of `name` and `enabled` entries, or an enabled server whose name is not made of letters, digits, `_`, and `-` is a preflight dropout, and the model never starts. Codex's `--config` parser splits a key on every `.` and keeps quotes literally, so it cannot address such a name; rename that server or set `enabled = false` for it in the Codex config.
+
 Grok authentication preflight has one bounded retry. If the first `grok models` result would be classified as unauthenticated, the runner waits five seconds and tries the same preflight once more. A second failure is terminal. The delay and second attempt share the runner's absolute deadline and cancellation latch, and the receipt keeps evidence from both attempts. Model execution is never retried.
 
 The parent tool sandbox still governs whether a subscribed child CLI can reach its credentials and network. Run setup's live probe from the actual parent profile. A blocked external CLI is a loud dropout, not a reason to elevate permissions or substitute a model silently.
@@ -118,7 +133,7 @@ Start the background process, continue launching the other lanes, then drain the
 
 The runner and its preflight have no implicit timeout. Do not invent a duration from role, mode, or a convenient round number; real implementation lanes can run for 90 minutes or much longer. Pass `--timeout` only when the user, an external service deadline, or a measured task contract supplies a real bound. That value starts at wrapper entry, before module loading and argument parsing, and remains one absolute deadline across setup, preflight, model execution, and output capture. It is never a fresh allowance per child, and long waits are armed in runtime-safe chunks without shortening the supplied deadline. Otherwise supervise liveness through the retained background task/session handle and cancel manually only on evidence that the run is dead. Cancel through that retained handle so the runner receives SIGINT or SIGTERM, sends it to an active child when one remains, stops waiting on inherited output pipes, removes the empty output reservation, and writes a `cancelled` receipt. Preserve that receipt; a retry is a new attempt with new unique output and receipt paths. Unchanged running state is not a dropout, and Claude's ten-minute foreground ceiling is never a reason to terminate a healthy lane.
 
-A `magpie` lane runs `codex exec` with `model_provider="magpie"` and the same sandbox, feature, and output flags as a `codex` lane. Its preflight only proves that the Codex CLI exists, because Codex cannot list a custom provider's catalog. The one model invocation proves the relay and the model. A rejected model id is an `unavailable-model` dropout. A Codex parent in the `workspace-write` sandbox cannot start the nested Codex CLI, which fails with `Operation not permitted` while it initializes; that lane is a `child-failed` dropout. Do not loosen the sandbox to recover it.
+A `magpie` lane runs `codex exec` with `model_provider="magpie"` and the same sandbox, feature, MCP, and output flags as a `codex` lane. Its preflight only proves that the Codex CLI exists, because Codex cannot list a custom provider's catalog. The one model invocation proves the relay and the model. A rejected model id is an `unavailable-model` dropout. A Codex parent in the `workspace-write` sandbox cannot start the nested Codex CLI, which fails with `Operation not permitted` while it initializes; that lane is a `child-failed` dropout. Do not loosen the sandbox to recover it.
 
 Read-only mode maps to Claude plan mode with project-only settings and an explicit tool list, Codex's read-only sandbox, and Grok plan mode plus its `read-only` sandbox and read-oriented tool list. Grok's built-in read-only profile deliberately keeps its own state and system temporary directories writable, so point a read-only Grok lane at the actual checkout rather than a worktree under `/tmp`, `/var/tmp`, or the host's temporary directory. `isolated-write` maps to Claude `acceptEdits` with project-only settings, Codex `workspace-write`, and Grok `acceptEdits` plus its `workspace` sandbox and write-capable tool list. Give every writer only a dedicated worktree or output directory. Never route a writer into the primary checkout.
 
@@ -130,7 +145,7 @@ Success requires all of these:
 
 1. Exit status `0`.
 2. Receipt status `complete`.
-3. Either `modelVerified: true` with `modelEvidence: "provider-report"`, or a Codex or magpie receipt with `reportedModel: null`, `modelVerified: false`, and `modelEvidence: "pinned-argv"`. For Claude's `fable` and `opus` aliases, the concrete provider report must belong to the requested family. Codex 0.149.0 accepts the exact `--model` argument but does not report the served model in its JSONL stream.
+3. Either `modelVerified: true` with `modelEvidence: "provider-report"`, or a Codex or magpie receipt with `reportedModel: null`, `modelVerified: false`, and `modelEvidence: "pinned-argv"`. For Claude's rolling aliases, the concrete provider report must belong to the requested family. Codex 0.149.0 accepts the exact `--model` argument but does not report the served model in its JSONL stream.
 4. A non-empty output file.
 
 A Pi lane has no runner receipt. It succeeds when its Lody item is `succeeded`, its output file is non-empty, and its transcript's assistant messages report the mapped provider and model. An item that fails, including one whose model id is not in the Pi agent config, is a dropout.

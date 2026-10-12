@@ -46,6 +46,14 @@ const RELAY_HEADER = [
   "Selectable efforts",
 ] as const;
 
+const ADDITIONAL_CLAUDE_HEADER = [
+  "Family",
+  "Provider",
+  "Model",
+  "Selectable efforts",
+  "Claude-native agent stem",
+] as const;
+
 const FAMILY_ORDER = ["fable", "sol", "grok", "opus"] as const;
 const MATRIX_PROVIDERS = ["claude", "codex", "grok"] as const;
 const DESCRIPTOR_RE =
@@ -193,11 +201,19 @@ interface RelayRow {
   selectableEfforts: Effort[];
 }
 
-function parseRelayFamilies(markdown: string): RelayRow[] {
+interface AdditionalClaudeRow extends RelayRow {
+  claudeNativeAgentStem: string;
+}
+
+function parseSectionTable(
+  markdown: string,
+  heading: string,
+  expectedHeader: readonly string[]
+): string[][] {
   const lines = markdown.split(/\r?\n/);
-  const start = lines.findIndex((line) => line.trim() === "## Relay providers");
+  const start = lines.findIndex((line) => line.trim() === heading);
   if (start < 0) {
-    throw new Error("missing ## Relay providers");
+    throw new Error(`missing ${heading}`);
   }
   const end = lines.findIndex((line, i) => i > start && line.startsWith("## "));
   const table = lines
@@ -205,23 +221,50 @@ function parseRelayFamilies(markdown: string): RelayRow[] {
     .map((line) => line.trim())
     .filter((line) => line.startsWith("|"));
   const header = splitRow(table[0]);
-  if (header.join("|") !== RELAY_HEADER.join("|")) {
-    throw new Error(`unexpected relay header: ${header.join(" | ")}`);
+  if (header.join("|") !== expectedHeader.join("|")) {
+    throw new Error(`unexpected ${heading} header: ${header.join(" | ")}`);
   }
   if (!isSeparator(splitRow(table[1]))) {
-    throw new Error("relay header separator missing");
+    throw new Error(`${heading} header separator missing`);
   }
   return table.slice(2).map((line) => {
     const cells = splitRow(line);
-    if (cells.length !== RELAY_HEADER.length) {
-      throw new Error(`relay row has ${cells.length} cells: ${line}`);
+    if (cells.length !== expectedHeader.length) {
+      throw new Error(`${heading} row has ${cells.length} cells: ${line}`);
     }
-    const [family, provider, model, selectableRaw] = cells;
+    return cells;
+  });
+}
+
+function parseRelayFamilies(markdown: string): RelayRow[] {
+  return parseSectionTable(markdown, "## Relay providers", RELAY_HEADER).map(
+    ([family, provider, model, selectableRaw]) => ({
+      family,
+      provider,
+      model,
+      selectableEfforts: selectableRaw.split(/\s+/).map(asEffort),
+    })
+  );
+}
+
+function parseAdditionalClaudeFamilies(markdown: string): AdditionalClaudeRow[] {
+  return parseSectionTable(
+    markdown,
+    "## Additional Claude families",
+    ADDITIONAL_CLAUDE_HEADER
+  ).map(([family, provider, model, selectableRaw, stem]) => {
+    if (provider !== "claude") {
+      throw new Error(`additional Claude family ${family} has provider ${provider}`);
+    }
+    if (!/^[a-z0-9-]+$/.test(stem)) {
+      throw new Error(`invalid Claude-native agent stem: ${stem}`);
+    }
     return {
       family,
       provider,
       model,
       selectableEfforts: selectableRaw.split(/\s+/).map(asEffort),
+      claudeNativeAgentStem: stem,
     };
   });
 }
@@ -266,6 +309,9 @@ function firstRunSheet(setup: string): string {
 
 describe("model matrix", () => {
   const rows = parseModelMatrix(readFileSync(DISPATCH_PATH, "utf8"));
+  const additionalClaude = parseAdditionalClaudeFamilies(
+    readFileSync(DISPATCH_PATH, "utf8")
+  );
   const setup = readFileSync(SETUP_PATH, "utf8");
   const quad = defaultDescriptors(rows);
 
@@ -301,7 +347,7 @@ describe("model matrix", () => {
   it("ships exactly the declared Claude-native frontier agents", () => {
     const expected = new Set<string>();
     const familyBodies = new Map<string, string>();
-    for (const row of rows) {
+    for (const row of [...rows, ...additionalClaude]) {
       const stem = row.claudeNativeAgentStem;
       if (stem === null) {
         continue;
@@ -327,7 +373,7 @@ describe("model matrix", () => {
         }
       }
     }
-    const declaredCount = rows.reduce(
+    const declaredCount = [...rows, ...additionalClaude].reduce(
       (count, row) =>
         count +
         (row.claudeNativeAgentStem === null
@@ -392,7 +438,44 @@ describe("model matrix", () => {
       );
       expect(sheet).not.toContain(`${row.provider}:${row.model}@`);
       expect(setup).toContain(
-        `| ${row.family} relay row + selected effort | not routed | \`codex exec\` on \`magpie\` | Lody session \`magpie/${row.model}\` |`
+        `| ${row.family} relay row + selected effort | \`codex exec\` on \`magpie\` | \`codex exec\` on \`magpie\` | Lody session \`magpie/${row.model}\` |`
+      );
+    }
+    const dispatch = readFileSync(DISPATCH_PATH, "utf8");
+    expect(dispatch).toContain(
+      "| Claude Code | native `Agent` | external runner | external runner | external runner |"
+    );
+    expect(dispatch).toContain("Claude Code itself never sends requests to the relay.");
+    expect(setup).not.toContain("A Claude Code parent does not route relay families.");
+  });
+
+  it("keeps additional Claude families selectable but outside the matrix defaults", () => {
+    expect(
+      additionalClaude.map((row) => [
+        row.family,
+        row.provider,
+        row.model,
+        row.claudeNativeAgentStem,
+      ])
+    ).toEqual([
+      ["sonnet", "claude", "sonnet", "sonnet"],
+      ["haiku", "claude", "haiku", "haiku"],
+    ]);
+    const matrixFamilies = new Set(rows.map((row) => row.family));
+    const matrixPairs = new Set(rows.map((row) => `${row.provider}:${row.model}`));
+    const sheet = firstRunSheet(setup);
+    for (const row of additionalClaude) {
+      expect(matrixFamilies.has(row.family)).toBe(false);
+      expect(matrixPairs.has(`${row.provider}:${row.model}`)).toBe(false);
+      expect(row.selectableEfforts).toEqual([...EFFORTS]);
+      expect(sheet).not.toContain(`${row.provider}:${row.model}@`);
+      // Claude plan mode serves a read-only Haiku lane with Sonnet, so a Codex
+      // parent can reach Haiku only through an isolated-write lane.
+      const codexRoute = row.family === "haiku"
+        ? "Claude CLI for `isolated-write` only; a read-only Haiku lane is a dropout because Claude plan mode serves Sonnet"
+        : "Claude CLI";
+      expect(setup).toContain(
+        `| ${row.family} additional Claude row + selected effort | native Agent \`pstack-${row.claudeNativeAgentStem}-<effort>\` | ${codexRoute} | not routed |`
       );
     }
   });
@@ -401,7 +484,7 @@ describe("model matrix", () => {
   // for an effort a family cannot select, so each target must stay selectable.
   it("keeps every budget proposal selectable in each family", () => {
     const relays = parseRelayFamilies(readFileSync(DISPATCH_PATH, "utf8"));
-    for (const row of [...rows, ...relays]) {
+    for (const row of [...rows, ...additionalClaude, ...relays]) {
       for (const target of ["max", "xhigh", "high", "medium"] as const) {
         expect(row.selectableEfforts).toContain(target);
       }
@@ -413,7 +496,7 @@ describe("model matrix", () => {
     expect(sol?.model).toBe("gpt-6.1-sol");
     expect(setup).toContain("Claude Code, Codex, or Pi.");
     expect(setup).toContain(`| Lody session \`magpie/codex/${sol?.model}\` |`);
-    for (const family of ["Fable", "Grok", "Opus"]) {
+    for (const family of ["Fable", "Grok", "Opus", "Sonnet", "Haiku"]) {
       const line = setup.split("\n").find((entry) => entry.startsWith(`| ${family} | `));
       expect(line?.split(" | ")[4]).toBe("not routed");
     }
@@ -445,7 +528,9 @@ describe("model matrix", () => {
       expect(setup).toContain(label);
     }
     expect(setup).toContain("normalized complete role map from step 2");
-    expect(setup).toContain("starts with `claude-fable-` or `claude-opus-`");
+    expect(setup).toContain(
+      "starts with `claude-fable-`, `claude-opus-`, `claude-sonnet-`, or `claude-haiku-`"
+    );
     expect(setup).toContain("preserving the provider, effort, role, and lane order");
     expect(setup).toContain("Show any rolling-alias migrations");
     expect(setup).toContain("Every documented role remains present.");
@@ -462,7 +547,7 @@ describe("model matrix", () => {
     expect(externalStart).toBeGreaterThan(nativeStart);
     const nativeLanes = dispatch.slice(nativeStart, externalStart);
     expect(nativeLanes).toContain(
-      "match the descriptor's `(provider, model)` to one model-matrix row"
+      "match the descriptor's `(provider, model)` to one model-matrix row or one additional Claude family row"
     );
     expect(nativeLanes).toContain("`pstack-<stem>-<effort>`");
   });
@@ -478,7 +563,12 @@ describe("model matrix", () => {
     expect(normalization).toContain("Never pass the versioned predecessor to Claude.");
     expect(normalization).toContain("without writing user files");
     expect(normalization).toContain("`/setup-pstack` will rewrite it");
-    expect(normalization).toContain("runner rejects a missed Fable or Opus version pin");
+    expect(normalization).toContain(
+      "runner rejects a missed version pin of any rolling Claude alias"
+    );
+    expect(normalization).toContain(
+      "`claude-fable-`, `claude-opus-`, `claude-sonnet-`, or `claude-haiku-`"
+    );
   });
 });
 

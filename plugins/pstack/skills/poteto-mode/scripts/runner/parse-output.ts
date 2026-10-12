@@ -1,4 +1,6 @@
 import type {
+  CodexMcpListing,
+  McpServerKey,
   NormalizedUsage,
   ParsedOutput,
   Provider,
@@ -187,4 +189,40 @@ export function reportedModelMatches(
     return true;
   }
   return false;
+}
+
+// Codex 0.162.1 splits a --config key on every "." and keeps quote characters
+// literally, so a TOML-quoted key names a new transport-less server and Codex
+// refuses to start. Only bare names can be disabled through --config.
+const ADDRESSABLE_MCP_SERVER = /^[A-Za-z0-9_-]+$/;
+
+export function parseCodexMcpListing(stdout: string): CodexMcpListing {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(stdout);
+  } catch {
+    return { kind: "malformed", reason: "codex mcp list did not emit valid JSON" };
+  }
+  if (!Array.isArray(raw)) {
+    return { kind: "malformed", reason: "codex mcp list did not emit a JSON array" };
+  }
+  const enabled: string[] = [];
+  for (const entry of raw) {
+    const server = object(entry);
+    if (
+      server === null ||
+      typeof server.name !== "string" ||
+      server.name.length === 0 ||
+      typeof server.enabled !== "boolean"
+    ) {
+      return {
+        kind: "malformed",
+        reason: "codex mcp list entry lacks a string name or a boolean enabled",
+      };
+    }
+    if (server.enabled) enabled.push(server.name);
+  }
+  const unaddressable = enabled.filter((name) => !ADDRESSABLE_MCP_SERVER.test(name));
+  if (unaddressable.length > 0) return { kind: "unaddressable", names: unaddressable };
+  return { kind: "ok", enabled: enabled as McpServerKey[] };
 }
