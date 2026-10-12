@@ -2,9 +2,33 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
-## Unreleased: Pi dispatches through Lody sessions
+## 1.12.0 syncs to Cursor pstack 0.15.20 and dispatches Pi through Lody sessions
 
-Every Pi lane is now one Lody session (#54). Lody is an agent IDE that runs each agent in its own session and worktree, and the maintainer runs Pi only inside it.
+Open Pstack 1.12.0 tracks Cursor pstack 0.15.20 at `1b6d44ff26d4e242f4e8f68c391e6d2f7ca16def` (#56). It reviews eleven upstream commits from `ea32d95` through `1b6d44f`. Eight change content here. `de2dba6` was already in place, `1b6d44f` only bumps Cursor's manifest, and `e5a02f8` is excluded. The catalog stays at 53 skills. The same release moves every Pi lane to a Lody session (#54).
+
+**Ketchup visuals.** `ea32d95` gives each `/ketchup` action item a side-by-side before and after. The agent makes the visual from what it already has and says so when none exists. The skill file is the upstream text.
+
+**Section cuts.** `08bd59b` removes sections that the agent follows without the text. The how explorer prompt, four why source references, and four principle leaves take the upstream text. The leaves keep `user-invocable: false`. The babysit playbook loses the paragraph on watcher re-arms and its Reply line, and step 9 still says that babysitting never authorizes merging. The worktree cleanup playbook loses its opening ownership line.
+
+**Comment Sicko id.** `de2dba6` renames upstream's agent from `Comment Sicko` to `comment-sicko` so Grok can spawn it. The port has used that id since it first imported the agent. Only `NOTICE.md` and the technical reference change, because the id is no longer a port change.
+
+**Fenced plan checks.** `87c8103` makes the plan checker follow CommonMark fences. A fence opens with up to three spaces of indent and three or more backticks or tildes, and a backtick info string may not contain a backtick. Only the same character at the same or greater length closes it. `check-plan.mjs` takes the rule in the port's typed style. `check-plan.test.ts` gains upstream's fence cases and asserts the port checker's own messages. Four of the five new cases failed against the old checker. Upstream's `package.json` hunk adds the test to its script, and the port's script already runs it.
+
+**Review-thread pagination.** `ff8f83d` makes `watch-pr` read every page of review threads. Before, an unresolved thread past the first 100 never blocked readiness. The six `watch-pr` files are the upstream text.
+
+**Unslop description.** `bc697d0` drops "Must always apply." from the unslop description. Upstream drops it because unslop is not model-invocable there. Unslop stays model-invocable here, so the port's reason differs. The description sits in the skill list that every session loads, and the phrase reads as an unconditional order. Poteto-mode still routes every prose surface to unslop by name.
+
+**Worktree audit base.** `cf9a111` checks `MERGED` against the remote's default branch instead of a literal `origin/main`. Without `-b`, the base is `origin/HEAD`, then `origin/main`, then `origin/master`. The fetch runs before the existence check, `-h` prints the usage, and the table opens with a `# base:` line. The script keeps the `~/.claude/projects` transcript scan and the `jq` and `rg` warnings. A scratch repository whose default branch is `master` exercised the no-flag, `-b`, and `-h` paths. The cleanup playbook shows the new usage and keeps the installed-plugin path.
+
+**Runner and delegate.** `2bd5dd4` makes the chat that receives `/poteto-mode` the runner and `poteto-agent` a delegate. Upstream's reason is that a subagent spawned to run the playbook is nested, so it cannot fan out the playbook's lanes. `poteto-agent` takes the new description with `general-purpose`, keeps its `skills` preload, and omits `is_background`. Its body names `Agent` spawns instead of `Task` spawns. Poteto-mode's Subagents section and the technical reference say that the receiving chat runs the playbook. The SessionStart context, `poteto-help`, and the Codex, Pi, and provider-dispatch references already treat `poteto-agent` as a helper, so they do not change.
+
+**Verification readiness.** `c49b37a` makes readiness in create-verification-skill mean a usable app, not a port that answers. A journey that the seed data cannot satisfy reports a failure in its feature's Gotchas. Setup that a stand-in did stays unverified until a run on the real target covers it. Step 3 keeps the `.claude/skills/verify-<app>/` path.
+
+**Agent Plugins manifest excluded.** `e5a02f8` adds a root `pstack/plugin.json` in the Agent Plugins 1.0.0 format. Codex 0.162.1 also reads that format, next to `.codex-plugin/plugin.json`, and which one it prefers is unverified. If the root file won, Codex would lose the SessionStart hook and the interface block. `UPSTREAM.md` records the exclusion.
+
+**Upstream README.** `README-UPSTREAM.md` takes the upstream README verbatim. It gains the runner and delegate wording and the `comment-sicko` subagent type.
+
+**Pi through Lody.** Every Pi lane is now one Lody session (#54). Lody is an agent IDE that runs each agent in its own session and worktree, and the maintainer runs Pi only inside it.
 
 **Why.** pi-subagents is gone, so the old route had no runtime. Lody injects its own `subagent` tool, but it takes only a task and a description, always runs the parent's model, and starts no worktree. It cannot carry a pstack descriptor, so pstack does not use it.
 

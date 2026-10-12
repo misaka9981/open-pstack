@@ -8,11 +8,11 @@ open-pstack tracks [Cursor's pstack](https://github.com/cursor/plugins/tree/main
 | --- | --- |
 | Repository | `https://github.com/cursor/plugins.git` |
 | Path | `pstack/` |
-| Commit | `978ca6e9c0e012047cd5058b8e829240336e704e` |
-| Upstream version | `0.15.17` |
-| open-pstack version | `1.11.1` |
+| Commit | `1b6d44ff26d4e242f4e8f68c391e6d2f7ca16def` |
+| Upstream version | `0.15.20` |
+| open-pstack version | `1.12.0` |
 
-The table above is the current Cursor sync point. Open Pstack 1.11.1 imports this 0.15.17 sync. `README-UPSTREAM.md` preserves the upstream pstack README verbatim. `CHANGES.md` and `NOTICE.md` describe the adaptations and provenance.
+The table above is the current Cursor sync point. Open Pstack 1.12.0 imports this 0.15.20 sync. `README-UPSTREAM.md` preserves the upstream pstack README verbatim. `CHANGES.md` and `NOTICE.md` describe the adaptations and provenance.
 
 ## Upstream-only exclusions
 
@@ -27,6 +27,7 @@ The table above is the current Cursor sync point. Open Pstack 1.11.1 imports thi
 - The `23e4138` built-in PR tool rule is not applied. Claude Code, Codex, and Pi have no built-in PR tool, so Opening a PR and the plan skeleton keep the resolved forge CLI. The `00b14f1` rewording of that paragraph is not applied either.
 - The `00b14f1` description cuts are not applied to `figure-it-out`, `principle-model-the-domain`, `principle-never-block-on-the-human`, or `principle-redesign-from-first-principles`. Upstream ships these four with `disable-model-invocation: true`, so the description does not trigger them there. Open Pstack keeps them model-invocable, so the description is their trigger and keeps its longer form. Their body cuts are applied.
 - The `00b14f1` distillation of `principle-test-behavior-not-implementation` and its poteto-mode index line is not applied. It distills the original rule that every test must fail when each import returns `undefined`. Open Pstack corrected that rule in 1.4.0 and keeps the correction.
+- The Agent Plugins v1 root manifest from `e5a02f8` (`pstack/plugin.json`) is not added. Codex 0.162.1 recognizes that format alongside `.codex-plugin/plugin.json`, and its precedence between the two is unverified. If the root file won, Codex would lose the SessionStart hook and the `interface` block that only `.codex-plugin/plugin.json` declares. Reopen this after a live Codex test with both manifests present.
 - The Claude manifest does not take the logo field from `efa2a53` because Claude Code has no schema for it. The shared asset is exposed through the Codex manifest instead.
 
 ## Check for changes
@@ -41,8 +42,8 @@ Fetch and inspect only commits that touched pstack after the recorded sync point
 
 ```shell
 git fetch cursor main
-git log --oneline 978ca6e9c0e012047cd5058b8e829240336e704e..cursor/main -- pstack
-git diff --stat 978ca6e9c0e012047cd5058b8e829240336e704e..cursor/main -- pstack
+git log --oneline 1b6d44ff26d4e242f4e8f68c391e6d2f7ca16def..cursor/main -- pstack
+git diff --stat 1b6d44ff26d4e242f4e8f68c391e6d2f7ca16def..cursor/main -- pstack
 ```
 
 No output means the tracked pstack tree has not changed. This comparison does not need a polling service or generated mirror branch.
