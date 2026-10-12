@@ -469,8 +469,13 @@ describe("model matrix", () => {
       expect(matrixPairs.has(`${row.provider}:${row.model}`)).toBe(false);
       expect(row.selectableEfforts).toEqual([...EFFORTS]);
       expect(sheet).not.toContain(`${row.provider}:${row.model}@`);
+      // Claude plan mode serves a read-only Haiku lane with Sonnet, so a Codex
+      // parent can reach Haiku only through an isolated-write lane.
+      const codexRoute = row.family === "haiku"
+        ? "Claude CLI for `isolated-write` only; a read-only Haiku lane is a dropout because Claude plan mode serves Sonnet"
+        : "Claude CLI";
       expect(setup).toContain(
-        `| ${row.family} additional Claude row + selected effort | native Agent \`pstack-${row.claudeNativeAgentStem}-<effort>\` | Claude CLI | not routed |`
+        `| ${row.family} additional Claude row + selected effort | native Agent \`pstack-${row.claudeNativeAgentStem}-<effort>\` | ${codexRoute} | not routed |`
       );
     }
   });

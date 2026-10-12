@@ -30,6 +30,8 @@ Setup also offers the Claude families below. They stay outside the model matrix,
 
 Each selectable effort passed a one-turn `claude -p` probe, and the reported models were `claude-sonnet-5-5` and `claude-haiku-5-5`. That proves Claude accepts the effort, not the reasoning depth it applies.
 
+From a Codex parent, run `claude:haiku` only in `isolated-write`. The runner maps read-only to Claude plan mode, and `claude -p --model haiku --permission-mode plan` is served by `claude-sonnet-5-5`, so a read-only Haiku lane always ends as a model-mismatch dropout. Native Claude Code dispatch through `pstack-haiku-<effort>` does not use plan mode and is not affected.
+
 ## Relay providers
 
 `magpie` is a local relay that Codex reaches through a `model_providers.magpie` entry in the user's `~/.codex/config.toml`. Its descriptors name the relay's model id, which may contain `/`: `magpie:wevnal/glm-5.3@high`. Split a descriptor on the first `:` and the last `@`. The runner never reads the relay URL; Codex resolves the provider name from the user's config.
