@@ -19,6 +19,17 @@ The allowed effort universe is exactly `low`, `medium`, `high`, `xhigh`, `max`. 
 
 `fable`, `opus`, `sonnet`, and `haiku` are Claude Code's rolling aliases. Claude resolves each alias to the latest available family revision. A runner receipt keeps the requested alias in `model` and the concrete provider-reported revision in `reportedModel`; verification accepts only a numeric `claude-<alias>-*` revision from the matching family.
 
+## Additional Claude families
+
+Setup also offers the Claude families below. They stay outside the model matrix, so they never join the first-run defaults or the default panels. A role uses one only when the operator assigns it.
+
+| Family | Provider | Model | Selectable efforts | Claude-native agent stem |
+|---|---|---|---|---|
+| sonnet | claude | sonnet | low medium high xhigh max | sonnet |
+| haiku | claude | haiku | low medium high xhigh max | haiku |
+
+Each selectable effort passed a one-turn `claude -p` probe, and the reported models were `claude-sonnet-5-5` and `claude-haiku-5-5`. That proves Claude accepts the effort, not the reasoning depth it applies.
+
 ## Relay providers
 
 `magpie` is a local relay that Codex reaches through a `model_providers.magpie` entry in the user's `~/.codex/config.toml`. Its descriptors name the relay's model id, which may contain `/`: `magpie:wevnal/glm-5.3@high`. Split a descriptor on the first `:` and the last `@`. The runner never reads the relay URL; Codex resolves the provider name from the user's config.
@@ -79,7 +90,7 @@ A Codex parent reaches `magpie:*` only through the external runner. `spawn_agent
 
 Native dispatch avoids a second CLI startup and its base context.
 
-- Claude Code: match the descriptor's `(provider, model)` to one model-matrix row, then dispatch it through `pstack-<stem>-<effort>` using that row's Claude-native agent stem and the descriptor's effort. Those definitions select the rolling model alias, requested effort, and `background: true`. `pstack-fable-max` and `pstack-opus-xhigh` remain in that set. Pass the complete task, grounding paths, access mode, and unique output location in the `Agent` prompt. Retain the task handle and drain it only after fan-out.
+- Claude Code: match the descriptor's `(provider, model)` to one model-matrix row or one additional Claude family row, then dispatch it through `pstack-<stem>-<effort>` using that row's Claude-native agent stem and the descriptor's effort. Those definitions select the rolling model alias, requested effort, and `background: true`. `pstack-fable-max` and `pstack-opus-xhigh` remain in that set. Pass the complete task, grounding paths, access mode, and unique output location in the `Agent` prompt. Retain the task handle and drain it only after fan-out.
 - Codex: call `spawn_agent` with the descriptor's model and `reasoning_effort`, the complete task, grounding paths, access mode, and unique output location. Use an isolated worktree for a writer. Codex subagents already run concurrently.
 - Pi: create every lane as one item of a `lody_session_create_many` call with the mapped `modelId` and `reasoningEffort`, the lane prompt, and a worktree or chat work context, as [`pi-tools.md`](pi-tools.md) specifies.
 
