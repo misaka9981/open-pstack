@@ -35,13 +35,33 @@ export function preflightCommand(provider: Provider): CommandSpec {
   }
 }
 
+const CODEX_DISABLED_FEATURES = [
+  "plugins",
+  "multi_agent",
+  "hooks",
+  "memories",
+  "apps",
+] as const;
+
+const codexFeatureFlags = CODEX_DISABLED_FEATURES.flatMap((feature) => [
+  "--disable",
+  feature,
+]);
+
 // Codex children load ChatGPT apps and every MCP server from the user's config.
 // The runner lists the servers first so the invocation can disable each one.
+// The listing takes the child's feature flags: disabled plugins drop their MCP
+// servers, and an override for a server the child lacks creates an entry with
+// no transport, which stops Codex from starting.
 export function mcpListCommand(provider: Provider): CommandSpec | null {
   switch (provider) {
     case "codex":
     case "magpie":
-      return { command: "codex", args: ["mcp", "list", "--json"], stdin: "none" };
+      return {
+        command: "codex",
+        args: [...codexFeatureFlags, "mcp", "list", "--json"],
+        stdin: "none",
+      };
     case "claude":
     case "grok":
       return null;
@@ -105,16 +125,7 @@ function codexExec(
       options.cwd,
       "--skip-git-repo-check",
       "--ephemeral",
-      "--disable",
-      "plugins",
-      "--disable",
-      "multi_agent",
-      "--disable",
-      "hooks",
-      "--disable",
-      "memories",
-      "--disable",
-      "apps",
+      ...codexFeatureFlags,
       "--json",
       "-",
     ],

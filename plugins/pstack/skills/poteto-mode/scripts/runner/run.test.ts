@@ -26,6 +26,18 @@ const FAKE_MCP_ENV = [
   "FAKE_MCP_LIST_LOG_PATH",
   "FAKE_MODEL_ARGV_PATH",
 ] as const;
+const LISTING_ARGS = [
+  "--disable", "plugins",
+  "--disable", "multi_agent",
+  "--disable", "hooks",
+  "--disable", "memories",
+  "--disable", "apps",
+  "mcp", "list", "--json",
+];
+
+function disabledFeatures(args: readonly string[]): string[] {
+  return args.flatMap((arg, index) => (args[index - 1] === "--disable" ? [arg] : []));
+}
 
 const fake = `#!/usr/bin/env bun
 import { appendFileSync, existsSync, unlinkSync, writeFileSync } from "node:fs";
@@ -33,7 +45,7 @@ const args = process.argv.slice(2);
 const name = process.argv[1].split("/").at(-1);
 const isPreflight =
   (name === "claude" && args[0] === "auth") ||
-  (name === "codex" && (args[0] === "login" || args[0] === "--version" || args[0] === "mcp")) ||
+  (name === "codex" && (args[0] === "login" || args[0] === "--version" || args.includes("mcp"))) ||
   (name === "grok" && args[0] === "models");
 const stage = isPreflight ? "preflight" : "model";
 const startedPath = isPreflight
@@ -76,7 +88,7 @@ if (name === "codex" && args[0] === "--version") {
   console.log("codex-cli 0.0.0");
   process.exit(0);
 }
-if (name === "codex" && args[0] === "mcp") {
+if (name === "codex" && args.includes("mcp")) {
   if (process.env.FAKE_MCP_LIST_LOG_PATH) {
     appendFileSync(process.env.FAKE_MCP_LIST_LOG_PATH, args.join(" ") + "\\n");
   }
@@ -383,7 +395,9 @@ describe("runLane", () => {
   for (const provider of ["codex", "magpie"] as const) {
     it(`runs a ${provider} child without apps and with each enabled MCP server off`, async () => {
       const argvPath = join(scratch, `${provider}-mcp.argv.json`);
+      const listLog = join(scratch, `${provider}-mcp.list.log`);
       process.env.FAKE_MODEL_ARGV_PATH = argvPath;
+      process.env.FAKE_MCP_LIST_LOG_PATH = listLog;
       process.env.FAKE_MCP_LIST_JSON = JSON.stringify([
         { name: "notion", enabled: true },
         { name: "code-review", enabled: false },
@@ -393,10 +407,11 @@ describe("runLane", () => {
       expect((await runLane(input)).exitCode).toBe(0);
 
       const args = JSON.parse(readFileSync(argvPath, "utf8")) as string[];
-      const disabled = args.flatMap((arg, index) =>
-        args[index - 1] === "--disable" ? [arg] : []
-      );
-      expect(disabled).toContain("apps");
+      expect(disabledFeatures(args)).toContain("apps");
+      // Plugins contribute MCP servers, so the listing must see the child's
+      // feature set or it names servers the child does not have.
+      const listingArgs = readFileSync(listLog, "utf8").trim().split(" ");
+      expect(disabledFeatures(listingArgs)).toEqual(disabledFeatures(args));
       const configs = args.filter((arg) => arg.startsWith("mcp_servers."));
       expect(configs).toEqual([
         "mcp_servers.notion.enabled=false",
@@ -430,7 +445,7 @@ describe("runLane", () => {
       status: "unavailable-cli",
       preflight: { status: "failed" },
     });
-    expect(recorded.preflight.argv.slice(1)).toEqual(["mcp", "list", "--json"]);
+    expect(recorded.preflight.argv.slice(1)).toEqual(LISTING_ARGS);
     expect(recorded.error?.message).toContain('"my.server"');
     expect(recorded.error?.message).toContain("model was not launched");
   });
@@ -455,7 +470,7 @@ describe("runLane", () => {
         status,
         preflight: { status: "failed" },
       });
-      expect(recorded.preflight.argv.slice(1)).toEqual(["mcp", "list", "--json"]);
+      expect(recorded.preflight.argv.slice(1)).toEqual(LISTING_ARGS);
       expect(recorded.error?.message).toContain("model was not launched");
     });
   }
@@ -471,7 +486,7 @@ describe("runLane", () => {
     const recorded = receipt(input.receiptPath);
 
     expect(result.exitCode).toBe(124);
-    expect(readFileSync(listLog, "utf8")).toBe("mcp list --json\n");
+    expect(readFileSync(listLog, "utf8")).toBe(`${LISTING_ARGS.join(" ")}\n`);
     expect(existsSync(modelStarted)).toBe(false);
     expect(recorded).toMatchObject({
       status: "timed-out",

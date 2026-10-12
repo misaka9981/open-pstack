@@ -251,7 +251,14 @@ describe("Codex tool surface", () => {
       }
       expect(mcpListCommand(provider)).toEqual({
         command: "codex",
-        args: ["mcp", "list", "--json"],
+        args: [
+          "--disable", "plugins",
+          "--disable", "multi_agent",
+          "--disable", "hooks",
+          "--disable", "memories",
+          "--disable", "apps",
+          "mcp", "list", "--json",
+        ],
         stdin: "none",
       });
     });
