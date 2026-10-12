@@ -565,6 +565,60 @@ describe("check-plan", () => {
     expect(problemsOf(mutated).join("\n")).toContain(expected);
   });
 
+  describe("fenced code blocks", () => {
+    const STRAY_APPENDIX = "Appendix D. Links and reading list, Example only]";
+
+    function withTail(example: string): string[] {
+      return problemsOf(skeleton + example);
+    }
+
+    it("accepts ordinary, indented, and longer closing fences", () => {
+      for (const indent of ["", " ", "  ", "   "]) {
+        expect(
+          withTail(`${indent}\`\`\`markdown\n## Example only\n${indent}\`\`\`\n`),
+          JSON.stringify(indent),
+        ).toEqual([]);
+      }
+      expect(withTail("```markdown\n## Example only\n````\n")).toEqual([]);
+    });
+
+    it("accepts nested backticks and tilde info strings", () => {
+      expect(
+        withTail("````markdown\n```markdown\n## Example only\n```\n````\n"),
+      ).toEqual([]);
+      expect(withTail("~~~markdown `info`\n## Example only\n ~~~\n")).toEqual([]);
+    });
+
+    it("keeps mismatched, shorter, and suffixed closers inside the fence", () => {
+      for (const inner of ["~~~", "```", "``` info"]) {
+        expect(
+          withTail(`\`\`\`\`markdown\n${inner}\n## Example only\n\`\`\`\`\n`),
+          inner,
+        ).toEqual([]);
+      }
+    });
+
+    it("rejects headings and prose outside a proper close", () => {
+      for (const suffix of ["  ", "\t"]) {
+        expect(
+          withTail(`\`\`\`markdown\n## Example only\n\`\`\`${suffix}\n## Example only\n`).join("\n"),
+          JSON.stringify(suffix),
+        ).toContain(STRAY_APPENDIX);
+      }
+      const prose = withTail(
+        "```markdown\nThis prose has a mid-sentence colon: inside code\n```\nThis prose has a mid-sentence colon: bad.\n",
+      );
+      expect(prose).toHaveLength(1);
+      expect(prose[0]).toContain("mid-sentence colon");
+    });
+
+    it("rejects a backtick info string that contains a backtick", () => {
+      expect(
+        withTail("```markdown `invalid`\n## Example only\n```\n").join("\n"),
+      ).toContain(STRAY_APPENDIX);
+    });
+  });
+
   it("CLI exits 0 on the extracted skeleton", async () => {
     const file = await writePlan(skeleton);
     const result = runNode([file]);

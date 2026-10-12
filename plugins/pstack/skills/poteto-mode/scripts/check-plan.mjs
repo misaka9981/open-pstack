@@ -156,6 +156,40 @@ export const CONTRACT = Object.freeze({
 const SUB_BLOCKS = CONTRACT.prBlocks.map((block) => block.name);
 
 /**
+ * @typedef {object} Fence
+ * @property {string} char
+ * @property {number} length
+ */
+
+/**
+ * CommonMark fence rules, so an indented, tilde, or nested example in a plan
+ * is not read as plan structure.
+ * @param {string} text
+ * @returns {Fence | null}
+ */
+function openingFence(text) {
+  const match = text.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
+  const marker = match?.[1];
+  if (!match || marker === undefined) return null;
+  const char = marker.charAt(0);
+  if (char === "`" && (match[2] ?? "").includes("`")) return null;
+  return { char, length: marker.length };
+}
+
+/**
+ * @param {string} text
+ * @param {Fence} opening
+ */
+function closingFence(text, opening) {
+  const marker = text.match(/^ {0,3}(`+|~+)[ \t]*$/)?.[1];
+  return (
+    marker !== undefined &&
+    marker.charAt(0) === opening.char &&
+    marker.length >= opening.length
+  );
+}
+
+/**
  * @param {string} raw
  * @returns {{ n: number, text: string, code: boolean }[]}
  */
@@ -167,12 +201,20 @@ function toLines(raw) {
     start = close === -1 ? 0 : close + 1;
   }
   const lines = [];
-  let fence = false;
+  /** @type {Fence | null} */
+  let fence = null;
   for (let i = start; i < split.length; i++) {
     const text = split[i] ?? "";
     const n = i + 1;
-    if (/^```/.test(text)) fence = !fence;
-    lines.push({ n, text, code: fence });
+    let code = fence !== null;
+    if (fence && closingFence(text, fence)) {
+      code = false;
+      fence = null;
+    } else if (!fence) {
+      fence = openingFence(text);
+      code = fence !== null;
+    }
+    lines.push({ n, text, code });
   }
   return lines;
 }
