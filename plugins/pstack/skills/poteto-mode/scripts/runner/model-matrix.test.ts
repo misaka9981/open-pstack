@@ -445,7 +445,9 @@ describe("model matrix", () => {
       expect(setup).toContain(label);
     }
     expect(setup).toContain("normalized complete role map from step 2");
-    expect(setup).toContain("starts with `claude-fable-` or `claude-opus-`");
+    expect(setup).toContain(
+      "starts with `claude-fable-`, `claude-opus-`, `claude-sonnet-`, or `claude-haiku-`"
+    );
     expect(setup).toContain("preserving the provider, effort, role, and lane order");
     expect(setup).toContain("Show any rolling-alias migrations");
     expect(setup).toContain("Every documented role remains present.");
@@ -478,7 +480,12 @@ describe("model matrix", () => {
     expect(normalization).toContain("Never pass the versioned predecessor to Claude.");
     expect(normalization).toContain("without writing user files");
     expect(normalization).toContain("`/setup-pstack` will rewrite it");
-    expect(normalization).toContain("runner rejects a missed Fable or Opus version pin");
+    expect(normalization).toContain(
+      "runner rejects a missed version pin of any rolling Claude alias"
+    );
+    expect(normalization).toContain(
+      "`claude-fable-`, `claude-opus-`, `claude-sonnet-`, or `claude-haiku-`"
+    );
   });
 });
 

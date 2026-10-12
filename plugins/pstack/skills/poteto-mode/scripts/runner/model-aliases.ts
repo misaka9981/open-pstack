@@ -1,17 +1,19 @@
-export type RollingClaudeAlias = "fable" | "opus";
+const rollingClaudeAliases = ["fable", "opus", "sonnet", "haiku"] as const;
+
+export type RollingClaudeAlias = (typeof rollingClaudeAliases)[number];
 
 export function isRollingClaudeAlias(
   model: string
 ): model is RollingClaudeAlias {
-  return model === "fable" || model === "opus";
+  return (rollingClaudeAliases as readonly string[]).includes(model);
 }
 
 export function versionedClaudeAlias(
   model: string
 ): RollingClaudeAlias | null {
-  if (/^claude-fable-[0-9]+(?:-[0-9]+)*$/.test(model)) return "fable";
-  if (/^claude-opus-[0-9]+(?:-[0-9]+)*$/.test(model)) return "opus";
-  return null;
+  return rollingClaudeAliases.find((alias) =>
+    new RegExp(`^claude-${alias}-[0-9]+(?:-[0-9]+)*$`).test(model)
+  ) ?? null;
 }
 
 export function concreteModelMatchesRollingAlias(

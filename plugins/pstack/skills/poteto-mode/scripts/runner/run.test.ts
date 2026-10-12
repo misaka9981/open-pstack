@@ -97,7 +97,9 @@ const reportedModel = model === "fable"
   ? "claude-fable-9-9"
   : model === "opus"
     ? "claude-opus-9"
-    : model;
+    : model === "sonnet" || model === "haiku"
+      ? "claude-" + model + "-5-5"
+      : model;
 if (process.env.FAKE_INVALID_MODEL === "1") {
   console.error("The requested model is not supported with this account.");
   process.exit(1);
@@ -298,6 +300,20 @@ describe("runLane", () => {
       if (provider === "claude") {
         expect(receipt(input.receiptPath).reportedModel).toBe("claude-fable-9-9");
       }
+    });
+  }
+
+  for (const model of ["sonnet", "haiku"] as const) {
+    it(`verifies the rolling ${model} alias against the reported revision`, async () => {
+      const input = { ...options("claude", model), model };
+      expect((await runLane(input)).exitCode).toBe(0);
+      expect(receipt(input.receiptPath)).toMatchObject({
+        status: "complete",
+        model,
+        reportedModel: `claude-${model}-5-5`,
+        modelVerified: true,
+        modelEvidence: "provider-report",
+      });
     });
   }
 
@@ -917,14 +933,21 @@ describe("runLane", () => {
     await expect(runLane(input)).rejects.toThrow("native to parent");
   });
 
-  it("rejects a versioned Claude family before it can stay pinned", async () => {
-    const input = { ...options("claude"), model: "claude-fable-9-9" };
-    await expect(runLane(input)).rejects.toThrow(
-      "normalize it to fable before invoking the runner"
-    );
-    expect(existsSync(input.outputPath)).toBe(false);
-    expect(existsSync(input.receiptPath)).toBe(false);
-  });
+  for (const [pin, alias] of [
+    ["claude-fable-9-9", "fable"],
+    ["claude-opus-9", "opus"],
+    ["claude-sonnet-5-5", "sonnet"],
+    ["claude-haiku-5-5", "haiku"],
+  ] as const) {
+    it(`rejects the versioned Claude pin ${pin} before it can stay pinned`, async () => {
+      const input = { ...options("claude"), model: pin };
+      await expect(runLane(input)).rejects.toThrow(
+        `normalize it to ${alias} before invoking the runner`
+      );
+      expect(existsSync(input.outputPath)).toBe(false);
+      expect(existsSync(input.receiptPath)).toBe(false);
+    });
+  }
 });
 
 describe("childEnvironment", () => {

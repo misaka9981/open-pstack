@@ -118,6 +118,10 @@ describe("parseProviderOutput", () => {
     expect(reportedModelMatches("claude", "fable", "fable")).toBe(false);
     expect(reportedModelMatches("claude", "fable", "fable-preview")).toBe(false);
     expect(reportedModelMatches("grok", "fable", "claude-fable-9-9")).toBe(false);
+    expect(reportedModelMatches("claude", "sonnet", "claude-sonnet-5-5")).toBe(true);
+    expect(reportedModelMatches("claude", "haiku", "claude-haiku-5-5")).toBe(true);
+    expect(reportedModelMatches("claude", "sonnet", "claude-haiku-5-5")).toBe(false);
+    expect(reportedModelMatches("claude", "haiku", "claude-sonnet-5-5")).toBe(false);
   });
 
   it("rejects malformed or textless responses", () => {
