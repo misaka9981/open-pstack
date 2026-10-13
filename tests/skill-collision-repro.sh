@@ -369,7 +369,7 @@ else
   note "ok: routed skills stay model-invocable"
 fi
 
-user_only_skills=(correct ketchup poteto-help)
+user_only_skills=(correct in-your-own-words ketchup poteto-help)
 user_only_bad=""
 for name in "${user_only_skills[@]}"; do
   user_only_skill="$plugin/skills/$name/SKILL.md"
