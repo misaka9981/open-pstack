@@ -58,7 +58,7 @@ Pi under Lody has no permission or read-only mode, so the contract is the only g
 |---|---|
 | Writer lane (implementation, arena candidate, swarm writer) | The writer contract, then the task. |
 | Read-only lane (review, exploration, judgment) | The read-only contract, then the task. |
-| `poteto-agent` | `/skill:poteto-mode ` followed by the writer contract and the task. Pi expands the command into the skill body. |
+| `poteto-agent` | `/skill:poteto-mode ` followed by the writer contract, or the read-only contract for a read-only helper, then the task. Pi expands the command into the skill body. |
 | `comment-sicko` (the **no-comments** skill) | The read-only contract, then "Find the `no-comments` skill; read `../../agents/comment-sicko.md` relative to its SKILL.md in full and act as that agent; report findings only." |
 
 ## Completion evidence
