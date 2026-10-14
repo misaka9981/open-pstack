@@ -1,6 +1,6 @@
 ---
 name: pstack-haiku-max
-description: Native Claude lane for pstack roles configured as claude:haiku@max.
+description: Native Claude lane for routed workflow skill roles configured as claude:haiku@max. A poteto-mode delegate uses poteto-agent with model and effort instead.
 model: haiku
 effort: max
 background: true

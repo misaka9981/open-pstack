@@ -1,6 +1,6 @@
 ---
 name: pstack-opus-xhigh
-description: Native Claude lane for pstack roles configured as claude:opus@xhigh.
+description: Native Claude lane for routed workflow skill roles configured as claude:opus@xhigh. A poteto-mode delegate uses poteto-agent with model and effort instead.
 model: opus
 effort: xhigh
 background: true

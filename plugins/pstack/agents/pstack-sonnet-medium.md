@@ -1,6 +1,6 @@
 ---
 name: pstack-sonnet-medium
-description: Native Claude lane for pstack roles configured as claude:sonnet@medium.
+description: Native Claude lane for routed workflow skill roles configured as claude:sonnet@medium. A poteto-mode delegate uses poteto-agent with model and effort instead.
 model: sonnet
 effort: medium
 background: true

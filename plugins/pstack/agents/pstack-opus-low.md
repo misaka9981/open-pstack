@@ -1,6 +1,6 @@
 ---
 name: pstack-opus-low
-description: Native Claude lane for pstack roles configured as claude:opus@low.
+description: Native Claude lane for routed workflow skill roles configured as claude:opus@low. A poteto-mode delegate uses poteto-agent with model and effort instead.
 model: opus
 effort: low
 background: true
