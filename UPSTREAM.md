@@ -8,11 +8,11 @@ open-pstack tracks [Cursor's pstack](https://github.com/cursor/plugins/tree/main
 | --- | --- |
 | Repository | `https://github.com/cursor/plugins.git` |
 | Path | `pstack/` |
-| Commit | `c86f349b102feb91f1966f8a6a60882a4e601b50` |
-| Upstream version | `0.15.23` |
-| open-pstack version | `1.15.0` |
+| Commit | `1e5c90a4b6f249917bd21fe361b3a2a7deb741b8` |
+| Upstream version | `0.15.24` |
+| open-pstack version | `1.16.0` |
 
-The table above is the current Cursor sync point. Open Pstack 1.15.0 keeps the 0.15.23 sync that 1.14.0 imported. `README-UPSTREAM.md` preserves the upstream pstack README verbatim. `CHANGES.md` and `NOTICE.md` describe the adaptations and provenance.
+The table above is the current Cursor sync point. Open Pstack 1.16.0 imports Cursor pstack 0.15.24. `README-UPSTREAM.md` preserves the upstream pstack README verbatim. `CHANGES.md` and `NOTICE.md` describe the adaptations and provenance.
 
 ## Upstream-only exclusions
 
@@ -30,6 +30,9 @@ The table above is the current Cursor sync point. Open Pstack 1.15.0 keeps the 0
 - The Agent Plugins v1 root manifest from `e5a02f8` (`pstack/plugin.json`) is not added. Codex 0.162.1 recognizes that format alongside `.codex-plugin/plugin.json`, and its precedence between the two is unverified. If the root file won, Codex would lose the SessionStart hook and the `interface` block that only `.codex-plugin/plugin.json` declares. Reopen this after a live Codex test with both manifests present.
 - The `b93e811` fallback in `poteto-agent.md` is not applied. With no path from its parent, upstream's agent searches `~/.cursor/plugins/` for `skills/poteto-mode/SKILL.md` and picks the copy whose `.cursor-plugin/plugin.json` has the highest version. That directory and manifest exist only in Cursor. The Claude agent preloads `pstack:poteto-mode` through its `skills` frontmatter, so it has the skill without a search. Upstream's note that the catalog hides poteto-mode is left out too, because Open Pstack's poteto-mode is model-invocable.
 - The Claude manifest does not take the logo field from `efa2a53` because Claude Code has no schema for it. The shared asset is exposed through the Codex manifest instead.
+- The speed half of the `ce649c0` model-to-job rule is not applied. Upstream picks fast or standard speed per spawn and keeps fast mode for urgent work. No Open Pstack route has a per-spawn speed setting, because `fast` is only part of Cursor's Grok selector. The pointer sentence in each routed skill and playbook drops the words "and fast or standard speed". Upstream's "nearest slug" fallback becomes a clamp to the family's Selectable efforts, and a rejected adjusted effort reruns once on the configured descriptor instead of another slug.
+- The `ce649c0` fallback prefixes in Arena and Interrogate, which put `cursor-grok-*` and `composer-*` in the Grok family and run a refused `composer-*` entry on the Grok default, are not applied. They change fallback lines that the no-fallback exclusion above already leaves out.
+- The `ce649c0` stuck-after runtime in Autopilot-full is not applied. Upstream records a stuck-after runtime for each subagent and calls an agent stuck when it shows nothing new past that runtime or an owner has not pushed by the first tick. Open Pstack has no implicit runtime timeout, so the tick marks an agent stuck only on failure evidence, and an owner with no push or trail row by the first tick is drift to record.
 
 ## Check for changes
 
@@ -43,8 +46,8 @@ Fetch and inspect only commits that touched pstack after the recorded sync point
 
 ```shell
 git fetch cursor main
-git log --oneline c86f349b102feb91f1966f8a6a60882a4e601b50..cursor/main -- pstack
-git diff --stat c86f349b102feb91f1966f8a6a60882a4e601b50..cursor/main -- pstack
+git log --oneline 1e5c90a4b6f249917bd21fe361b3a2a7deb741b8..cursor/main -- pstack
+git diff --stat 1e5c90a4b6f249917bd21fe361b3a2a7deb741b8..cursor/main -- pstack
 ```
 
 No output means the tracked pstack tree has not changed. This comparison does not need a polling service or generated mirror branch.
