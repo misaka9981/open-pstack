@@ -1,6 +1,6 @@
 ---
 name: pstack-fable-low
-description: Native Claude lane for pstack roles configured as claude:fable@low.
+description: Native Claude lane for routed workflow skill roles configured as claude:fable@low. A poteto-mode delegate uses poteto-agent with model and effort instead.
 model: fable
 effort: low
 background: true

@@ -1,6 +1,6 @@
 ---
 name: pstack-fable-high
-description: Native Claude lane for pstack roles configured as claude:fable@high.
+description: Native Claude lane for routed workflow skill roles configured as claude:fable@high. A poteto-mode delegate uses poteto-agent with model and effort instead.
 model: fable
 effort: high
 background: true

@@ -359,7 +359,7 @@ describe("model matrix", () => {
         const { fields, body } = parseFrontmatter(text);
         expect(fields).toEqual({
           name,
-          description: `Native Claude lane for pstack roles configured as ${row.provider}:${row.model}@${effort}.`,
+          description: `Native Claude lane for routed workflow skill roles configured as ${row.provider}:${row.model}@${effort}. A poteto-mode delegate uses poteto-agent with model and effort instead.`,
           model: row.model,
           effort,
           background: "true",
@@ -549,7 +549,12 @@ describe("model matrix", () => {
     expect(nativeLanes).toContain(
       "match the descriptor's `(provider, model)` to one model-matrix row or one additional Claude family row"
     );
-    expect(nativeLanes).toContain("`pstack-<stem>-<effort>`");
+    expect(nativeLanes).toContain(
+      "Dispatch a poteto-mode delegate as `subagent_type: \"poteto-agent\"` with `model` set to that row's model alias"
+    );
+    expect(nativeLanes).toContain(
+      "Dispatch a routed skill lane through `pstack-<stem>-<effort>`"
+    );
   });
 
   it("normalizes old rolling-family pins before any runtime route", () => {

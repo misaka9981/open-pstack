@@ -1,6 +1,6 @@
 ---
 name: pstack-sonnet-high
-description: Native Claude lane for pstack roles configured as claude:sonnet@high.
+description: Native Claude lane for routed workflow skill roles configured as claude:sonnet@high. A poteto-mode delegate uses poteto-agent with model and effort instead.
 model: sonnet
 effort: high
 background: true
