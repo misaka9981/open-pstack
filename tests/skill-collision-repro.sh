@@ -230,10 +230,15 @@ autopilot_stack="$plugin/skills/poteto-mode/playbooks/autopilot-stack.md"
 opening_a_pr="$plugin/skills/poteto-mode/playbooks/opening-a-pr.md"
 multi_phase_plan="$plugin/skills/poteto-mode/playbooks/multi-phase-plan.md"
 shipping_safety_bad=""
+# A numbered step runs until the next numbered step or the Reply line, so indented
+# continuation paragraphs belong to the step above them.
+step_block() {
+  awk -v n="$1" '/^[0-9]+\. / { inside = index($0, n ". ") == 1 } /^\*\*Reply:\*\*/ { inside = 0 } inside' "$2"
+}
 grep -Fq 'watch-pr --owner "$base_owner" --repo "$base_name" --pr "$pr"' "$playbook" || shipping_safety_bad="${shipping_safety_bad}Babysit watcher does not pin the base repository and PR number"$'\n'
 grep -Fq -- '--disable-auto' "$shipping" || shipping_safety_bad="${shipping_safety_bad}Shipping does not disarm pre-existing auto-merge"$'\n'
 grep -Fq 'Before launching any verifier' "$shipping" || shipping_safety_bad="${shipping_safety_bad}Shipping does not disarm the frozen queue before independent verification"$'\n'
-shipping_disarm_order="$(awk '/^2\. / { disarm = index($0, "Before launching any verifier"); verify = index($0, "One subagent per PR"); if (disarm == 0 || verify == 0 || disarm >= verify) print $0 }' "$shipping")"
+shipping_disarm_order="$(step_block 1 "$shipping" | awk '{ text = text $0 "\n" } END { disarm = index(text, "Before launching any verifier"); verify = index(text, "One subagent per PR"); if (disarm == 0 || verify == 0 || disarm >= verify) print "out of order" }')"
 if [ -n "$shipping_disarm_order" ]; then
   shipping_safety_bad="${shipping_safety_bad}Shipping does not confirm the frozen queue unarmed before launching verifiers"$'\n'
 fi
@@ -244,7 +249,7 @@ grep -Fq -- '--owner "$base_owner" --repo "$base_name"' "$shipping" || shipping_
 grep -Fq -- '--force-with-lease="refs/heads/$branch:$captured_sha"' "$shipping" || shipping_safety_bad="${shipping_safety_bad}Shipping does not bind rewritten branch pushes to the captured SHA"$'\n'
 grep -Fq 'git merge-base --is-ancestor "$landing_base_sha" "refs/heads/$branch"' "$shipping" || shipping_safety_bad="${shipping_safety_bad}Shipping does not prove its recorded patch base is an ancestor before rebasing"$'\n'
 grep -Fq 'git rebase --onto "$trunk_tip" "$landing_base_sha" -- "$branch"' "$shipping" || shipping_safety_bad="${shipping_safety_bad}Shipping does not drop a squash-merged parent with an option-safe onto rebase"$'\n'
-grep -Fq 'return to step 5 and merge it' "$shipping" || shipping_safety_bad="${shipping_safety_bad}Shipping does not merge after an unarmed frontier becomes ready"$'\n'
+grep -Fq 'return to step 4 and merge it' "$shipping" || shipping_safety_bad="${shipping_safety_bad}Shipping does not merge after an unarmed frontier becomes ready"$'\n'
 grep -Fq 'any terminal, non-passing conclusion, regardless of whether auto-merge or a merge-queue entry is pending' "$shipping" || shipping_safety_bad="${shipping_safety_bad}Shipping lets pending merge state hide a terminal required-check failure"$'\n'
 grep -Fq '`UNSTABLE` is not a failure by itself' "$shipping" || shipping_safety_bad="${shipping_safety_bad}Shipping treats advisory or pending status as a terminal failure"$'\n'
 grep -Fq "return to step 4's guarded rebase and step 3's re-verification" "$shipping" || shipping_safety_bad="${shipping_safety_bad}Shipping does not recover an armed stale or conflicted frontier"$'\n'
@@ -262,21 +267,20 @@ grep -Fq '`gh pr merge "$pr" --squash --auto --match-head-commit "$landing_sha" 
 grep -Fq 'required, SHA-scoped verification check for the independent verdict' "$shipping" || shipping_safety_bad="${shipping_safety_bad}Shipping allows armed auto-merge to outlive its independent verdict"$'\n'
 grep -Fq -- '--json headRefOid,baseRefName,state,mergedAt,mergeStateStatus,statusCheckRollup,autoMergeRequest' "$shipping" || shipping_safety_bad="${shipping_safety_bad}Shipping does not observe the head SHA and base branch while watching"$'\n'
 grep -Fq 'On any head or base change' "$shipping" || shipping_safety_bad="${shipping_safety_bad}Shipping does not invalidate an armed merge after a head or base change"$'\n'
-shipping_step_2="$(grep -E '^2\. ' "$shipping" || true)"
-shipping_step_4="$(grep -E '^4\. ' "$shipping" || true)"
-shipping_step_5="$(grep -E '^5\. ' "$shipping" || true)"
-shipping_step_8="$(grep -E '^8\. ' "$shipping" || true)"
-printf '%s\n' "$shipping_step_2" | grep -Fq '`mergeQueueEntry`' || shipping_safety_bad="${shipping_safety_bad}Shipping does not inspect GitHub merge-queue state before verification"$'\n'
-printf '%s\n' "$shipping_step_2" | grep -Fq '`dequeuePullRequest`' || shipping_safety_bad="${shipping_safety_bad}Shipping does not dequeue GitHub merge-queue entries before verification"$'\n'
-printf '%s\n' "$shipping_step_2" | grep -Fq 'both `autoMergeRequest` and `mergeQueueEntry` are null' || shipping_safety_bad="${shipping_safety_bad}Shipping treats a null auto-merge request as fully disarmed"$'\n'
-printf '%s\n' "$shipping_step_4" | grep -Fq '`mergeQueueEntry`' || shipping_safety_bad="${shipping_safety_bad}Shipping does not dequeue the frontier and descendants before mutation"$'\n'
-printf '%s\n' "$shipping_step_4" | grep -Fq 'Re-read `baseRefName` after any retarget and require it to equal `<trunk>`' || shipping_safety_bad="${shipping_safety_bad}Shipping does not verify the destination after retargeting"$'\n'
-printf '%s\n' "$shipping_step_4" | grep -Fq 'Record `<trunk>` as `<landing-base-ref>`' || shipping_safety_bad="${shipping_safety_bad}Shipping conflates the destination branch with the patch-base commit"$'\n'
-printf '%s\n' "$shipping_step_5" | grep -Fq '`baseRefName` equals `<trunk>`' || shipping_safety_bad="${shipping_safety_bad}Shipping does not require the intended destination immediately before merge"$'\n'
-printf '%s\n' "$shipping_step_5" | grep -Fq 'GitHub has no server-enforced expected-base precondition' || shipping_safety_bad="${shipping_safety_bad}Shipping does not state the GitHub base-guard limitation"$'\n'
-printf '%s\n' "$shipping_step_5" | grep -Fq 'Run the GitHub merge immediately after the matching preflight' || shipping_safety_bad="${shipping_safety_bad}Shipping cannot execute its required GitHub merge after checking the destination"$'\n'
-printf '%s\n' "$shipping_step_8" | grep -Fq '`baseRefName`' || shipping_safety_bad="${shipping_safety_bad}Shipping does not monitor the destination branch during landing"$'\n'
-printf '%s\n' "$shipping_step_8" | grep -Fq '`mergeQueueEntry`' || shipping_safety_bad="${shipping_safety_bad}Shipping does not monitor native merge-queue state during landing"$'\n'
+shipping_verify_step="$(step_block 1 "$shipping")"
+shipping_land_step="$(step_block 4 "$shipping")"
+shipping_watch_step="$(step_block 5 "$shipping")"
+printf '%s\n' "$shipping_verify_step" | grep -Fq '`mergeQueueEntry`' || shipping_safety_bad="${shipping_safety_bad}Shipping does not inspect GitHub merge-queue state before verification"$'\n'
+printf '%s\n' "$shipping_verify_step" | grep -Fq '`dequeuePullRequest`' || shipping_safety_bad="${shipping_safety_bad}Shipping does not dequeue GitHub merge-queue entries before verification"$'\n'
+printf '%s\n' "$shipping_verify_step" | grep -Fq 'both `autoMergeRequest` and `mergeQueueEntry` are null' || shipping_safety_bad="${shipping_safety_bad}Shipping treats a null auto-merge request as fully disarmed"$'\n'
+printf '%s\n' "$shipping_land_step" | grep -Fq '`mergeQueueEntry`' || shipping_safety_bad="${shipping_safety_bad}Shipping does not dequeue the frontier and descendants before mutation"$'\n'
+printf '%s\n' "$shipping_land_step" | grep -Fq 'Re-read `baseRefName` after any retarget and require it to equal `<trunk>`' || shipping_safety_bad="${shipping_safety_bad}Shipping does not verify the destination after retargeting"$'\n'
+printf '%s\n' "$shipping_land_step" | grep -Fq 'Record `<trunk>` as `<landing-base-ref>`' || shipping_safety_bad="${shipping_safety_bad}Shipping conflates the destination branch with the patch-base commit"$'\n'
+printf '%s\n' "$shipping_land_step" | grep -Fq '`baseRefName` equals `<trunk>`' || shipping_safety_bad="${shipping_safety_bad}Shipping does not require the intended destination immediately before merge"$'\n'
+printf '%s\n' "$shipping_land_step" | grep -Fq 'GitHub has no server-enforced expected-base precondition' || shipping_safety_bad="${shipping_safety_bad}Shipping does not state the GitHub base-guard limitation"$'\n'
+printf '%s\n' "$shipping_land_step" | grep -Fq 'Run the GitHub merge immediately after the matching preflight' || shipping_safety_bad="${shipping_safety_bad}Shipping cannot execute its required GitHub merge after checking the destination"$'\n'
+printf '%s\n' "$shipping_watch_step" | grep -Fq '`baseRefName`' || shipping_safety_bad="${shipping_safety_bad}Shipping does not monitor the destination branch during landing"$'\n'
+printf '%s\n' "$shipping_watch_step" | grep -Fq '`mergeQueueEntry`' || shipping_safety_bad="${shipping_safety_bad}Shipping does not monitor native merge-queue state during landing"$'\n'
 github_pr_commands="$(grep -Eho '`gh pr (create|edit|view|ready|merge|checks)[^`]*`' "${forge_neutral_files[@]}" || true)"
 github_pr_unscoped="$(printf '%s\n' "$github_pr_commands" | grep -Fv -- '--repo "$base_repo"' || true)"
 if [ -n "$github_pr_unscoped" ]; then
@@ -320,22 +324,21 @@ grep -Fq 'An appended stack child keeps its recorded parent tip until that paren
 grep -Fq 'For fork heads, take the order from the verified local parent ancestry' "$shipping" || shipping_safety_bad="${shipping_safety_bad}Shipping tries to infer a fork stack from shared trunk bases"$'\n'
 grep -Fq 'only the current bottom PR through Shipping, one at a time' "$autopilot_stack" || shipping_safety_bad="${shipping_safety_bad}Autopilot-stack offers merge-when-ready outside the current bottom frontier"$'\n'
 grep -Fq -- '--force-with-lease="refs/heads/$branch:$captured_sha"' "$autopilot_full" || shipping_safety_bad="${shipping_safety_bad}Autopilot-full does not bind its post-rebase push to the captured SHA"$'\n'
-grep -Fq "A private-stack child fetches its parent's exact tip" "$autopilot_full" || shipping_safety_bad="${shipping_safety_bad}Autopilot-full rebases a private-stack child onto trunk instead of its parent"$'\n'
-grep -Fq 'Record the selected exact commit as `<target-tip>`' "$autopilot_full" || shipping_safety_bad="${shipping_safety_bad}Autopilot-full does not record the exact rebase target"$'\n'
-grep -Fq 'git rebase --onto "$target_tip" "$current_base_sha" -- "$branch"' "$autopilot_full" || shipping_safety_bad="${shipping_safety_bad}Autopilot-full does not isolate child commits when changing a private-stack parent"$'\n'
+grep -Fq 'record its exact tip as `<target-tip>`' "$autopilot_full" || shipping_safety_bad="${shipping_safety_bad}Autopilot-full does not record the exact rebase target"$'\n'
+grep -Fq 'git rebase --onto "$target_tip" "$current_base_sha" -- "$branch"' "$autopilot_full" || shipping_safety_bad="${shipping_safety_bad}Autopilot-full does not isolate its own commits when moving onto the target tip"$'\n'
 grep -Fq 'git fetch -- "$head_url" "refs/heads/$branch"' "$opening_a_pr" || shipping_safety_bad="${shipping_safety_bad}Opening a PR does not refresh a fork head through its push repository URL"$'\n'
 grep -Fq 'resolve and validate `<head-url>` through Shipping step 1, capture it as `head_url`' "$opening_a_pr" || shipping_safety_bad="${shipping_safety_bad}Opening a PR does not resolve its head URL before a shared-worktree refresh"$'\n'
 grep -Fq 'git fetch -- "$head_url" "refs/heads/$head_branch"' "$multi_phase_plan" || shipping_safety_bad="${shipping_safety_bad}Multi-phase plan does not fetch a live-lane head through its push repository URL"$'\n'
 grep -Fq 'Resolve and validate `<head-url>` through Shipping step 1 and capture it as `head_url` for the live-lane fetch' "$multi_phase_plan" || shipping_safety_bad="${shipping_safety_bad}Multi-phase plan does not resolve its head URL before a live-lane fetch"$'\n'
-autopilot_full_rewrite_order="$(awk '/^2\. / { capture = index($0, "git ls-remote"); rebase = index($0, "git rebase --onto"); if (capture == 0 || rebase == 0 || capture >= rebase) print $0 }' "$autopilot_full")"
+autopilot_full_rewrite_order="$(step_block 2 "$autopilot_full" | awk '{ text = text $0 "\n" } END { capture = index(text, "git ls-remote"); rebase = index(text, "git rebase --onto"); if (capture == 0 || rebase == 0 || capture >= rebase) print "out of order" }')"
 if [ -n "$autopilot_full_rewrite_order" ]; then
   shipping_safety_bad="${shipping_safety_bad}Autopilot-full does not capture the published head before rebasing"$'\n'
 fi
 grep -Fq "Shipping step 4's disarm-and-confirm rule" "$autopilot_full" || shipping_safety_bad="${shipping_safety_bad}Autopilot-full can rewrite an armed pull request"$'\n'
-grep -Fq "Shipping step 5's server-enforced expected-head flow" "$autopilot_full" || shipping_safety_bad="${shipping_safety_bad}Autopilot-full does not bind owner merges to the current landing SHA"$'\n'
+grep -Fq "Shipping step 4's server-enforced expected-head flow" "$autopilot_full" || shipping_safety_bad="${shipping_safety_bad}Autopilot-full does not bind owner merges to the current landing SHA"$'\n'
 grep -Fq -- '--force-with-lease="refs/heads/$branch:$captured_sha"' "$autopilot_stack" || shipping_safety_bad="${shipping_safety_bad}Autopilot-stack does not bind its topology push to the captured SHA"$'\n'
 grep -Fq "Shipping step 4's disarm-and-confirm rule" "$autopilot_stack" || shipping_safety_bad="${shipping_safety_bad}Autopilot-stack can rewrite an armed pull request"$'\n'
-grep -Fq "step 6's captured-SHA lease flow" "$autopilot_stack" || shipping_safety_bad="${shipping_safety_bad}Autopilot-stack drift handling does not reuse its guarded push flow"$'\n'
+grep -Fq "step 2's captured-SHA lease flow" "$autopilot_stack" || shipping_safety_bad="${shipping_safety_bad}Autopilot-stack drift handling does not reuse its guarded push flow"$'\n'
 if [ -n "$shipping_safety_bad" ]; then
   note "FAIL: forge-neutral landing safety rules regressed:"
   note "$shipping_safety_bad"
