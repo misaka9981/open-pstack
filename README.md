@@ -120,6 +120,7 @@ That is the main workflow. The other skills are there when poteto-mode needs the
 | --- | --- |
 | `poteto-help` | You are new to pstack or unsure which skill fits. It answers your question and gives you a prompt to send. On Claude Code and Pi, it runs only when you type it. |
 | `in-your-own-words` | You want the agent to play back your goal and the problem before it starts. On Claude Code and Pi, it runs only when you type it. |
+| `sharpen` | You want a task approached the way a top expert would, aimed at what you are really after, without overspecifying it or deciding your choices for you. On Claude Code and Pi, it runs only when you type it. |
 | `how` | You want a clear explanation of how part of the system works. |
 | `why` | You want evidence for why the system was built that way. |
 | `architect` | A change crosses a function or module boundary and the design needs to be settled first. |
@@ -168,7 +169,7 @@ This repository also keeps:
 
 ## Staying close to Lauren's pstack
 
-Open Pstack 1.15.0 tracks pstack 0.15.23 at Cursor commit [`c86f349b102feb91f1966f8a6a60882a4e601b50`](https://github.com/cursor/plugins/commit/c86f349b102feb91f1966f8a6a60882a4e601b50).
+Open Pstack 1.16.0 tracks pstack 0.15.24 at Cursor commit [`1e5c90a4b6f249917bd21fe361b3a2a7deb741b8`](https://github.com/cursor/plugins/commit/1e5c90a4b6f249917bd21fe361b3a2a7deb741b8).
 
 The two projects have separate version numbers. The pstack version identifies Lauren's upstream content. The Open Pstack version identifies the Claude Code and Codex package built from it.
 

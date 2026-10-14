@@ -88,6 +88,8 @@ A Codex parent reaches `magpie:*` only through the external runner. `spawn_agent
 
 `inherit-parent` and `auto` remain aliases. They use the parent's current model and effort through its native subagent primitive. In a panel they still consume one lane, but they reduce provider diversity; say so in the synthesis record.
 
+When poteto-mode's Subagents section adjusts a lane's effort for the job, the adjusted effort replaces the descriptor's effort on every route. On Claude Code it is the `Agent` call's `effort` for a `poteto-agent` delegate and the `pstack-<stem>-<effort>` agent for a routed skill lane. On Codex it is `reasoning_effort`, on Pi the Lody item's `reasoningEffort`, and on an external lane the runner's `--effort`. The provider and model stay the descriptor's.
+
 ## Native lanes
 
 Native dispatch avoids a second CLI startup and its base context. The spawner decides what the child loads. A poteto-mode delegate is a subagent that poteto-mode or one of its playbooks spawns for a configured role, such as a code delegate, a `hardest tasks` or `judgment and prose` delegate, or a multi-phase plan explorer. It gets poteto-mode plus the role's model and effort. A routed skill lane is a subagent that `arena`, `architect`, `interrogate`, `swarm`, `how`, `why`, or `reflect` spawns. It gets only the model and effort, and it never starts a pstack workflow.

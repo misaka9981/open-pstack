@@ -36,7 +36,7 @@ Start all reviewers in one fan-out phase, one per entry on `interrogate reviewer
 
 Route each reviewer's descriptor with `read-only` access and a unique output and receipt path. Use the parent subagent primitive without a model override for an `inherit-parent` or `auto` entry. If a provider, login, or model is unavailable, record a dropout and continue with the completed reviewers. Never pick the closest model or silently fall back; that destroys the meaning of cross-provider agreement.
 
-Read `references/reviewer-prompt.md` and fill in the same template for every reviewer with the stated intent, the diff or file contents, the rubric from `references/rubric.md`, and the code-quality lens from `references/code-quality-review.md`.
+Read `references/reviewer-prompt.md` and fill in the same template for every reviewer with the stated intent, the diff or file contents, the rubric from `references/rubric.md`, and the code-quality lens from `references/code-quality-review.md`. Pick each subagent's reasoning level for the job, per the Subagents section of the **poteto-mode** skill.
 
 ## Step 4, Synthesize
 
