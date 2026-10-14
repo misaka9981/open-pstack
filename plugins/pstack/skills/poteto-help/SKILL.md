@@ -40,7 +40,7 @@ On Codex or Pi, when the mirror state row says not configured and it matters, as
 2. Set the models. On Codex and Pi, run [`/setup-pstack`](../setup-pstack/SKILL.md). It asks for a reasoning budget, maps a model to each role, and writes a model sheet. The sheet applies to new sessions. On Claude Code, the plugin ships its own sheet, so `/setup-pstack` reports it and stops. Change models there by editing `plugins/pstack/pstack-models.md` in the repository and updating the plugin.
 3. Start a real task with `/poteto-mode`, a goal, and a check that can pass or fail.
 
-On Claude Code and Codex, a SessionStart hook adds a short instruction to each new session that routes non-trivial engineering work into `/poteto-mode`. Codex runs the hook only after the user trusts it. Pi has no hook, so nothing runs there until the user invokes a skill. Most pstack skills can also load when a request matches their description. On Claude Code and Pi, `/correct`, `/ketchup`, and `/poteto-help` start only when the user types them. Codex ignores that flag and can load them on its own. The [README](https://github.com/misaka9981/open-pstack/blob/main/README.md) and [guide page 1](https://github.com/cursor/plugins/blob/main/pstack/docs/guide/01-setup.md) have the details. The guide is written for Cursor's interface, but its ideas carry over. Offer to word their first prompt with them, per [`references/prompting.md`](references/prompting.md).
+On Claude Code and Codex, a SessionStart hook adds a short instruction to each new session that routes non-trivial engineering work into `/poteto-mode`. Codex runs the hook only after the user trusts it. Pi has no hook, so nothing runs there until the user invokes a skill. Most pstack skills can also load when a request matches their description. On Claude Code and Pi, `/correct`, `/in-your-own-words`, `/ketchup`, and `/poteto-help` start only when the user types them. Codex ignores that flag and can load them on its own. The [README](https://github.com/misaka9981/open-pstack/blob/main/README.md) and [guide page 1](https://github.com/cursor/plugins/blob/main/pstack/docs/guide/01-setup.md) have the details. The guide is written for Cursor's interface, but its ideas carry over. Offer to word their first prompt with them, per [`references/prompting.md`](references/prompting.md).
 
 If cost is the worry, say where the tokens go and how to spend fewer. pstack spends extra tokens on subagents and review panels. Pick a smaller budget or cheaper models: rerun `/setup-pstack` on Codex and Pi, or edit the shipped sheet on Claude Code. A role set to `auto` or `inherit-parent` runs on the parent session's model, which saves tokens when that model is cheaper. A shorter panel list runs fewer subagents, one for each entry. Save `/poteto-mode` for work that needs rigor.
 
@@ -65,11 +65,12 @@ The default answer is `/poteto-mode`, which runs most of the others when its ste
 | The user wants to | Skill |
 |---|---|
 | Do any non-trivial task with rigor | [`/poteto-mode`](../poteto-mode/SKILL.md) |
+| Check that the agent understood their goal and the problem before it starts | [`/in-your-own-words`](../in-your-own-words/SKILL.md) |
 | Know how code works now, or where new code should live | [`/how`](../how/SKILL.md) |
 | Know why code is shaped this way, or where a number came from | [`/why`](../why/SKILL.md) |
 | Understand a change or subsystem, explained plainly | [`/teach`](../teach/SKILL.md) |
 | Catch up on their own recent work on a topic | [`/recall`](../recall/SKILL.md) |
-| Catch up on everything in this chat since their last message, with enough context to decide each action item | [`/ketchup`](../ketchup/SKILL.md) |
+| Catch up on what changed in this chat since their last message, in a few plain sentences and small visuals, with enough context to decide each action item | [`/ketchup`](../ketchup/SKILL.md) |
 | Know what a small diff could break outside itself | [`/blast-radius`](../blast-radius/SKILL.md) |
 | Settle types and module shape before code that crosses a function boundary | [`/architect`](../architect/SKILL.md) |
 | Get several attempts at one brief, merged into the best one | [`/arena`](../arena/SKILL.md) |
@@ -136,7 +137,7 @@ Principles are one-rule skills that `/poteto-mode` reads and cites in its replie
 | A question got treated as the next step of the last task | Say "new task", or say the turn doesn't need the mode. |
 | A new model choice had no effect | The model sheet loads when a session starts. Start a new one. On Codex and Pi, sessions load the `AGENTS.md` block, so an edit to the sheet file alone waits for a `/setup-pstack` run. On Claude Code, the shipped `pstack-models.md` replaces `~/.claude/pstack-models.md`, so edit the shipped file and update the plugin. |
 | Runs cost more than expected | See the cost paragraph under Get set up. |
-| A skill didn't load on its own | A skill loads on its own only when the request matches its description, and on Claude Code and Pi `/correct`, `/ketchup`, and `/poteto-help` never do. Otherwise it loads when the user types it or when `/poteto-mode` runs it, and it doesn't run every skill. |
+| A skill didn't load on its own | A skill loads on its own only when the request matches its description, and on Claude Code and Pi `/correct`, `/in-your-own-words`, `/ketchup`, and `/poteto-help` never do. Otherwise it loads when the user types it or when `/poteto-mode` runs it, and it doesn't run every skill. |
 | Parallel agents overwrote each other | Give each writer its own worktree. |
 | An overnight run moved but finished nothing | `/loop` needs a check that can pass or fail, not a duration. See [guide page 7](https://github.com/cursor/plugins/blob/main/pstack/docs/guide/07-overnight.md). |
 | The reply claims success from a green build | Ask for the real command, flow, stored value, or profile. That's the prove-it-works principle. |

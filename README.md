@@ -119,6 +119,7 @@ That is the main workflow. The other skills are there when poteto-mode needs the
 | Skill | Use it when |
 | --- | --- |
 | `poteto-help` | You are new to pstack or unsure which skill fits. It answers your question and gives you a prompt to send. On Claude Code and Pi, it runs only when you type it. |
+| `in-your-own-words` | You want the agent to play back your goal and the problem before it starts. On Claude Code and Pi, it runs only when you type it. |
 | `how` | You want a clear explanation of how part of the system works. |
 | `why` | You want evidence for why the system was built that way. |
 | `architect` | A change crosses a function or module boundary and the design needs to be settled first. |
@@ -128,7 +129,7 @@ That is the main workflow. The other skills are there when poteto-mode needs the
 | `maintain-verification-skill` | The project's verification instructions no longer match the product. |
 | `babysit` | A pull request needs CI failures and review comments handled until it is ready. |
 | `reflect` | A hard task is finished and its lessons should improve the next run. |
-| `ketchup` | You want everything in this chat since your last message, in plain words, with an executive summary for each action item so you can make the call. On Claude Code and Pi, it runs only when you type it. |
+| `ketchup` | You want what changed in this chat since your last message, in a few plain sentences and small visuals, with just enough context on each action item to make the call. On Claude Code and Pi, it runs only when you type it. |
 
 Plugin skills include `pstack:` in their name. In Claude Code, invoke a native skill such as `/pstack:architect`. In Codex, ask for the skill, such as `Use pstack:architect for this design.` See the [technical reference](docs/reference.md) for the full list.
 
@@ -167,7 +168,7 @@ This repository also keeps:
 
 ## Staying close to Lauren's pstack
 
-Open Pstack 1.13.0 tracks pstack 0.15.20 at Cursor commit [`1b6d44ff26d4e242f4e8f68c391e6d2f7ca16def`](https://github.com/cursor/plugins/commit/1b6d44ff26d4e242f4e8f68c391e6d2f7ca16def).
+Open Pstack 1.14.0 tracks pstack 0.15.23 at Cursor commit [`c86f349b102feb91f1966f8a6a60882a4e601b50`](https://github.com/cursor/plugins/commit/c86f349b102feb91f1966f8a6a60882a4e601b50).
 
 The two projects have separate version numbers. The pstack version identifies Lauren's upstream content. The Open Pstack version identifies the Claude Code and Codex package built from it.
 

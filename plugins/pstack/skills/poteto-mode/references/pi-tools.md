@@ -13,7 +13,7 @@ pstack skills keep Claude Code tool language (`Skill`, `Agent`, `AskUserQuestion
 | Fetch a URL / search the web | The web tools the session has loaded; otherwise `bash` with `curl` |
 | Invoke a skill (the `Skill` tool, `/command`) | Read the named skill's `SKILL.md` from the catalog and follow it. The user invokes one with `/skill:<name>`. |
 | `paths` frontmatter scopes automatic loading | Claude Code only. On Pi, invoke `typescript-best-practices` by name. |
-| `disable-model-invocation: true` frontmatter makes a skill typed-only | Pi hides `correct`, `ketchup`, and `poteto-help` from the model. The user runs one with `/skill:<name>`. |
+| `disable-model-invocation: true` frontmatter makes a skill typed-only | Pi hides `correct`, `in-your-own-words`, `ketchup`, and `poteto-help` from the model. The user runs one with `/skill:<name>`. |
 | Dispatch subagents (the `Agent`/`Task` tool) | One `lody_session_create_many` call per fan-out phase; see Dispatch below |
 | Wait for subagent results | Lody delivers the batch result as one continuation; see Completion evidence below |
 | Track tasks (the todolist / `TodoWrite`) | Keep the checklist in the reply or in a working file. Pi has no todo tool. |
@@ -58,7 +58,7 @@ Pi under Lody has no permission or read-only mode, so the contract is the only g
 |---|---|
 | Writer lane (implementation, arena candidate, swarm writer) | The writer contract, then the task. |
 | Read-only lane (review, exploration, judgment) | The read-only contract, then the task. |
-| `poteto-agent` | `/skill:poteto-mode ` followed by the writer contract and the task. Pi expands the command into the skill body. |
+| `poteto-agent` | `/skill:poteto-mode ` followed by the writer contract, or the read-only contract for a read-only helper, then the task. Pi expands the command into the skill body. |
 | `comment-sicko` (the **no-comments** skill) | The read-only contract, then "Find the `no-comments` skill; read `../../agents/comment-sicko.md` relative to its SKILL.md in full and act as that agent; report findings only." |
 
 ## Completion evidence
