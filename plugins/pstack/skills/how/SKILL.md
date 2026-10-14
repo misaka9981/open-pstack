@@ -9,7 +9,7 @@ Explore the codebase to answer "how does X work?" questions. Produce architectur
 
 **Dispatch contract.** Resolve every configured role through [`provider-dispatch.md`](../poteto-mode/references/provider-dispatch.md). Values are provider-qualified descriptors; the parent chooses native versus external execution. On Codex or Pi, resolve remaining Claude tool names via [`codex-tools.md`](../poteto-mode/references/codex-tools.md) or [`pi-tools.md`](../poteto-mode/references/pi-tools.md).
 
-Every spawn is a `read-only` lane. Explorers use the `how explorer` line from the current harness's pstack model sheet (default `grok:grok-4.6@xhigh`), and every explainer uses the `how explainer` line (default `claude:opus@xhigh`). A native lane uses the parent subagent primitive; an external lane uses the launcher directly.
+Every spawn is a `read-only` lane. Explorers use the `how explorer` line from the current harness's pstack model sheet (default `grok:grok-4.6@xhigh`), and every explainer uses the `how explainer` line (default `claude:opus@xhigh`). A native lane uses the parent subagent primitive; an external lane uses the launcher directly. Pick each subagent's reasoning level for the job, per the Subagents section of the **poteto-mode** skill.
 
 ## 1. Assess complexity
 

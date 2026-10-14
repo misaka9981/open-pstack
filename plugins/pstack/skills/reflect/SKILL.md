@@ -23,7 +23,7 @@ Claude Code writes each main session as a flat `<id>.jsonl`, which this lists. S
 
 ## 2. Spawn three reviewers in parallel
 
-Start all three lanes in one fan-out phase through provider dispatch. Reviewers need MCP access to look up the tickets, chat threads, and observability traces the transcript references, so keep them native to the parent. The prompt forbids file writes; the parent applies edits.
+Start all three lanes in one fan-out phase through provider dispatch. Reviewers need MCP access to look up the tickets, chat threads, and observability traces the transcript references, so keep them native to the parent. The prompt forbids file writes; the parent applies edits. Pick each subagent's reasoning level for the job, per the Subagents section of the **poteto-mode** skill.
 
 | Lens | Model descriptor | Prompt template |
 |---|---|---|
