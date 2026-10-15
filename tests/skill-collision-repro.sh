@@ -355,7 +355,7 @@ else
   note "ok: excluded upstream skills stay absent"
 fi
 
-routed_model_skills=(how why unslop typescript-best-practices benchmark-checklist)
+routed_model_skills=(architect arena automate-me benchmark-checklist create-verification-skill figure-it-out how interrogate no-comments poteto-mode show-me-your-work swarm tdd technical-writing typescript-best-practices unslop why)
 routed_model_bad=""
 for name in "${routed_model_skills[@]}"; do
   routed_skill="$plugin/skills/$name/SKILL.md"
@@ -365,14 +365,14 @@ for name in "${routed_model_skills[@]}"; do
   fi
 done
 if [ -n "$routed_model_bad" ]; then
-  note "FAIL: skills routed by name must stay model-invocable:"
+  note "FAIL: skills routed by name or loaded by paths must stay model-invocable:"
   note "$routed_model_bad"
   fail=1
 else
   note "ok: routed skills stay model-invocable"
 fi
 
-user_only_skills=(correct in-your-own-words ketchup poteto-help sharpen)
+user_only_skills=(blast-radius bro correct in-your-own-words ketchup maintain-verification-skill poteto-help recall reflect sharpen teach)
 user_only_bad=""
 for name in "${user_only_skills[@]}"; do
   user_only_skill="$plugin/skills/$name/SKILL.md"

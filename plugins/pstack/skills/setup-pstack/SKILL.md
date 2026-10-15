@@ -142,3 +142,7 @@ Do not copy the model sheet between harnesses without rerunning the parent-speci
 Before declaring setup complete, run one small read-only mixed panel from this parent: every distinct descriptor in the written sheet, distinct output/receipt paths, and an independent cross-judge. Launch Claude-native agents and every external process in the background with retained handles, then drain them. On Pi, launch the panel as one `lody_session_create_many` call and verify each lane transcript. Verify the native transcript entries and every external receipt. A structural config check or unit test is not a substitute.
 
 Report the sheet path, parent route table, requested-effort probe results, smoke results, and external elapsed/token/cost receipts. Re-running this skill re-probes and updates the same sheet. Do not claim the provider exposed hidden applied-effort observability.
+
+### 12. Offer a verification skill (optional)
+
+Check whether the project has a way to drive the real app for proof (a `verify-*` skill, or an existing harness). If not, offer once: "want a project-local verification skill, so agents can drive the app the way a user does and prove changes work? I can generate one with create-verification-skill." On yes, run the **create-verification-skill** skill. On no, move on without pushing.

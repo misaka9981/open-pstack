@@ -68,8 +68,9 @@ command -v jq >/dev/null || echo "warn: jq not found; PR column will be empty" >
 command -v rg >/dev/null || echo "warn: rg not found; LAST_CHAT column will be empty and no row can bucket verify-recent-chat" >&2
 
 # Transcripts: ~/.claude/projects/<encoded-cwd>/<uuid>.jsonl, where <encoded-cwd> is a
-# session's cwd with every "/" turned into "-". A session run inside a worktree lives
-# under that worktree's own directory, so scan the whole projects tree, not one repo's.
+# session's absolute cwd with every character except ASCII letters, digits, and "-"
+# turned into "-". A session run inside a worktree lives under that worktree's own
+# directory, so scan the whole projects tree, not one repo's.
 transcripts="$HOME/.claude/projects"
 now=$(date +%s)
 

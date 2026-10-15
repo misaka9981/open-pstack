@@ -9,7 +9,7 @@ A guided flow for turning the user's working conventions into a skill agents wil
 
 This skill orchestrates three others: an inline mining pass (see step 1), the `plugin-dev:skill-development` skill (authoring), and the **unslop** skill (prose discipline). It sequences them. It doesn't replace them.
 
-**Platform note.** On Codex or another non-Claude runtime, the Claude tool names, `claude-*` slugs, and Claude built-in skills named below (including `plugin-dev:skill-development`) are Claude defaults. Resolve them via [`codex-tools.md`](../poteto-mode/references/codex-tools.md) or [`pi-tools.md`](../poteto-mode/references/pi-tools.md).
+**Platform note.** On Codex or another non-Claude runtime, the Claude tool names and Claude built-in skills named below (including `plugin-dev:skill-development`) are Claude defaults. Resolve them via [`codex-tools.md`](../poteto-mode/references/codex-tools.md) or [`pi-tools.md`](../poteto-mode/references/pi-tools.md).
 
 ## Flow
 
@@ -27,7 +27,7 @@ Update mode changes the rest of the flow:
 
 ### 1. Mine their history
 
-Locate the active workspace's transcripts before fanning out. Claude Code stores them at `~/.claude/projects/<encoded-cwd>/*.jsonl`, where `<encoded-cwd>` is the workspace's working directory with `/` → `-`. Use only that path. Don't glob across `~/.claude/projects/`. That crosses workspace boundaries and reads private chats from unrelated projects.
+Locate the active workspace's transcripts before fanning out. Claude Code stores them at `~/.claude/projects/<encoded-cwd>/*.jsonl`, where `<encoded-cwd>` is the absolute working directory with every character except ASCII letters, digits, and `-` turned into `-`. Use only that path. Don't glob across `~/.claude/projects/`. That crosses workspace boundaries and reads private chats from unrelated projects.
 
 Survey recent agent conversations within that scope for recurring patterns. Run multiple parallel subagents across slices of history (e.g. last 2-4 weeks, split into 3 slices so each has enough material). Pick each subagent's reasoning level for the job, per the Subagents section of the **poteto-mode** skill. Each slice mining subagent reads transcripts from the workspace-scoped path the parent provides, looks for the signals below, and returns a short structured list of patterns it saw with evidence pointers. Default signals worth hunting:
 
@@ -102,3 +102,4 @@ Run a description-optimization loop only if the skill's trigger accuracy turns o
 
 - User wants a task-specific skill (not working conventions): `plugin-dev:skill-development` alone, no mining required.
 - User wants to capture one narrow workflow (e.g. "how I write commit messages"). That's a regular skill, not a mode skill.
+
