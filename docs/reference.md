@@ -2,7 +2,7 @@
 
 This page contains the full skill, dependency, runtime, and porting reference. For the plain-English introduction and quick start, see the [main README](../README.md).
 
-[Poteto](https://x.com/poteto)'s [pstack](https://github.com/cursor/plugins/tree/main/pstack), adapted to run in Claude Code and Codex without Cursor. One shared skill tree serves both harnesses; Grok remains available as a model-provider lane. Version 1.16.0 is synced to Cursor pstack v0.15.24 at `1e5c90a4b6f249917bd21fe361b3a2a7deb741b8`. See [UPSTREAM.md](../UPSTREAM.md) for the exact sync contract.
+[Poteto](https://x.com/poteto)'s [pstack](https://github.com/cursor/plugins/tree/main/pstack), adapted to run in Claude Code and Codex without Cursor. One shared skill tree serves both harnesses; Grok remains available as a model-provider lane. Version 1.17.0 is synced to Cursor pstack v0.15.25 at `e5136d82418d2db3165ea1050d17577cd618cc05`. See [UPSTREAM.md](../UPSTREAM.md) for the exact sync contract.
 
 Original by Lauren Tan. This distribution builds on Michael Denyer's [pstack-claude](https://github.com/michael-denyer/pstack-claude) port and retains its history and MIT attribution. It imports one MIT-licensed skill, `deslop`, from [cursor-team-kit](https://github.com/cursor/plugins/tree/main/cursor-team-kit), because pstack routes to it.
 
@@ -199,7 +199,7 @@ The earlier port collapsed panels to Claude-only models. The bundled runner rest
 - The `poteto-agent` subagent ID and all references to it.
 - `run_in_background: true` on Agent calls (Claude Code supports it).
 - `/loop`, `/deslop`, `/babysit` slash references in skill bodies — they all resolve in Claude Code now.
-- The principle/playbook structure and upstream principle prose, except the local correctness edits in `principle-attack-the-premise` and `principle-test-behavior-not-implementation`.
+- The principle/playbook structure and upstream principle prose.
 
 ### What's deliberately not ported
 
