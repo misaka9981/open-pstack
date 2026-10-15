@@ -127,9 +127,9 @@ That is the main workflow. The other skills are there when poteto-mode needs the
 | `arena` | You want several complete attempts, followed by a comparison of their best parts. |
 | `interrogate` | You want different models to try to break a design or diff. |
 | `create-verification-skill` | Your project has no repeatable way for an agent to prove real behavior. |
-| `maintain-verification-skill` | The project's verification instructions no longer match the product. |
+| `maintain-verification-skill` | The project's verification instructions no longer match the product. On Claude Code and Pi, it runs only when you type it. |
 | `babysit` | A pull request needs CI failures and review comments handled until it is ready. |
-| `reflect` | A hard task is finished and its lessons should improve the next run. |
+| `reflect` | A hard task is finished and its lessons should improve the next run. On Claude Code and Pi, it runs only when you type it. |
 | `ketchup` | You want what changed in this chat since your last message, in a few plain sentences and small visuals, with just enough context on each action item to make the call. On Claude Code and Pi, it runs only when you type it. |
 
 Plugin skills include `pstack:` in their name. In Claude Code, invoke a native skill such as `/pstack:architect`. In Codex, ask for the skill, such as `Use pstack:architect for this design.` See the [technical reference](docs/reference.md) for the full list.

@@ -17,7 +17,20 @@ The table above is the current Cursor sync point. Open Pstack 1.17.0 imports Cur
 ## Upstream-only exclusions
 
 - Commits `799151d` and `6fecddb` add and relocate `make-bot-ui`. It builds a page whose buttons wake a Cursor-hosted Grok Bot. It depends on Cursor routines, webhook events, a secret-request card, and UI primitives that Claude Code, Codex, and Pi do not share.
-- Four `disable-model-invocation: true` lines from `73f8be4` are not applied to `how`, `why`, `unslop`, or `typescript-best-practices`. Poteto-mode invokes those skills by name, and the flag blocks that route on Claude Code. For the same reason, `benchmark-checklist` from `23e4138` ships without the flag. The new `principle-explain-the-number` leaf takes `user-invocable: false` like the other principle leaves.
+- Upstream marks every skill except `setup-pstack` with `disable-model-invocation: true`. On Claude Code that flag makes the Skill tool refuse a model call, so Open Pstack leaves it off only where something calls the skill by name from the model side. The `principle-*` leaves take `user-invocable: false` instead. These 17 skills ship without the flag, each for the reason given:
+  - `poteto-mode`: the SessionStart context tells the model to invoke it.
+  - `how` and `why`: poteto-mode's Investigation, Bug fix, and other playbooks, `architect`, `teach`, and the SessionStart context.
+  - `architect`: poteto-mode's trigger list, the Bug fix and Refactoring playbooks, `figure-it-out`, and the SessionStart context.
+  - `arena`: poteto-mode's trigger list and Feature step 4, `architect`, `figure-it-out`, `blast-radius`, and the SessionStart context.
+  - `interrogate`: poteto-mode's trigger list, Opening a PR, and the SessionStart context.
+  - `swarm`: poteto-mode's trigger list, the multi-phase plan, and Autopilot-full.
+  - `figure-it-out`: poteto-mode's Playbooks section and the Refactoring playbook.
+  - `show-me-your-work`: poteto-mode's trigger list, Autonomous run, Hillclimb, Autopilot-full, and `figure-it-out`.
+  - `no-comments`, `technical-writing`, `unslop`, and `benchmark-checklist`: poteto-mode's trigger list and the playbooks that run them.
+  - `tdd`: the Bug fix playbook and the SessionStart context.
+  - `create-verification-skill`: setup-pstack's last step.
+  - `automate-me`: Recall step 1 routes a request to capture habits to it.
+  - `typescript-best-practices`: no skill routes it. Its `paths` frontmatter loads it for `.ts` and `.tsx` files on Claude Code, and the Codex and Pi tool maps tell the agent to start it by name. The flag would block both.
 - The `23a56e2` Fable defaults for `bug-fix`, `perf-issue`, and `hillclimb` were never applied. `889ec4b` and `70b2dc8` superseded them with Grok, and Open Pstack now follows that default.
 - The Sol family runs `gpt-6.1-sol` instead of upstream's `gpt-5.6-sol` (`gpt-5.6-sol-max`). The maintainer chose the newer model, and it is the Codex model the magpie relay exposes to Pi (#21).
 - The Grok 4.7 slug from `70b2dc8` is not applied. The Grok route keeps `grok:grok-4.6` until a maintainer with the Grok CLI probes `grok-4.7` through the runner.

@@ -130,25 +130,25 @@ The table uses the short upstream names. Claude Code exposes each native skill w
 | `/arena` | run N parallel attempts at the same task and pick the best parts |
 | `/interrogate` | have four different models try to break a diff |
 | `/automate-me` | draft your own personal -mode skill from recent transcripts |
-| `/reflect` | capture a long task's lessons as a skill edit |
+| `/reflect` | capture a long task's lessons as a skill edit (user-invoked only on Claude Code and Pi) |
 | `/correct` | make a mistake agents keep repeating in this repo impossible, enforced by architecture, types, lint, or tests before docs (user-invoked only on Claude Code and Pi) |
 | `/tdd` | fix a bug by writing the failing test first, then the fix |
 | `/benchmark-checklist` | vet a benchmark, speedup, or regression you measured before you report or act on it |
 | `/typescript-best-practices` | ground type-system discipline in TypeScript syntax |
-| `/teach` | understand a change or subsystem for real: `how` + `why` woven into one plain explanation |
+| `/teach` | understand a change or subsystem for real: `how` + `why` woven into one plain explanation (user-invoked only on Claude Code and Pi) |
 | `/swarm` | fan out N parallel workers across slices or races, then one aggregated report |
 | `/technical-writing` | write docs, RFCs, readmes, PR descriptions, and commit messages to one layered standard |
-| `/bro` | restate the last message in plain human language, no jargon |
+| `/bro` | restate the last message in plain human language, no jargon (user-invoked only on Claude Code and Pi) |
 | `/figure-it-out` | design a rigorous, auditable playbook for a task no bundled playbook fits |
 | `/show-me-your-work` | log decisions to a reviewable tsv decision trail |
-| `/blast-radius` | find what a change could break beyond the diff and prove safety by running code |
-| `/recall` | catch up on recent working context from chat history, live state, and the shared record |
+| `/blast-radius` | find what a change could break beyond the diff and prove safety by running code (user-invoked only on Claude Code and Pi) |
+| `/recall` | catch up on recent working context from chat history, live state, and the shared record (user-invoked only on Claude Code and Pi) |
 | `/ketchup` | catch up on what changed in this chat since your last message, in a few plain sentences and small visuals (user-invoked only on Claude Code and Pi) |
 | `/setup-pstack` | configure pstack per-role model choices, reasoning budget, and per-family requested effort |
 | `/unslop` | clean up writing by removing AI tells |
 | `/no-comments` | strip comments before review via the `comment-sicko` subagent, then fix what it finds |
 | `/create-verification-skill` | generate a project-local verification skill and feature map |
-| `/maintain-verification-skill` | re-sync a drifted verification skill and its feature map |
+| `/maintain-verification-skill` | re-sync a drifted verification skill and its feature map (user-invoked only on Claude Code and Pi) |
 | `/deslop` | deslop a diff before commit |
 | `/babysit` | monitor an open PR, fix CI/comments, keep it merge-ready |
 
