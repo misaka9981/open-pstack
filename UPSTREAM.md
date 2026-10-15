@@ -8,11 +8,11 @@ open-pstack tracks [Cursor's pstack](https://github.com/cursor/plugins/tree/main
 | --- | --- |
 | Repository | `https://github.com/cursor/plugins.git` |
 | Path | `pstack/` |
-| Commit | `1e5c90a4b6f249917bd21fe361b3a2a7deb741b8` |
-| Upstream version | `0.15.24` |
-| open-pstack version | `1.16.0` |
+| Commit | `e5136d82418d2db3165ea1050d17577cd618cc05` |
+| Upstream version | `0.15.25` |
+| open-pstack version | `1.17.0` |
 
-The table above is the current Cursor sync point. Open Pstack 1.16.0 imports Cursor pstack 0.15.24. `README-UPSTREAM.md` preserves the upstream pstack README verbatim. `CHANGES.md` and `NOTICE.md` describe the adaptations and provenance.
+The table above is the current Cursor sync point. Open Pstack 1.17.0 imports Cursor pstack 0.15.25. `README-UPSTREAM.md` preserves the upstream pstack README verbatim. `CHANGES.md` and `NOTICE.md` describe the adaptations and provenance.
 
 ## Upstream-only exclusions
 
@@ -26,7 +26,6 @@ The table above is the current Cursor sync point. Open Pstack 1.16.0 imports Cur
 - The `70b2dc8` and `12d587d` lines that rerun a rejected model on its family default or the closest valid slug are not applied. They conflict with the no-fallback contract in `provider-dispatch.md`.
 - The `23e4138` built-in PR tool rule is not applied. Claude Code, Codex, and Pi have no built-in PR tool, so Opening a PR and the plan skeleton keep the resolved forge CLI. The `00b14f1` rewording of that paragraph is not applied either.
 - The `00b14f1` description cuts are not applied to `figure-it-out`, `principle-model-the-domain`, `principle-never-block-on-the-human`, or `principle-redesign-from-first-principles`. Upstream ships these four with `disable-model-invocation: true`, so the description does not trigger them there. Open Pstack keeps them model-invocable, so the description is their trigger and keeps its longer form. Their body cuts are applied.
-- The `00b14f1` distillation of `principle-test-behavior-not-implementation` and its poteto-mode index line is not applied. It distills the original rule that every test must fail when each import returns `undefined`. Open Pstack corrected that rule in 1.4.0 and keeps the correction.
 - The Agent Plugins v1 root manifest from `e5a02f8` (`pstack/plugin.json`) is not added. Codex 0.162.1 recognizes that format alongside `.codex-plugin/plugin.json`, and its precedence between the two is unverified. If the root file won, Codex would lose the SessionStart hook and the `interface` block that only `.codex-plugin/plugin.json` declares. Reopen this after a live Codex test with both manifests present.
 - The `b93e811` fallback in `poteto-agent.md` is not applied. With no path from its parent, upstream's agent searches `~/.cursor/plugins/` for `skills/poteto-mode/SKILL.md` and picks the copy whose `.cursor-plugin/plugin.json` has the highest version. That directory and manifest exist only in Cursor. The Claude agent preloads `pstack:poteto-mode` through its `skills` frontmatter, so it has the skill without a search. Upstream's note that the catalog hides poteto-mode is left out too, because Open Pstack's poteto-mode is model-invocable.
 - The Claude manifest does not take the logo field from `efa2a53` because Claude Code has no schema for it. The shared asset is exposed through the Codex manifest instead.
@@ -46,8 +45,8 @@ Fetch and inspect only commits that touched pstack after the recorded sync point
 
 ```shell
 git fetch cursor main
-git log --oneline 1e5c90a4b6f249917bd21fe361b3a2a7deb741b8..cursor/main -- pstack
-git diff --stat 1e5c90a4b6f249917bd21fe361b3a2a7deb741b8..cursor/main -- pstack
+git log --oneline e5136d82418d2db3165ea1050d17577cd618cc05..cursor/main -- pstack
+git diff --stat e5136d82418d2db3165ea1050d17577cd618cc05..cursor/main -- pstack
 ```
 
 No output means the tracked pstack tree has not changed. This comparison does not need a polling service or generated mirror branch.
