@@ -1,13 +1,13 @@
 ---
 name: no-comments
-description: "Spawn the comment-sicko subagent, fix accepted findings, and offer encodings for claimed constraints."
+description: "Spawn Comment Sicko, fix accepted findings, and offer encodings for claimed constraints."
 ---
 
 # No comments
 
-Spawn comment-sicko. Act on accepted findings.
+Spawn Comment Sicko. Act on accepted findings.
 
-Defer to comment-sicko's fresh perspective.
+Defer to Comment Sicko's fresh perspective.
 
 **Platform note.** On Codex or another non-Claude runtime, the `comment-sicko` subagent and the Claude tool names below are Claude defaults. Resolve them via [`codex-tools.md`](../poteto-mode/references/codex-tools.md) or [`pi-tools.md`](../poteto-mode/references/pi-tools.md).
 
