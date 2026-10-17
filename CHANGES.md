@@ -2,6 +2,14 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.19.0 syncs to Cursor pstack 182f2ce and cuts marginal sections from four skills
+
+Open Pstack 1.19.0 tracks Cursor pstack at `182f2ce414e83224915c190d2f63239c1608d0a5` (#71). It reviews two upstream commits after `e5136d8`. Cursor's manifests still say 0.15.25. The catalog stays at 55 skills.
+
+**Section cuts.** `99743e9` removes text that agents follow as well without it. Interrogate's lead-judgment reference drops its preamble, the section on why the step matters, and Verdict Calibration, and keeps the filtering principles. Swarm drops its opening summary, Phase A item 3, which set N, and the Phase C sentence about a compact result table. `principle-type-system-discipline` keeps the bullets on branded primitives, parsing at boundaries, and authoritative schemas, and its description drops "refuse to lie to the compiler". `principle-migrate-callers-then-delete-legacy-apis` keeps the test bullet and the conditions. The port takes this text. Swarm keeps its dispatch contract and its descriptor step, and the two principle leaves keep `user-invocable: false`.
+
+**Claude Code harness tree.** `182f2ce` installs upstream pstack in Claude Code from a generated copy under `harness/pstack/`. That copy adds an adapter, `docs/harness/claude-code.md`, which the model reads to map Cursor names at run time. Open Pstack already writes those names into the shared tree, so the port does not take the generated tree or the adapter. `UPSTREAM.md` records this exclusion. `README-UPSTREAM.md` takes the new README lines verbatim: the Claude Code install commands, the generator note, and the note that benny is Cursor-only.
+
 ## 1.18.0 removes undocumented drift from Cursor pstack 0.15.25
 
 Open Pstack 1.18.0 keeps the Cursor pstack 0.15.25 sync that 1.17.0 imported (#69). A three-way audit compared every port file with upstream `e5136d8`. Differences caused by a Cursor-only or Grok-specific primitive stay. Every other difference now matches upstream or is documented here, in `UPSTREAM.md`, or in the technical reference. The catalog stays at 55 skills.
