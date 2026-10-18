@@ -2,6 +2,18 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.20.0 syncs to Cursor pstack 019a6a2 and checks that every skill name is its folder
+
+Open Pstack 1.20.0 tracks Cursor pstack at `019a6a20592c10bf92869e5740368f578a9997fd` (#73). It reviews four upstream commits after `182f2ce`. Cursor's manifests still say 0.15.25. The catalog stays at 55 skills.
+
+**Type-guard brand.** `0317eb8` stops the branded-type example from building its brand with `as`, which the skill's own "No `as` casts" row forbids. `parseAgentId` now narrows through an `isAgentId` type guard and returns the input with no cast. The Branded types row in `typescript-best-practices` says a brand comes from a verifying type guard. The port takes this text.
+
+**Skill names match folders.** `a968159` makes upstream's harness generator fail when a skill's frontmatter `name` differs from its folder, and renames `make-bot-ui` and `poteto-mode`. Claude Code lists a skill by its `name`, so a display name such as `Poteto Mode` cannot run as a slash command. Open Pstack has no generator, so `tests/skill-collision-repro.sh` gains a static check with the same rule. The name must equal the folder and use lowercase words joined by single hyphens, at most 64 characters. Every Open Pstack skill already passes. `poteto-mode` already had the right name, and `make-bot-ui` is excluded.
+
+**Claude Code adapter gaps.** `1b80080` extends upstream's Claude Code adapter. It writes model choices to `~/.claude/rules/pstack-models.md`, adds a one-line skip rule for Cursor-only steps, and ships the guide and README in the generated tree. Open Pstack does not take the adapter, so none of this applies. `UPSTREAM.md` records why for each part.
+
+**Docs refresh.** `019a6a2` edits the upstream guide and README and adds `scripts/check-pstack-docs.mjs`, which checks them against the skill tree. `README-UPSTREAM.md` takes the new README text verbatim. The guide edits and the check have no local target, because Open Pstack does not ship the guide or the upstream README as skill content.
+
 ## 1.19.0 syncs to Cursor pstack 182f2ce and cuts marginal sections from four skills
 
 Open Pstack 1.19.0 tracks Cursor pstack at `182f2ce414e83224915c190d2f63239c1608d0a5` (#71). It reviews two upstream commits after `e5136d8`. Cursor's manifests still say 0.15.25. The catalog stays at 55 skills.
