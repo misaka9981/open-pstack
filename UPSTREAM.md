@@ -8,11 +8,11 @@ open-pstack tracks [Cursor's pstack](https://github.com/cursor/plugins/tree/main
 | --- | --- |
 | Repository | `https://github.com/cursor/plugins.git` |
 | Path | `pstack/` |
-| Commit | `182f2ce414e83224915c190d2f63239c1608d0a5` |
+| Commit | `019a6a20592c10bf92869e5740368f578a9997fd` |
 | Upstream version | `0.15.25` |
-| open-pstack version | `1.19.0` |
+| open-pstack version | `1.20.0` |
 
-The table above is the current Cursor sync point. Open Pstack 1.19.0 imports two commits that land after Cursor pstack 0.15.25. Cursor's manifests still say 0.15.25. `README-UPSTREAM.md` preserves the upstream pstack README verbatim. `CHANGES.md` and `NOTICE.md` describe the adaptations and provenance.
+The table above is the current Cursor sync point. Open Pstack 1.20.0 imports six commits that land after Cursor pstack 0.15.25. Cursor's manifests still say 0.15.25. `README-UPSTREAM.md` preserves the upstream pstack README verbatim. `CHANGES.md` and `NOTICE.md` describe the adaptations and provenance.
 
 ## Upstream-only exclusions
 
@@ -58,8 +58,8 @@ Fetch and inspect only commits that touched pstack after the recorded sync point
 
 ```shell
 git fetch cursor main
-git log --oneline 182f2ce414e83224915c190d2f63239c1608d0a5..cursor/main -- pstack
-git diff --stat 182f2ce414e83224915c190d2f63239c1608d0a5..cursor/main -- pstack
+git log --oneline 019a6a20592c10bf92869e5740368f578a9997fd..cursor/main -- pstack
+git diff --stat 019a6a20592c10bf92869e5740368f578a9997fd..cursor/main -- pstack
 ```
 
 No output means the tracked pstack tree has not changed. This comparison does not need a polling service or generated mirror branch.
