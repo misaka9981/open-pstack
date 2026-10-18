@@ -33,6 +33,25 @@ else
   note "ok: all principle-* leaves request user-hidden and remain model-readable"
 fi
 
+# Claude Code lists a skill by its frontmatter name, so a name that differs from the folder cannot be invoked as /pstack:<folder>.
+bad_skill_name=""
+for skill in "$repo"/plugins/pstack/skills/*/SKILL.md; do
+  folder="$(basename "$(dirname "$skill")")"
+  name="$(sed -n '2,/^---$/p' "$skill" | sed -n 's/^name:[[:space:]]*//p' | head -n1 | sed -E "s/^([\"'])(.*)\\1\$/\\2/; s/[[:space:]]+\$//")"
+  if [ "$name" != "$folder" ]; then
+    bad_skill_name="$bad_skill_name$skill (name \"$name\", folder $folder)"$'\n'
+  elif ! printf '%s\n' "$folder" | grep -Eq '^[a-z0-9]+(-[a-z0-9]+)*$' || [ "${#folder}" -gt 64 ]; then
+    bad_skill_name="$bad_skill_name$skill (not lowercase words joined by single hyphens, at most 64 characters)"$'\n'
+  fi
+done
+if [ -n "$bad_skill_name" ]; then
+  note "FAIL: every skill name must equal its folder name:"
+  note "$bad_skill_name"
+  fail=1
+else
+  note "ok: every skill name equals its folder name and fits the Agent Skills name rule"
+fi
+
 verof() { { grep -m1 '"version"' "$1" || true; } | sed -E 's/.*"version"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/'; }
 vc="$(verof "$repo/plugins/pstack/.claude-plugin/plugin.json")"
 vx="$(verof "$repo/plugins/pstack/.codex-plugin/plugin.json")"
