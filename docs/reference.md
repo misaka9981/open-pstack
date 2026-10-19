@@ -22,7 +22,7 @@ This repo ships as a Claude Code marketplace containing one plugin (`pstack`).
 /reload-plugins
 ```
 
-The plugin auto-fires through a `SessionStart` hook on startup, `/clear`, and post-compact. The hook injects a small mandate that routes non-trivial engineering work into `poteto-mode`; the full skill loads only when invoked. Dispatched subagents ignore the mandate, and explicit user instructions take precedence. To opt out, delete `hooks/hooks.json` from the installed copy at `~/.claude/plugins/cache/open-pstack/pstack/<version>/hooks/hooks.json`; a plugin update restores it.
+The plugin auto-fires through a `SessionStart` hook on startup, `/clear`, and post-compact. The hook injects a small mandate that routes non-trivial engineering work into `poteto-mode`; the full skill loads only when invoked. After a compaction in a session whose transcript shows poteto-mode was invoked, the hook also tells the model to invoke it again, because Claude Code can drop or truncate the skill text at compaction. Subagents that a subagent tool spawned ignore the mandate. A session that a person, the app, or another session started with a brief follows it. Explicit user instructions take precedence. To opt out, delete `hooks/hooks.json` from the installed copy at `~/.claude/plugins/cache/open-pstack/pstack/<version>/hooks/hooks.json`; a plugin update restores it.
 
 ### Codex
 

@@ -17,3 +17,16 @@ if [ "$harness" = claude ] && [ -f "$sheet" ]; then
 	cat "$sheet"
 	printf '</pstack-model-sheet>\n'
 fi
+# Claude Code restores invoked skills after compaction only from memory of the
+# current process, so a resumed session loses poteto-mode. The transcript on
+# disk still records the invocation.
+if [ "$harness" = claude ] && [ ! -t 0 ]; then
+	input="$(cat)"
+	source="$(printf '%s' "$input" | sed -n 's/.*"source" *: *"\([^"]*\)".*/\1/p')"
+	transcript="$(printf '%s' "$input" | sed -n 's/.*"transcript_path" *: *"\([^"]*\)".*/\1/p' | sed 's/\\\\/\\/g')"
+	if [ "$source" = compact ] && [ -f "$transcript" ] &&
+		grep -qF -e '"skill":"pstack:poteto-mode"' -e '<command-name>/pstack:poteto-mode</command-name>' "$transcript"; then
+		printf '\n<pstack-compaction>\n%s\n</pstack-compaction>\n' \
+			'This session ran poteto-mode before this compaction. Claude Code can drop or truncate that skill text at compaction. Invoke the `pstack:poteto-mode` skill with the Skill tool again before your next action. Then continue the playbook and the todo list from the summary.'
+	fi
+fi
