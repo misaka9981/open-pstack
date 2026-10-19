@@ -59,7 +59,7 @@ The marketplace install is the normal user path. Direct links are only for testi
 ├── plugins/pstack/                   # the plugin itself
 │   ├── .claude-plugin/plugin.json    # Claude Code manifest
 │   ├── .codex-plugin/plugin.json     # Codex manifest (skills: ./skills/)
-│   ├── skills/                       # 55 skills shared by Claude Code, Codex, and Pi
+│   ├── skills/                       # 57 skills shared by Claude Code, Codex, and Pi
 │   │   ├── poteto-mode/references/{codex-tools,pi-tools,provider-dispatch}.md  # tool + provider routing
 │   │   └── poteto-mode/scripts/      # bun/bash/node tooling: watch-pr, orch, runner, check-plan.mjs, worktree-audit.sh
 │   ├── hooks/                        # SessionStart auto-fire: injects the poteto-mode mandate (the model sheet only on Claude Code)
@@ -149,6 +149,8 @@ The table uses the short upstream names. Claude Code exposes each native skill w
 | `/no-comments` | strip comments before review via the `comment-sicko` subagent, then fix what it finds |
 | `/create-verification-skill` | generate a project-local verification skill and feature map |
 | `/maintain-verification-skill` | re-sync a drifted verification skill and its feature map (user-invoked only on Claude Code and Pi) |
+| `/create-formal-verification-skill` | formally verify one property that tests rarely reach and generate a project-local skill that rechecks it |
+| `/maintain-formal-verification-skill` | bring a formal verification back in line after the code it covers changed, and tell drift from bugs (user-invoked only on Claude Code and Pi) |
 | `/deslop` | deslop a diff before commit |
 | `/babysit` | monitor an open PR, fix CI/comments, keep it merge-ready |
 

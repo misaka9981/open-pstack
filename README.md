@@ -128,6 +128,8 @@ That is the main workflow. The other skills are there when poteto-mode needs the
 | `interrogate` | You want different models to try to break a design or diff. |
 | `create-verification-skill` | Your project has no repeatable way for an agent to prove real behavior. |
 | `maintain-verification-skill` | The project's verification instructions no longer match the product. On Claude Code and Pi, it runs only when you type it. |
+| `create-formal-verification-skill` | Tests rarely reach the case that breaks a race, retry, state machine, parser, or unsafe code. It verifies one property with a tool that fits and leaves a project skill that rechecks it. |
+| `maintain-formal-verification-skill` | Code that a formal verification covers changed since it was last checked. It brings the verification back in line and says whether each failure is drift or a bug. On Claude Code and Pi, it runs only when you type it. |
 | `babysit` | A pull request needs CI failures and review comments handled until it is ready. |
 | `reflect` | A hard task is finished and its lessons should improve the next run. On Claude Code and Pi, it runs only when you type it. |
 | `ketchup` | You want what changed in this chat since your last message, in plain words and small visuals, with every item waiting on you listed and decidable from the reply alone, even when that makes the reply long. On Claude Code and Pi, it runs only when you type it. |
