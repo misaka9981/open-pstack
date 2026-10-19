@@ -2,6 +2,22 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.21.0 syncs to Cursor pstack 0.15.28 and adds formal verification skills
+
+Open Pstack 1.21.0 tracks Cursor pstack 0.15.28 at `d457567332aa6989e753ea289f30ea2bfbc80bc0` (#75). It reviews ten upstream commits after `019a6a2`. Three of them, `0b8e952`, `0148b78`, and the manifest half of `d457567`, only bump Cursor's manifests, which are not shipped. The catalog grows from 55 to 57 skills.
+
+**Ketchup lists every waiting item.** `16541c6` and `bc14437` make each `/ketchup` call decidable from the reply alone. Each item that waits on the user gets its own bullet with its link, what it changes for users, the evidence behind the pick, its risk, and the pick. Items that share a call share one call line. The reply grows with the item count, and ketchup never cuts or shrinks items to stay under a word count. The rule against drawing status lists and action items moves into the Visuals section. The port takes this text and keeps its substitution of a Mermaid diagram or chart for Cursor's `/visualize`. The README, technical reference, and `poteto-help` ketchup rows now describe the new behavior, because the old "few plain sentences" wording is no longer true. `f9be7aa` adds a ketchup recipe line, and the port takes it.
+
+**Sharpen.** `75fabac` drops the sentence "Don't hand back a rewritten prompt." The port takes this text.
+
+**Formal verification skills.** `4382e68` and `6b78e9f` add `create-formal-verification-skill`. It finds the code where a bug costs the most and tests reach the least, verifies one property there with the tool the question needs, and leaves a project-local skill that rechecks it. TLA+ is the default for event-order questions in any language. When no verifier runs on the language, the agent says so and tests the real code with generated inputs. `7b353f7` has that skill record the covered code and a sync commit, and adds `maintain-formal-verification-skill`, which brings the verification back in line after the covered code changes and reports each check as in sync, updated, bug, or blocked. Both skill bodies name no Claude tool, Cursor path, or model, so the port takes them as written and adds no Platform note.
+
+**Invocation flags.** `f9be7aa` ends `/setup-pstack` with a one-time offer to run `create-formal-verification-skill`. It returns as setup step 13, after the verification-skill offer, and names the bundled skill the way step 12 does. Cursor's note on where the command resolves is left out, as it was for step 12. That call by name means `create-formal-verification-skill` drops upstream's `disable-model-invocation: true`, under the `UPSTREAM.md` rule. Nothing calls `maintain-formal-verification-skill` from the model side. `create-formal-verification-skill` and `poteto-help` only point the user at it, so it keeps upstream's flag, like `maintain-verification-skill`. The `UPSTREAM.md` flag list grows to 18 skills, and Claude Code and Pi now have 12 typed-only skills. The static invariant, the Codex and Pi tool maps, the `poteto-help` setup paragraph and troubleshooting row, the README and reference rows, and the `UPSTREAM.md` flag list name each new skill in its group.
+
+**Help.** `f9be7aa` and `7b353f7` add `poteto-help` rows for both skills, a state check that mentions them, and a recipe. The port takes these. The setup step says the two verification offers run on Codex and Pi, because `/setup-pstack` stops before them on Claude Code when the plugin ships its sheet. `f9be7aa` also rewrites the paragraph on other harnesses to install upstream pstack in Claude Code through the `cursor-plugins` marketplace and its adapter. Open Pstack has neither, so `poteto-help` keeps its paragraph on the three harnesses, and `UPSTREAM.md` records the exclusion.
+
+**Docs.** `README-UPSTREAM.md` takes the d457567 README text verbatim. The guide edits in `f9be7aa`, `7b353f7`, and `d457567` and the regenerated `harness/pstack/` copy in every commit of the range have no local target, as `UPSTREAM.md` records.
+
 ## 1.20.0 syncs to Cursor pstack 019a6a2 and checks that every skill name is its folder
 
 Open Pstack 1.20.0 tracks Cursor pstack at `019a6a20592c10bf92869e5740368f578a9997fd` (#73). It reviews four upstream commits after `182f2ce`. Cursor's manifests still say 0.15.25. The catalog stays at 55 skills.
