@@ -5,7 +5,7 @@ Before responding to any non-trivial engineering task — a feature, bug fix, re
 
 When the intent is already specific, enter directly: `pstack:tdd` (bug with a reproducible failure), `pstack:architect` (types and module shape before code that crosses a function boundary), `pstack:how` (how a subsystem works), `pstack:why` (why it was built this way), `pstack:arena` (N parallel attempts at one task), `pstack:interrogate` (multi-model diff review).
 
-If you were dispatched as a subagent to execute a specific task, ignore this block — poteto-mode governs the orchestrating session, and it already shaped your dispatch.
+If a subagent tool (Claude Code `Agent`, Codex `spawn_agent`) spawned you for a specific task, ignore this block. Poteto-mode governs the orchestrating session and already shaped your dispatch. A session that a person, the app, or another session started with a brief is not a subagent. The mandate applies to it even when the brief does not mention poteto-mode, and to any non-trivial task that arrives later.
 
 User instructions (CLAUDE.md, AGENTS.md, direct requests) take precedence over this mandate. Other session-start mandates (such as superpowers) compose with it: their skill-check discipline stands, and poteto-mode is the implementation entry point they route to for non-trivial code work.
 </EXTREMELY_IMPORTANT>
