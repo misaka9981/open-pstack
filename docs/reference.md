@@ -2,7 +2,7 @@
 
 This page contains the full skill, dependency, runtime, and porting reference. For the plain-English introduction and quick start, see the [main README](../README.md).
 
-[Poteto](https://x.com/poteto)'s [pstack](https://github.com/cursor/plugins/tree/main/pstack), adapted to run in Claude Code and Codex without Cursor. One shared skill tree serves both harnesses; Grok remains available as a model-provider lane. Version 1.21.0 is synced to Cursor pstack v0.15.28 at `d457567332aa6989e753ea289f30ea2bfbc80bc0`. See [UPSTREAM.md](../UPSTREAM.md) for the exact sync contract.
+[Poteto](https://x.com/poteto)'s [pstack](https://github.com/cursor/plugins/tree/main/pstack), adapted to run in Claude Code and Codex without Cursor. One shared skill tree serves both harnesses; Grok remains available as a model-provider lane. Version 1.22.0 is synced to Cursor pstack v0.15.30 at `4ec7ffa173eaa70d3d9467a627baf0954645a353`. See [UPSTREAM.md](../UPSTREAM.md) for the exact sync contract.
 
 Original by Lauren Tan. This distribution builds on Michael Denyer's [pstack-claude](https://github.com/michael-denyer/pstack-claude) port and retains its history and MIT attribution. It imports one MIT-licensed skill, `deslop`, from [cursor-team-kit](https://github.com/cursor/plugins/tree/main/cursor-team-kit), because pstack routes to it.
 
@@ -59,7 +59,7 @@ The marketplace install is the normal user path. Direct links are only for testi
 ├── plugins/pstack/                   # the plugin itself
 │   ├── .claude-plugin/plugin.json    # Claude Code manifest
 │   ├── .codex-plugin/plugin.json     # Codex manifest (skills: ./skills/)
-│   ├── skills/                       # 57 skills shared by Claude Code, Codex, and Pi
+│   ├── skills/                       # 58 skills shared by Claude Code, Codex, and Pi
 │   │   ├── poteto-mode/references/{codex-tools,pi-tools,provider-dispatch}.md  # tool + provider routing
 │   │   └── poteto-mode/scripts/      # bun/bash/node tooling: watch-pr, orch, runner, check-plan.mjs, worktree-audit.sh
 │   ├── hooks/                        # SessionStart auto-fire: injects the poteto-mode mandate (the model sheet only on Claude Code)
@@ -123,7 +123,7 @@ The table uses the short upstream names. Claude Code exposes each native skill w
 | `/poteto-mode` | default entry point for any non-trivial task |
 | `/poteto-help` | learn how to set up and use pstack, or find which skill, playbook, or principle fits a task (user-invoked only on Claude Code and Pi) |
 | `/in-your-own-words` | have the agent play back your goal and the problem before it starts (user-invoked only on Claude Code and Pi) |
-| `/sharpen` | approach a task the way a top expert would, aimed at what you are really after, without overspecifying it or deciding your choices (user-invoked only on Claude Code and Pi) |
+| `/sharpen` | rewrite a prompt to be deeper, not bigger, with what a top professional would add and an outside check, and hand it back without doing the task (user-invoked only on Claude Code and Pi) |
 | `/how` | walk through how a subsystem works |
 | `/why` | investigate why something was built this way (parallel multi-MCP evidence) |
 | `/architect` | settle types and module shape before writing code that crosses a function boundary |
@@ -151,6 +151,7 @@ The table uses the short upstream names. Claude Code exposes each native skill w
 | `/maintain-verification-skill` | re-sync a drifted verification skill and its feature map (user-invoked only on Claude Code and Pi) |
 | `/create-formal-verification-skill` | formally verify one property that tests rarely reach and generate a project-local skill that rechecks it |
 | `/maintain-formal-verification-skill` | bring a formal verification back in line after the code it covers changed, and tell drift from bugs (user-invoked only on Claude Code and Pi) |
+| `/statechart` | draw what the user sees as a Mermaid statechart checked against a TLA+ model, with each bug drawn as a numbered path, or turn an agreed chart into a TLA+ skeleton (user-invoked only on Claude Code and Pi) |
 | `/deslop` | deslop a diff before commit |
 | `/babysit` | monitor an open PR, fix CI/comments, keep it merge-ready |
 

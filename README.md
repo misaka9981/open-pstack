@@ -120,7 +120,7 @@ That is the main workflow. The other skills are there when poteto-mode needs the
 | --- | --- |
 | `poteto-help` | You are new to pstack or unsure which skill fits. It answers your question and gives you a prompt to send. On Claude Code and Pi, it runs only when you type it. |
 | `in-your-own-words` | You want the agent to play back your goal and the problem before it starts. On Claude Code and Pi, it runs only when you type it. |
-| `sharpen` | You want a task approached the way a top expert would, aimed at what you are really after, without overspecifying it or deciding your choices for you. On Claude Code and Pi, it runs only when you type it. |
+| `sharpen` | You want a prompt made deeper, not bigger, before you send it. It adds what a top professional would do that you did not ask for, the raw material and methods they would use, and an outside check that the result is right. It hands back the rewritten prompt, leaves your choices open, and does not do the task. On Claude Code and Pi, it runs only when you type it. |
 | `how` | You want a clear explanation of how part of the system works. |
 | `why` | You want evidence for why the system was built that way. |
 | `architect` | A change crosses a function or module boundary and the design needs to be settled first. |
@@ -130,6 +130,7 @@ That is the main workflow. The other skills are there when poteto-mode needs the
 | `maintain-verification-skill` | The project's verification instructions no longer match the product. On Claude Code and Pi, it runs only when you type it. |
 | `create-formal-verification-skill` | Tests rarely reach the case that breaks a race, retry, state machine, parser, or unsafe code. It verifies one property with a tool that fits and leaves a project skill that rechecks it. |
 | `maintain-formal-verification-skill` | Code that a formal verification covers changed since it was last checked. It brings the verification back in line and says whether each failure is drift or a bug. On Claude Code and Pi, it runs only when you type it. |
+| `statechart` | Someone who owns the behavior needs to see it, not read a spec. It draws what the user sees as a Mermaid statechart generated from a TLA+ model, marks each state as working, still wrong, or fixed by your open pull request, and draws each bug that TLC finds as a numbered path. It also turns an agreed chart into a TLA+ skeleton. On Claude Code and Pi, it runs only when you type it. |
 | `babysit` | A pull request needs CI failures and review comments handled until it is ready. |
 | `reflect` | A hard task is finished and its lessons should improve the next run. On Claude Code and Pi, it runs only when you type it. |
 | `ketchup` | You want what changed in this chat since your last message, in plain words and small visuals, with every item waiting on you listed and decidable from the reply alone, even when that makes the reply long. On Claude Code and Pi, it runs only when you type it. |
@@ -171,7 +172,7 @@ This repository also keeps:
 
 ## Staying close to Lauren's pstack
 
-Open Pstack 1.21.0 tracks pstack 0.15.28 at Cursor commit [`d457567332aa6989e753ea289f30ea2bfbc80bc0`](https://github.com/cursor/plugins/commit/d457567332aa6989e753ea289f30ea2bfbc80bc0).
+Open Pstack 1.22.0 tracks pstack 0.15.30 at Cursor commit [`4ec7ffa173eaa70d3d9467a627baf0954645a353`](https://github.com/cursor/plugins/commit/4ec7ffa173eaa70d3d9467a627baf0954645a353).
 
 The two projects have separate version numbers. The pstack version identifies Lauren's upstream content. The Open Pstack version identifies the Claude Code and Codex package built from it.
 
