@@ -2,7 +2,7 @@
 
 This page contains the full skill, dependency, runtime, and porting reference. For the plain-English introduction and quick start, see the [main README](../README.md).
 
-[Poteto](https://x.com/poteto)'s [pstack](https://github.com/cursor/plugins/tree/main/pstack), adapted to run in Claude Code and Codex without Cursor. One shared skill tree serves both harnesses; Grok remains available as a model-provider lane. Version 1.21.0 is synced to Cursor pstack v0.15.28 at `d457567332aa6989e753ea289f30ea2bfbc80bc0`. See [UPSTREAM.md](../UPSTREAM.md) for the exact sync contract.
+[Poteto](https://x.com/poteto)'s [pstack](https://github.com/cursor/plugins/tree/main/pstack), adapted to run in Claude Code and Codex without Cursor. One shared skill tree serves both harnesses; Grok remains available as a model-provider lane. Version 1.22.0 is synced to Cursor pstack v0.15.30 at `4ec7ffa173eaa70d3d9467a627baf0954645a353`. See [UPSTREAM.md](../UPSTREAM.md) for the exact sync contract.
 
 Original by Lauren Tan. This distribution builds on Michael Denyer's [pstack-claude](https://github.com/michael-denyer/pstack-claude) port and retains its history and MIT attribution. It imports one MIT-licensed skill, `deslop`, from [cursor-team-kit](https://github.com/cursor/plugins/tree/main/cursor-team-kit), because pstack routes to it.
 
@@ -59,7 +59,7 @@ The marketplace install is the normal user path. Direct links are only for testi
 ├── plugins/pstack/                   # the plugin itself
 │   ├── .claude-plugin/plugin.json    # Claude Code manifest
 │   ├── .codex-plugin/plugin.json     # Codex manifest (skills: ./skills/)
-│   ├── skills/                       # 57 skills shared by Claude Code, Codex, and Pi
+│   ├── skills/                       # 58 skills shared by Claude Code, Codex, and Pi
 │   │   ├── poteto-mode/references/{codex-tools,pi-tools,provider-dispatch}.md  # tool + provider routing
 │   │   └── poteto-mode/scripts/      # bun/bash/node tooling: watch-pr, orch, runner, check-plan.mjs, worktree-audit.sh
 │   ├── hooks/                        # SessionStart auto-fire: injects the poteto-mode mandate (the model sheet only on Claude Code)

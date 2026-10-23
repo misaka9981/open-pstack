@@ -8,11 +8,11 @@ open-pstack tracks [Cursor's pstack](https://github.com/cursor/plugins/tree/main
 | --- | --- |
 | Repository | `https://github.com/cursor/plugins.git` |
 | Path | `pstack/` |
-| Commit | `d457567332aa6989e753ea289f30ea2bfbc80bc0` |
-| Upstream version | `0.15.28` |
-| open-pstack version | `1.21.0` |
+| Commit | `4ec7ffa173eaa70d3d9467a627baf0954645a353` |
+| Upstream version | `0.15.30` |
+| open-pstack version | `1.22.0` |
 
-The table above is the current Cursor sync point. Open Pstack 1.21.0 imports ten commits after `019a6a2`, through Cursor pstack 0.15.28. `README-UPSTREAM.md` preserves the upstream pstack README verbatim. `CHANGES.md` and `NOTICE.md` describe the adaptations and provenance.
+The table above is the current Cursor sync point. Open Pstack 1.22.0 imports four commits after `d457567`, through Cursor pstack 0.15.30. The `eb4db2b` step that runs the skill script tests is adapted, not excluded. It runs from `.github/workflows/ci.yml` against `plugins/pstack/skills/`, because the port has no `validate-plugins.yml`. `README-UPSTREAM.md` preserves the upstream pstack README verbatim. `CHANGES.md` and `NOTICE.md` describe the adaptations and provenance.
 
 ## Upstream-only exclusions
 
@@ -60,8 +60,8 @@ Fetch and inspect only commits that touched pstack after the recorded sync point
 
 ```shell
 git fetch cursor main
-git log --oneline d457567332aa6989e753ea289f30ea2bfbc80bc0..cursor/main -- pstack
-git diff --stat d457567332aa6989e753ea289f30ea2bfbc80bc0..cursor/main -- pstack
+git log --oneline 4ec7ffa173eaa70d3d9467a627baf0954645a353..cursor/main -- pstack
+git diff --stat 4ec7ffa173eaa70d3d9467a627baf0954645a353..cursor/main -- pstack
 ```
 
 No output means the tracked pstack tree has not changed. This comparison does not need a polling service or generated mirror branch.

@@ -2,6 +2,22 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.22.0 syncs to Cursor pstack 0.15.30 and adds the statechart skill
+
+Open Pstack 1.22.0 tracks Cursor pstack 0.15.30 at `4ec7ffa173eaa70d3d9467a627baf0954645a353` (#79). It reviews four upstream commits after `d457567`. The manifest halves of `88d4751` and `eb4db2b` only bump Cursor's manifests, which are not shipped. The catalog grows from 57 to 58 skills.
+
+**Sharpen.** `88d4751` restores the prompt that `/sharpen` started with. It asks what a top professional would do that the user did not ask for, the rawest material they would start from, their methods and tools, and what outside check would show the result is right. Then it rewrites the user's prompt to ask for that, and it no longer does the task. The port takes this text. The README, technical reference, and `poteto-help` sharpen rows now describe the new behavior, because the old rows said sharpen approaches the task itself. The recipe line now takes the prompt the user is about to send.
+
+**Statechart.** `eb4db2b` adds `statechart`. It draws what an app's user sees as a Mermaid statechart generated from a TLA+ model, so a PM can judge the behavior without reading the spec. Each state shows whether it works, is still wrong, or is fixed by an open change, and each bug TLC finds is a numbered path. It also turns an agreed chart into a TLA+ skeleton and audits code against an existing spec. `7698375` brings in six fixes, and `4ec7ffa` deletes comments that repeat the code and renames helpers. The scripts use only Node built-ins and name no Cursor path, tool, or model, so the port takes the skill tree byte for byte and adds no Platform note.
+
+**Invocation flags.** Nothing calls `statechart` from the model side. `poteto-help` only points the user at it, so it keeps upstream's `disable-model-invocation: true`. The `UPSTREAM.md` flag list stays at 18 skills, and Claude Code and Pi now have 13 typed-only skills. The static invariant, the Codex and Pi tool maps, the `poteto-help` setup paragraph and troubleshooting row, and the README and reference rows name it in its group.
+
+**CI.** `eb4db2b` runs the skill script tests with `node --test` in Cursor's `validate-plugins.yml`. The port runs the same glob from `.github/workflows/ci.yml` against `plugins/pstack/skills/`. Neither workflow installs TLC, so the TLC tests skip and the rest run.
+
+**Help.** `88d4751` rewrites the `poteto-help` sharpen row and recipe, and `eb4db2b` adds a statechart row. The port takes these.
+
+**Docs.** `README-UPSTREAM.md` takes the 4ec7ffa README text verbatim. The guide edits in `88d4751` and `eb4db2b` and the regenerated `harness/pstack/` copy in every commit of the range have no local target, as `UPSTREAM.md` records.
+
 ## 1.21.0 syncs to Cursor pstack 0.15.28 and adds formal verification skills
 
 Open Pstack 1.21.0 tracks Cursor pstack 0.15.28 at `d457567332aa6989e753ea289f30ea2bfbc80bc0` (#75). It reviews ten upstream commits after `019a6a2`. Three of them, `0b8e952`, `0148b78`, and the manifest half of `d457567`, only bump Cursor's manifests, which are not shipped. The catalog grows from 55 to 57 skills.
