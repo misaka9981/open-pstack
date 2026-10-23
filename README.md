@@ -120,7 +120,7 @@ That is the main workflow. The other skills are there when poteto-mode needs the
 | --- | --- |
 | `poteto-help` | You are new to pstack or unsure which skill fits. It answers your question and gives you a prompt to send. On Claude Code and Pi, it runs only when you type it. |
 | `in-your-own-words` | You want the agent to play back your goal and the problem before it starts. On Claude Code and Pi, it runs only when you type it. |
-| `sharpen` | You want a task approached the way a top expert would, aimed at what you are really after, without overspecifying it or deciding your choices for you. On Claude Code and Pi, it runs only when you type it. |
+| `sharpen` | You want a prompt made deeper, not bigger, before you send it. It adds what a top professional would do that you did not ask for, the raw material and methods they would use, and an outside check that the result is right. It hands back the rewritten prompt, leaves your choices open, and does not do the task. On Claude Code and Pi, it runs only when you type it. |
 | `how` | You want a clear explanation of how part of the system works. |
 | `why` | You want evidence for why the system was built that way. |
 | `architect` | A change crosses a function or module boundary and the design needs to be settled first. |
