@@ -44,6 +44,8 @@ Run these commands inside Claude Code:
 /reload-plugins
 ```
 
+Claude Code leaves auto-update off for third-party marketplaces, so pstack stays on the version you installed. To turn it on, run `/plugin`, open the **Marketplaces** tab, select `open-pstack`, and choose **Enable auto-update**. To update once by hand, run `claude plugin update pstack@open-pstack` in a terminal, then restart Claude Code.
+
 ### Codex
 
 Run these commands in your shell:
