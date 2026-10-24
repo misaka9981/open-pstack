@@ -151,7 +151,7 @@ The table uses the short upstream names. Claude Code exposes each native skill w
 | `/maintain-verification-skill` | re-sync a drifted verification skill and its feature map (user-invoked only on Claude Code and Pi) |
 | `/create-formal-verification-skill` | formally verify one property that tests rarely reach and generate a project-local skill that rechecks it |
 | `/maintain-formal-verification-skill` | bring a formal verification back in line after the code it covers changed, and tell drift from bugs (user-invoked only on Claude Code and Pi) |
-| `/statechart` | draw what the user sees as a Mermaid statechart checked against a TLA+ model, with each bug drawn as a numbered path, or turn an agreed chart into a TLA+ skeleton (user-invoked only on Claude Code and Pi) |
+| `/statechart` | draw how a product flow, protocol, or service moves between states as a Mermaid statechart checked against a TLA+ model, with each bug drawn as a numbered path, or turn an agreed chart into a TLA+ skeleton |
 | `/deslop` | deslop a diff before commit |
 | `/babysit` | monitor an open PR, fix CI/comments, keep it merge-ready |
 

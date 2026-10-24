@@ -374,7 +374,7 @@ else
   note "ok: excluded upstream skills stay absent"
 fi
 
-routed_model_skills=(architect arena automate-me benchmark-checklist create-formal-verification-skill create-verification-skill figure-it-out how interrogate no-comments poteto-mode show-me-your-work swarm tdd technical-writing typescript-best-practices unslop why)
+routed_model_skills=(architect arena automate-me benchmark-checklist create-formal-verification-skill create-verification-skill figure-it-out how interrogate no-comments poteto-mode show-me-your-work statechart swarm tdd technical-writing typescript-best-practices unslop why)
 routed_model_bad=""
 for name in "${routed_model_skills[@]}"; do
   routed_skill="$plugin/skills/$name/SKILL.md"
@@ -391,7 +391,7 @@ else
   note "ok: routed skills stay model-invocable"
 fi
 
-user_only_skills=(blast-radius bro correct in-your-own-words ketchup maintain-formal-verification-skill maintain-verification-skill poteto-help recall reflect sharpen statechart teach)
+user_only_skills=(blast-radius bro correct in-your-own-words ketchup maintain-formal-verification-skill maintain-verification-skill poteto-help recall reflect sharpen teach)
 user_only_bad=""
 for name in "${user_only_skills[@]}"; do
   user_only_skill="$plugin/skills/$name/SKILL.md"
