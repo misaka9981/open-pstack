@@ -44,6 +44,8 @@ Run these commands inside Claude Code:
 /reload-plugins
 ```
 
+Claude Code leaves auto-update off for third-party marketplaces, so pstack stays on the version you installed. To turn it on, run `/plugin`, open the **Marketplaces** tab, select `open-pstack`, and choose **Enable auto-update**. To update once by hand, run `claude plugin update pstack@open-pstack` in a terminal, then restart Claude Code.
+
 ### Codex
 
 Run these commands in your shell:
@@ -130,10 +132,11 @@ That is the main workflow. The other skills are there when poteto-mode needs the
 | `maintain-verification-skill` | The project's verification instructions no longer match the product. On Claude Code and Pi, it runs only when you type it. |
 | `create-formal-verification-skill` | Tests rarely reach the case that breaks a race, retry, state machine, parser, or unsafe code. It verifies one property with a tool that fits and leaves a project skill that rechecks it. |
 | `maintain-formal-verification-skill` | Code that a formal verification covers changed since it was last checked. It brings the verification back in line and says whether each failure is drift or a bug. On Claude Code and Pi, it runs only when you type it. |
-| `statechart` | Someone who owns the behavior needs to see it, not read a spec. It draws what the user sees as a Mermaid statechart generated from a TLA+ model, marks each state as working, still wrong, or fixed by your open pull request, and draws each bug that TLC finds as a numbered path. It also turns an agreed chart into a TLA+ skeleton. On Claude Code and Pi, it runs only when you type it. |
+| `statechart` | Someone who owns the behavior needs to see it, not read a spec. It draws how a system moves between states, such as a product flow, a protocol, or a service, as a Mermaid statechart generated from a TLA+ model. Each bug that TLC finds is a numbered path to a state that breaks a rule, and the chart can show which bugs a proposed fix removes. It also turns an agreed chart into a TLA+ skeleton. |
 | `babysit` | A pull request needs CI failures and review comments handled until it is ready. |
 | `reflect` | A hard task is finished and its lessons should improve the next run. On Claude Code and Pi, it runs only when you type it. |
 | `ketchup` | You want what changed in this chat since your last message, in plain words and small visuals, with every item waiting on you listed and decidable from the reply alone, even when that makes the reply long. On Claude Code and Pi, it runs only when you type it. |
+| `ketchup-video` | You want the `ketchup` catch-up as a short silent video of slides, with the calls waiting on you as text under it. On Claude Code and Pi, it runs only when you type it. |
 
 Plugin skills include `pstack:` in their name. In Claude Code, invoke a native skill such as `/pstack:architect`. In Codex, ask for the skill, such as `Use pstack:architect for this design.` See the [technical reference](docs/reference.md) for the full list.
 
@@ -172,7 +175,7 @@ This repository also keeps:
 
 ## Staying close to Lauren's pstack
 
-Open Pstack 1.22.0 tracks pstack 0.15.30 at Cursor commit [`4ec7ffa173eaa70d3d9467a627baf0954645a353`](https://github.com/cursor/plugins/commit/4ec7ffa173eaa70d3d9467a627baf0954645a353).
+Open Pstack 1.23.0 tracks pstack 0.15.32 at Cursor commit [`e73df471cd4bd918367e99f3dd9c51bd53ddf5f0`](https://github.com/cursor/plugins/commit/e73df471cd4bd918367e99f3dd9c51bd53ddf5f0).
 
 The two projects have separate version numbers. The pstack version identifies Lauren's upstream content. The Open Pstack version identifies the Claude Code and Codex package built from it.
 

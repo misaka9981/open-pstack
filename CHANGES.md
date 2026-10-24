@@ -2,6 +2,26 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.23.0 syncs to Cursor pstack 0.15.32 and adds the ketchup-video skill
+
+Open Pstack 1.23.0 tracks Cursor pstack 0.15.32 at `e73df471cd4bd918367e99f3dd9c51bd53ddf5f0` (#81). It reviews thirteen upstream commits after `4ec7ffa`. Two of them, `642289e` and `b1a1298`, only bump Cursor's manifests, which are not shipped. The catalog grows from 58 to 59 skills.
+
+**Statechart.** `076f4b2` widens `statechart` from what an app's user sees to how any system moves between states, such as a product flow, a protocol, or a service. The reader can be a PM, an engineer, or a reviewer. Each bug is a numbered path to a state that breaks a rule. Charts render with the Pele and resvg renderer, which the first PNG render installs with npm into the user cache folder. The first TLC run installs TLC and Java with mise, about 305 MB. The bundled OutputFolder example model is gone. The scripts still name no Cursor path, tool, or model, so the port takes the skill tree byte for byte. The README, technical reference, and `poteto-help` statechart rows now describe any system, because the old rows said it draws only what the user sees. Upstream did not change its `poteto-help` row, so that row now differs from the upstream text. The technical reference lists mise, npm, and the network as statechart dependencies.
+
+**Formal verification.** `00d5dec` has a generated formal verification skill tell the next agent to read each TLA+ result with `/statechart`. The port takes this paragraph verbatim.
+
+**Invocation flags.** That paragraph calls `statechart` by name from the model side. Under the `UPSTREAM.md` rule, `statechart` now drops upstream's `disable-model-invocation: true`, and the flag list grows to 19 skills. Nothing calls `ketchup-video` by name from the model side, so it keeps upstream's flag. Claude Code and Pi still have 13 typed-only skills. The static invariant moves `statechart` to the routed list and adds `ketchup-video` to the user-only list. The Codex and Pi tool maps, the `poteto-help` setup paragraph and troubleshooting row, and the README and reference rows follow.
+
+**Ketchup video.** `3c0fdb4` adds `ketchup-video`. It catches the user up like `/ketchup`, but it shows what happened as a short silent video of slides. The waiting calls stay as text under the video. Upstream's reply always embeds the video. Claude Code, Codex, and Pi chats cannot always show a video, so the port embeds it where the chat can and otherwise links the rendered file. The rest of the skill is the upstream text. `poteto-help` takes upstream's routing row.
+
+**Reflect.** `7054003` keeps `/reflect` from editing a skill in the plugin cache. Before approval, it shows where the edited copy will go. After approval, it copies the skill folder there and edits the copy. It never opens a PR or pushes. The port takes the Claude Code paths from the path table: `~/.claude/plugins/cache/`, `.claude/skills/<skill>/`, and `~/.claude/skills/<skill>/`.
+
+**Swarm.** `e73df47` numbers Phase A from 1 to 4 and has Phase D ask for a result table. The port's Phase B names no step number, so only the list and Phase D change.
+
+**Scripts.** `86c2448` makes `check-plan.mjs` strip an inline code span only at a closing delimiter of the same length. Prose after a multi-backtick span is still checked. The port's test file has diverged from upstream, so the two new cases follow the local test style. `f83fbe6` picks GNU or BSD `stat` and `date` flags once in `worktree-audit.sh`. `3c596e7` prefers an active PR over branch history in `orch`. `fe096ef` caps `watch-pr` polling sleeps at the deadline. `96dec8e` tells fork heads apart during `watch-pr` stack discovery. The `orch` and `watch-pr` files matched upstream, so the port takes them as written.
+
+**Docs.** `a0b0ad9` notes that Claude Code leaves auto-update off for third-party marketplaces. `README-UPSTREAM.md` takes the e73df47 README text verbatim. The Open Pstack README adds the same note for the `open-pstack` marketplace, with `claude plugin update pstack@open-pstack` for a one-time update. The guide edit in `3c0fdb4` and the regenerated `harness/pstack/` copy in every commit of the range have no local target, as `UPSTREAM.md` records.
+
 ## 1.22.0 syncs to Cursor pstack 0.15.30 and adds the statechart skill
 
 Open Pstack 1.22.0 tracks Cursor pstack 0.15.30 at `4ec7ffa173eaa70d3d9467a627baf0954645a353` (#79). It reviews four upstream commits after `d457567`. The manifest halves of `88d4751` and `eb4db2b` only bump Cursor's manifests, which are not shipped. The catalog grows from 57 to 58 skills.

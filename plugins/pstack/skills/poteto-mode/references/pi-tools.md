@@ -13,7 +13,7 @@ pstack skills keep Claude Code tool language (`Skill`, `Agent`, `AskUserQuestion
 | Fetch a URL / search the web | The web tools the session has loaded; otherwise `bash` with `curl` |
 | Invoke a skill (the `Skill` tool, `/command`) | Read the named skill's `SKILL.md` from the catalog and follow it. The user invokes one with `/skill:<name>`. |
 | `paths` frontmatter scopes automatic loading | Claude Code only. On Pi, invoke `typescript-best-practices` by name. |
-| `disable-model-invocation: true` frontmatter makes a skill typed-only | Pi hides `blast-radius`, `bro`, `correct`, `in-your-own-words`, `ketchup`, `maintain-formal-verification-skill`, `maintain-verification-skill`, `poteto-help`, `recall`, `reflect`, `sharpen`, `statechart`, and `teach` from the model. The user runs one with `/skill:<name>`. |
+| `disable-model-invocation: true` frontmatter makes a skill typed-only | Pi hides `blast-radius`, `bro`, `correct`, `in-your-own-words`, `ketchup`, `ketchup-video`, `maintain-formal-verification-skill`, `maintain-verification-skill`, `poteto-help`, `recall`, `reflect`, `sharpen`, and `teach` from the model. The user runs one with `/skill:<name>`. |
 | Dispatch subagents (the `Agent`/`Task` tool) | One `lody_session_create_many` call per fan-out phase; see Dispatch below |
 | Wait for subagent results | Lody delivers the batch result as one continuation; see Completion evidence below |
 | Track tasks (the todolist / `TodoWrite`) | Keep the checklist in the reply or in a working file. Pi has no todo tool. |
