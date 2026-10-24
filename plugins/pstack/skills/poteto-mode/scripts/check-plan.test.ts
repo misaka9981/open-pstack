@@ -619,6 +619,27 @@ describe("check-plan", () => {
     });
   });
 
+  describe("inline code spans", () => {
+    function withLine(line: string): string[] {
+      return problemsOf(`${skeleton}${line}\n`);
+    }
+
+    it("ignores prose punctuation inside matching multi-backtick spans", () => {
+      for (const count of [2, 3, 4]) {
+        const delimiter = "`".repeat(count);
+        expect(
+          withLine(`Use ${delimiter}echo \`x\`: \u201cquoted\u201d \u2014 example${delimiter}.`),
+          String(count),
+        ).toEqual([]);
+      }
+    });
+
+    it("checks prose after a multi-backtick span and around unmatched delimiters", () => {
+      expect(withLine("Use ``echo `x`: y``. Bad: prose.").join("\n")).toContain("mid-sentence colon");
+      expect(withLine("Use ``unclosed: bad` here.").join("\n")).toContain("mid-sentence colon");
+    });
+  });
+
   it("CLI exits 0 on the extracted skeleton", async () => {
     const file = await writePlan(skeleton);
     const result = runNode([file]);
