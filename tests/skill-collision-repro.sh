@@ -391,7 +391,7 @@ else
   note "ok: routed skills stay model-invocable"
 fi
 
-user_only_skills=(blast-radius bro correct in-your-own-words ketchup maintain-formal-verification-skill maintain-verification-skill poteto-help recall reflect sharpen teach)
+user_only_skills=(blast-radius bro correct in-your-own-words ketchup ketchup-video maintain-formal-verification-skill maintain-verification-skill poteto-help recall reflect sharpen teach)
 user_only_bad=""
 for name in "${user_only_skills[@]}"; do
   user_only_skill="$plugin/skills/$name/SKILL.md"

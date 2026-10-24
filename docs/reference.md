@@ -59,7 +59,7 @@ The marketplace install is the normal user path. Direct links are only for testi
 ├── plugins/pstack/                   # the plugin itself
 │   ├── .claude-plugin/plugin.json    # Claude Code manifest
 │   ├── .codex-plugin/plugin.json     # Codex manifest (skills: ./skills/)
-│   ├── skills/                       # 58 skills shared by Claude Code, Codex, and Pi
+│   ├── skills/                       # 59 skills shared by Claude Code, Codex, and Pi
 │   │   ├── poteto-mode/references/{codex-tools,pi-tools,provider-dispatch}.md  # tool + provider routing
 │   │   └── poteto-mode/scripts/      # bun/bash/node tooling: watch-pr, orch, runner, check-plan.mjs, worktree-audit.sh
 │   ├── hooks/                        # SessionStart auto-fire: injects the poteto-mode mandate (the model sheet only on Claude Code)
@@ -144,6 +144,7 @@ The table uses the short upstream names. Claude Code exposes each native skill w
 | `/blast-radius` | find what a change could break beyond the diff and prove safety by running code (user-invoked only on Claude Code and Pi) |
 | `/recall` | catch up on recent working context from chat history, live state, and the shared record (user-invoked only on Claude Code and Pi) |
 | `/ketchup` | catch up on what changed in this chat since your last message, with every item waiting on you listed and decidable from the reply alone (user-invoked only on Claude Code and Pi) |
+| `/ketchup-video` | catch up like `/ketchup`, with what happened as a short silent video of slides and the waiting calls as text under it (user-invoked only on Claude Code and Pi) |
 | `/setup-pstack` | configure pstack per-role model choices, reasoning budget, and per-family requested effort |
 | `/unslop` | clean up writing by removing AI tells |
 | `/no-comments` | strip comments before review via the `comment-sicko` subagent, then fix what it finds |
