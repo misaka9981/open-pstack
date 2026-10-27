@@ -2,6 +2,26 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.24.0 syncs to Cursor pstack 0.15.35 and replaces the statechart scripts with a compiler
+
+Open Pstack 1.24.0 tracks Cursor pstack 0.15.35 at `ab1f702ce8e8b6557edb56b09f52cde8bfb83f17` (#83). It reviews six upstream commits after `e73df47`. Two of them, `7c7bde7` and `164ced1`, only bump Cursor's manifests, which are not shipped. The catalog stays at 59 skills.
+
+**Statechart compiler.** `34b1b7c` replaces the statechart scripts with a TypeScript compiler. One command, `statechart SPEC.tla`, checks the model with TLC, draws the Mermaid chart, and reports the shortest path to each rule that breaks. A POSIX launcher runs it on Node 22.18 or later, Bun 1.1.5 or later, or Deno 2.0 or later, with no build step. The chart-to-TLA+ skeleton, the code audit against a spec, and the fixed marks are gone. Charts render with the `pele` npm package, as `references/render.md` describes. `740d2c0` keeps qualified INSTANCE action names in property traces, and `519d36a` makes a macOS test wait for the killed worker to be reaped. The scripts name no Cursor path, tool, or model, so the port takes the tree byte for byte. The skill keeps no typed-only flag under the `UPSTREAM.md` rule. The README, technical reference, and `poteto-help` rows now describe the compiler, and the technical reference names the runtimes it needs. Upstream's new `poteto-help` row speaks of what the user sees. The port's row keeps any system, as the skill description does.
+
+**CI.** `34b1b7c` runs the skill script tests as TypeScript on Node 22 and installs fast-check for the differential test. The port does the same in `.github/workflows/ci.yml`. CI has no mise, so the TLC tests skip there.
+
+**Interrogate.** `ab1f702` turns interrogate into adversaries who must prove each finding with a run. The lead reruns each command and keeps only the findings the rerun confirms. The reviewer prompt, rubric, lead-judgment, and code-quality references are gone. Interrogate now reads arena's runner defaults, so it has no reviewer table, and the static invariant checks the default quad in arena and architect only. Each adversary runs through `provider-dispatch.md` in `isolated-write` mode in place of Cursor's `generalPurpose` agent. Interrogate states the intent with `in-your-own-words`, a call by name from the model side. So `in-your-own-words` drops upstream's `disable-model-invocation: true`, and the flag list grows to 20 skills. Claude Code and Pi now have 12 typed-only skills. The static invariant, the Codex and Pi tool maps, the `poteto-help` setup paragraph and troubleshooting row, and the README and reference rows follow.
+
+**Arena judge.** `ab1f702` never picks the cross-judge from the parent's family, and an `auto` or `inherit-parent` entry never judges. The port applies this by provider. When no entry from another provider exists, or the chosen judge drops out, arena skips the judge and picks the base alone. Upstream's retries on other slugs and pool entries are left out under the no-fallback contract. Phase D and the synthesis note handle a skipped judge.
+
+**Poteto-mode.** `ab1f702` has the agent restate the user's goal in its first message, its briefs, each PR's `## Why`, and its final report. Every lane runs in the background, a steer or resume included. Explain the Number applies before you measure, and its leaf asks for the deciding result before a run. Upstream's chain of slug fallbacks after a rejected adjusted slug is left out, as `UPSTREAM.md` records.
+
+**Autopilot playbooks.** `ab1f702` blocks a PR only for a problem a failing run or a wrong doc line shows. Owners push each finished unit before the next. A wording-only change gets no verifier. A known concurrent change to the same files is a reason to rebase. Autopilot-stack becomes Autopilot-full without the merge, and a PR stacks only on a PR it builds on. Each owner rebases its own PR onto its parent. The port keeps its fork-head PR base, disarm-and-confirm rule, and captured-SHA push in that flow. The multi-phase plan and Babysit follow. Opening a PR no longer runs interrogate in a subagent that opens a PR.
+
+**Ketchup video.** `ab1f702` burns a subtitle into each slide and measures each hold from the rendered file. The port keeps its embed-or-link substitution.
+
+**Docs.** `README-UPSTREAM.md` takes the ab1f702 README text verbatim. The guide edits in `34b1b7c` and `ab1f702` and the regenerated `harness/pstack/` copy have no local target, as `UPSTREAM.md` records.
+
 ## 1.23.0 syncs to Cursor pstack 0.15.32 and adds the ketchup-video skill
 
 Open Pstack 1.23.0 tracks Cursor pstack 0.15.32 at `e73df471cd4bd918367e99f3dd9c51bd53ddf5f0` (#81). It reviews thirteen upstream commits after `4ec7ffa`. Two of them, `642289e` and `b1a1298`, only bump Cursor's manifests, which are not shipped. The catalog grows from 58 to 59 skills.
