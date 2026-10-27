@@ -14,7 +14,7 @@ pstack skills retain Claude Code tool language (`Skill`, `Agent`, `AskUserQuesti
 | Search the web | `web_search` |
 | Invoke a skill (the `Skill` tool, `/command`) | Skills load natively. Follow the instructions presented. |
 | `paths` frontmatter scopes automatic loading | Claude Code only. On Codex, invoke `pstack:typescript-best-practices` by name. |
-| `disable-model-invocation: true` frontmatter makes a skill typed-only | Codex ignores it, so `blast-radius`, `bro`, `correct`, `in-your-own-words`, `ketchup`, `ketchup-video`, `maintain-formal-verification-skill`, `maintain-verification-skill`, `poteto-help`, `recall`, `reflect`, `sharpen`, and `teach` stay in the model's skill list. Do not start any of them unless the user asks for it by name. |
+| `disable-model-invocation: true` frontmatter makes a skill typed-only | Codex ignores it, so `blast-radius`, `bro`, `correct`, `ketchup`, `ketchup-video`, `maintain-formal-verification-skill`, `maintain-verification-skill`, `poteto-help`, `recall`, `reflect`, `sharpen`, and `teach` stay in the model's skill list. Do not start any of them unless the user asks for it by name. |
 | Dispatch a subagent (the `Agent`/`Task` tool) | `spawn_agent` |
 | Dispatch N parallel subagents in one turn | N `spawn_agent` calls in one response |
 | Wait for a subagent result | `wait_agent` |

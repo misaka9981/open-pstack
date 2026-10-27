@@ -32,5 +32,7 @@ jobs:
         run: |
           bun -e 'for (const path of ["package.json", ".claude-plugin/marketplace.json", ".agents/plugins/marketplace.json", "plugins/pstack/.claude-plugin/plugin.json", "plugins/pstack/.codex-plugin/plugin.json"]) JSON.parse(await Bun.file(path).text())'
           PSTACK_STATIC_ONLY=1 bash tests/skill-collision-repro.sh
+      - name: Install skill script test dependencies
+        run: npm install --no-save fast-check@4.5.3
       - name: Test skill scripts
-        run: node --test plugins/pstack/skills/*/scripts/test/*.test.mjs
+        run: node --disable-warning=ExperimentalWarning --test plugins/pstack/skills/*/scripts/test/*.test.ts
