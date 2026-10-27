@@ -123,8 +123,8 @@ quad_bad=""
 # Anchor on the quad's last slug rather than a hard-coded one, so a model swap in
 # setup-pstack cannot leave this check hunting for a slug nobody ships any more.
 anchor="${canon_quad##* }"
-# arena and architect each state the quad on one line; interrogate lists it
-# as one slug per row of its Reviewer A/B/C/D table (upstream #167).
+# arena and architect each state the quad on one line. interrogate reads
+# arena's runner defaults, so it has no copy to check.
 for name in arena architect; do
   skill="$repo/plugins/pstack/skills/$name/SKILL.md"
   n="$(grep -Fc "$anchor" "$skill" || true)"
@@ -135,9 +135,6 @@ for name in arena architect; do
   got="$(grep -F "$anchor" "$skill" | quad_of)"
   [ "$got" = "$canon_quad" ] || quad_bad="$quad_bad$skill: [$got] != [$canon_quad]"$'\n'
 done
-interrogate="$repo/plugins/pstack/skills/interrogate/SKILL.md"
-got="$(grep -E '^\| Reviewer [A-Z] \|' "$interrogate" | quad_of)"
-[ "$got" = "$canon_quad" ] || quad_bad="$quad_bad$interrogate reviewer table: [$got] != [$canon_quad]"$'\n'
 while IFS= read -r line; do
   got="$(printf '%s\n' "$line" | quad_of)"
   [ "$got" = "$canon_quad" ] || quad_bad="$quad_bad$setup role row: [$got] != [$canon_quad]"$'\n'
@@ -147,7 +144,7 @@ if [ -n "$quad_bad" ]; then
   note "$quad_bad"
   fail=1
 else
-  note "ok: default model quad identical across provider dispatch + 3 panel skills + setup-pstack ($canon_quad)"
+  note "ok: default model quad identical across provider dispatch + 2 panel skills + setup-pstack ($canon_quad)"
 fi
 
 plugin="$repo/plugins/pstack"
@@ -374,7 +371,7 @@ else
   note "ok: excluded upstream skills stay absent"
 fi
 
-routed_model_skills=(architect arena automate-me benchmark-checklist create-formal-verification-skill create-verification-skill figure-it-out how interrogate no-comments poteto-mode show-me-your-work statechart swarm tdd technical-writing typescript-best-practices unslop why)
+routed_model_skills=(architect arena automate-me benchmark-checklist create-formal-verification-skill create-verification-skill figure-it-out how in-your-own-words interrogate no-comments poteto-mode show-me-your-work statechart swarm tdd technical-writing typescript-best-practices unslop why)
 routed_model_bad=""
 for name in "${routed_model_skills[@]}"; do
   routed_skill="$plugin/skills/$name/SKILL.md"
@@ -391,7 +388,7 @@ else
   note "ok: routed skills stay model-invocable"
 fi
 
-user_only_skills=(blast-radius bro correct in-your-own-words ketchup ketchup-video maintain-formal-verification-skill maintain-verification-skill poteto-help recall reflect sharpen teach)
+user_only_skills=(blast-radius bro correct ketchup ketchup-video maintain-formal-verification-skill maintain-verification-skill poteto-help recall reflect sharpen teach)
 user_only_bad=""
 for name in "${user_only_skills[@]}"; do
   user_only_skill="$plugin/skills/$name/SKILL.md"

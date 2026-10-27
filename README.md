@@ -121,7 +121,7 @@ That is the main workflow. The other skills are there when poteto-mode needs the
 | Skill | Use it when |
 | --- | --- |
 | `poteto-help` | You are new to pstack or unsure which skill fits. It answers your question and gives you a prompt to send. On Claude Code and Pi, it runs only when you type it. |
-| `in-your-own-words` | You want the agent to play back your goal and the problem before it starts. On Claude Code and Pi, it runs only when you type it. |
+| `in-your-own-words` | You want the agent to play back your goal and the problem before it starts. Interrogate also uses it to state the intent of a change. |
 | `sharpen` | You want a prompt made deeper, not bigger, before you send it. It adds what a top professional would do that you did not ask for, the raw material and methods they would use, and an outside check that the result is right. It hands back the rewritten prompt, leaves your choices open, and does not do the task. On Claude Code and Pi, it runs only when you type it. |
 | `how` | You want a clear explanation of how part of the system works. |
 | `why` | You want evidence for why the system was built that way. |
@@ -132,11 +132,11 @@ That is the main workflow. The other skills are there when poteto-mode needs the
 | `maintain-verification-skill` | The project's verification instructions no longer match the product. On Claude Code and Pi, it runs only when you type it. |
 | `create-formal-verification-skill` | Tests rarely reach the case that breaks a race, retry, state machine, parser, or unsafe code. It verifies one property with a tool that fits and leaves a project skill that rechecks it. |
 | `maintain-formal-verification-skill` | Code that a formal verification covers changed since it was last checked. It brings the verification back in line and says whether each failure is drift or a bug. On Claude Code and Pi, it runs only when you type it. |
-| `statechart` | Someone who owns the behavior needs to see it, not read a spec. It draws how a system moves between states, such as a product flow, a protocol, or a service, as a Mermaid statechart generated from a TLA+ model. Each bug that TLC finds is a numbered path to a state that breaks a rule, and the chart can show which bugs a proposed fix removes. It also turns an agreed chart into a TLA+ skeleton. |
+| `statechart` | Someone who owns the behavior needs to see it, not read a spec. It draws how a system moves between states, such as a product flow, a protocol, or a service, as a Mermaid statechart. One command checks the TLA+ model with TLC, draws the chart, and reports the shortest path to each state that breaks a rule. It runs on Node 22.18 or later, Bun, or Deno. |
 | `babysit` | A pull request needs CI failures and review comments handled until it is ready. |
 | `reflect` | A hard task is finished and its lessons should improve the next run. On Claude Code and Pi, it runs only when you type it. |
 | `ketchup` | You want what changed in this chat since your last message, in plain words and small visuals, with every item waiting on you listed and decidable from the reply alone, even when that makes the reply long. On Claude Code and Pi, it runs only when you type it. |
-| `ketchup-video` | You want the `ketchup` catch-up as a short silent video of slides, with the calls waiting on you as text under it. On Claude Code and Pi, it runs only when you type it. |
+| `ketchup-video` | You want the `ketchup` catch-up as a short subtitled video of slides, with the calls waiting on you as text under it. On Claude Code and Pi, it runs only when you type it. |
 
 Plugin skills include `pstack:` in their name. In Claude Code, invoke a native skill such as `/pstack:architect`. In Codex, ask for the skill, such as `Use pstack:architect for this design.` See the [technical reference](docs/reference.md) for the full list.
 

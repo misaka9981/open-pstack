@@ -110,7 +110,7 @@ Not declared as deps, but referenced in skill bodies:
 - **`bun`** — runs the vendored `skills/poteto-mode/scripts/` tooling (`watch-pr`, `orch`, `runner`). Install via [`brew install oven-sh/bun/bun`](https://bun.sh). `bootstrap.ts` installs dependencies for `watch-pr` and `orch`; the runner uses only Bun and Node built-ins, so it launches directly without an install/re-exec layer.
 - **`node`** — runs `skills/poteto-mode/scripts/check-plan.mjs`. The checker uses only Node built-ins and does not need Bun.
 - **Claude Code, Codex, and Grok Build CLIs** — the external runner uses the assigned subscribed CLI directly. Install and authenticate only the providers present in your model sheet. Same-provider work stays native; the runner refuses it.
-- **`mise`, `npm`, and the network.** Only `statechart` needs them. Its first TLC run installs TLC and Java with mise, about 305 MB. Its first PNG render installs Pele and resvg with npm into `~/.cache/statechart/`, or under `XDG_CACHE_HOME` when it is set. The skill's `--help` tells how to use a TLC and Java that you already have.
+- **`mise`, `npm`, and the network.** Only `statechart` needs them. Its first TLC run installs TLC and Java with mise, about 305 MB. To render a chart as an image, the agent installs the `pele` npm package once, outside the repo. Set `TLA2TOOLS` and `JAVA` to use a TLC and Java that you already have. The command itself needs Node 22.18 or later, Bun 1.1.5 or later, or Deno 2.0 or later.
 - **`jq` and `rg` (ripgrep)** — only for `scripts/worktree-audit.sh` (the Worktree cleanup playbook). Without them the audit still runs but blanks its PR and LAST_CHAT columns, so it warns on stderr rather than returning a table that looks complete.
 
 No third-party plugins.
@@ -123,7 +123,7 @@ The table uses the short upstream names. Claude Code exposes each native skill w
 | --- | --- |
 | `/poteto-mode` | default entry point for any non-trivial task |
 | `/poteto-help` | learn how to set up and use pstack, or find which skill, playbook, or principle fits a task (user-invoked only on Claude Code and Pi) |
-| `/in-your-own-words` | have the agent play back your goal and the problem before it starts (user-invoked only on Claude Code and Pi) |
+| `/in-your-own-words` | have the agent play back your goal and the problem before it starts |
 | `/sharpen` | rewrite a prompt to be deeper, not bigger, with what a top professional would add and an outside check, and hand it back without doing the task (user-invoked only on Claude Code and Pi) |
 | `/how` | walk through how a subsystem works |
 | `/why` | investigate why something was built this way (parallel multi-MCP evidence) |
@@ -145,7 +145,7 @@ The table uses the short upstream names. Claude Code exposes each native skill w
 | `/blast-radius` | find what a change could break beyond the diff and prove safety by running code (user-invoked only on Claude Code and Pi) |
 | `/recall` | catch up on recent working context from chat history, live state, and the shared record (user-invoked only on Claude Code and Pi) |
 | `/ketchup` | catch up on what changed in this chat since your last message, with every item waiting on you listed and decidable from the reply alone (user-invoked only on Claude Code and Pi) |
-| `/ketchup-video` | catch up like `/ketchup`, with what happened as a short silent video of slides and the waiting calls as text under it (user-invoked only on Claude Code and Pi) |
+| `/ketchup-video` | catch up like `/ketchup`, with what happened as a short subtitled video of slides and the waiting calls as text under it (user-invoked only on Claude Code and Pi) |
 | `/setup-pstack` | configure pstack per-role model choices, reasoning budget, and per-family requested effort |
 | `/unslop` | clean up writing by removing AI tells |
 | `/no-comments` | strip comments before review via the `comment-sicko` subagent, then fix what it finds |
@@ -153,7 +153,7 @@ The table uses the short upstream names. Claude Code exposes each native skill w
 | `/maintain-verification-skill` | re-sync a drifted verification skill and its feature map (user-invoked only on Claude Code and Pi) |
 | `/create-formal-verification-skill` | formally verify one property that tests rarely reach and generate a project-local skill that rechecks it |
 | `/maintain-formal-verification-skill` | bring a formal verification back in line after the code it covers changed, and tell drift from bugs (user-invoked only on Claude Code and Pi) |
-| `/statechart` | draw how a product flow, protocol, or service moves between states as a Mermaid statechart checked against a TLA+ model, with each bug drawn as a numbered path, or turn an agreed chart into a TLA+ skeleton |
+| `/statechart` | draw how a product flow, protocol, or service moves between states as a Mermaid statechart checked against a TLA+ model, with the shortest path to each state that breaks a rule |
 | `/deslop` | deslop a diff before commit |
 | `/babysit` | monitor an open PR, fix CI/comments, keep it merge-ready |
 

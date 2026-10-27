@@ -41,7 +41,7 @@ On Codex or Pi, when the mirror state row says not configured and it matters, as
 2. Set the models. On Codex and Pi, run [`/setup-pstack`](../setup-pstack/SKILL.md). It asks for a reasoning budget, maps a model to each role, and writes a model sheet. The sheet applies to new sessions. Then it offers once each to generate a verification skill and a formal verification skill for the project, unless the project already has one. On Claude Code, the plugin ships its own sheet, so `/setup-pstack` reports it and stops. Change models there by editing `plugins/pstack/pstack-models.md` in the repository and updating the plugin.
 3. Start a real task with `/poteto-mode`, a goal, and a check that can pass or fail.
 
-On Claude Code and Codex, a SessionStart hook adds a short instruction to each new session that routes non-trivial engineering work into `/poteto-mode`. Codex runs the hook only after the user trusts it. Pi has no hook, so nothing runs there until the user invokes a skill. Most pstack skills can also load when a request matches their description. On Claude Code and Pi, `/blast-radius`, `/bro`, `/correct`, `/in-your-own-words`, `/ketchup`, `/ketchup-video`, `/maintain-formal-verification-skill`, `/maintain-verification-skill`, `/poteto-help`, `/recall`, `/reflect`, `/sharpen`, and `/teach` start only when the user types them. Codex ignores that flag and can load them on its own. The [README](https://github.com/misaka9981/open-pstack/blob/main/README.md) and [guide page 1](https://github.com/cursor/plugins/blob/main/pstack/docs/guide/01-setup.md) have the details. The guide is written for Cursor's interface, but its ideas carry over. Offer to word their first prompt with them, per [`references/prompting.md`](references/prompting.md).
+On Claude Code and Codex, a SessionStart hook adds a short instruction to each new session that routes non-trivial engineering work into `/poteto-mode`. Codex runs the hook only after the user trusts it. Pi has no hook, so nothing runs there until the user invokes a skill. Most pstack skills can also load when a request matches their description. On Claude Code and Pi, `/blast-radius`, `/bro`, `/correct`, `/ketchup`, `/ketchup-video`, `/maintain-formal-verification-skill`, `/maintain-verification-skill`, `/poteto-help`, `/recall`, `/reflect`, `/sharpen`, and `/teach` start only when the user types them. Codex ignores that flag and can load them on its own. The [README](https://github.com/misaka9981/open-pstack/blob/main/README.md) and [guide page 1](https://github.com/cursor/plugins/blob/main/pstack/docs/guide/01-setup.md) have the details. The guide is written for Cursor's interface, but its ideas carry over. Offer to word their first prompt with them, per [`references/prompting.md`](references/prompting.md).
 
 If cost is the worry, say where the tokens go and how to spend fewer. pstack spends extra tokens on subagents and review panels. Pick a smaller budget or cheaper models: rerun `/setup-pstack` on Codex and Pi, or edit the shipped sheet on Claude Code. A role set to `auto` or `inherit-parent` runs on the parent session's model, which saves tokens when that model is cheaper. A shorter panel list runs fewer subagents, one for each entry. Save `/poteto-mode` for work that needs rigor.
 
@@ -73,7 +73,7 @@ The default answer is `/poteto-mode`, which runs most of the others when its ste
 | Understand a change or subsystem, explained plainly | [`/teach`](../teach/SKILL.md) |
 | Catch up on their own recent work on a topic | [`/recall`](../recall/SKILL.md) |
 | Catch up on what changed in this chat since their last message, in plain words and small visuals, with every item waiting on them listed and decidable from the reply alone | [`/ketchup`](../ketchup/SKILL.md) |
-| Catch up like `/ketchup`, in a short silent video of slides, with the waiting calls as text under it | [`/ketchup-video`](../ketchup-video/SKILL.md) |
+| Catch up like `/ketchup`, in a short subtitled video of slides, with the waiting calls as text under it | [`/ketchup-video`](../ketchup-video/SKILL.md) |
 | Know what a small diff could break outside itself | [`/blast-radius`](../blast-radius/SKILL.md) |
 | Settle types and module shape before code that crosses a function boundary | [`/architect`](../architect/SKILL.md) |
 | Get several attempts at one brief, merged into the best one | [`/arena`](../arena/SKILL.md) |
@@ -90,7 +90,7 @@ The default answer is `/poteto-mode`, which runs most of the others when its ste
 | Bring a verification skill and its feature map back in line with the app | [`/maintain-verification-skill`](../maintain-verification-skill/SKILL.md) |
 | Formally verify a race, invariant, or other property that tests rarely reach | [`/create-formal-verification-skill`](../create-formal-verification-skill/SKILL.md) |
 | Bring a formal verification back in line after the code it covers changed, and learn whether a failure is drift or a bug | [`/maintain-formal-verification-skill`](../maintain-formal-verification-skill/SKILL.md) |
-| Show how a product flow, protocol, or service moves between states as a chart checked by a model, with each bug drawn as a numbered path, turn an agreed chart into a TLA+ skeleton, or audit the code against its TLA+ spec | [`/statechart`](../statechart/SKILL.md) |
+| Show how a product flow, protocol, or service moves between states as a chart checked by a TLA+ model, with the shortest path to each state that breaks a rule | [`/statechart`](../statechart/SKILL.md) |
 | Vet a performance number before reporting or acting on it | [`/benchmark-checklist`](../benchmark-checklist/SKILL.md) |
 | Run a large or cross-cutting change, or one to review after stepping away | [`/figure-it-out`](../figure-it-out/SKILL.md) |
 | Keep a decision log during a run, and review it afterward | [`/show-me-your-work`](../show-me-your-work/SKILL.md) |
@@ -126,7 +126,7 @@ Playbooks are step lists inside `/poteto-mode`, not skills, so they have no slas
 - "land the stack" runs Shipping.
 - "take over this branch" runs Session pickup.
 - "pause safely" runs Pause safely.
-- "full autopilot on this queue" runs Autopilot-full. "stack them, don't ship" runs Autopilot-stack.
+- "full autopilot on this queue" runs Autopilot-full. "autopilot, don't merge" runs Autopilot-stack.
 - "run the eval playbook" runs Eval.
 
 Without `/poteto-mode`, a phrase such as "babysit this pr" can start the standalone `/babysit` skill instead. The Playbooks section of [`poteto-mode`](../poteto-mode/SKILL.md) lists every playbook and when it applies. [Guide page 6](https://github.com/cursor/plugins/blob/main/pstack/docs/guide/06-verify-and-ship.md) covers opening, babysitting, and landing a PR.
@@ -143,7 +143,7 @@ Principles are one-rule skills that `/poteto-mode` reads and cites in its replie
 | A question got treated as the next step of the last task | Say "new task", or say the turn doesn't need the mode. |
 | A new model choice had no effect | The model sheet loads when a session starts. Start a new one. On Codex and Pi, sessions load the `AGENTS.md` block, so an edit to the sheet file alone waits for a `/setup-pstack` run. On Claude Code, the shipped `pstack-models.md` replaces `~/.claude/pstack-models.md`, so edit the shipped file and update the plugin. |
 | Runs cost more than expected | See the cost paragraph under Get set up. |
-| A skill didn't load on its own | A skill loads on its own only when the request matches its description, and on Claude Code and Pi `/blast-radius`, `/bro`, `/correct`, `/in-your-own-words`, `/ketchup`, `/ketchup-video`, `/maintain-formal-verification-skill`, `/maintain-verification-skill`, `/poteto-help`, `/recall`, `/reflect`, `/sharpen`, and `/teach` never do. Otherwise it loads when the user types it or when `/poteto-mode` runs it, and it doesn't run every skill. |
+| A skill didn't load on its own | A skill loads on its own only when the request matches its description, and on Claude Code and Pi `/blast-radius`, `/bro`, `/correct`, `/ketchup`, `/ketchup-video`, `/maintain-formal-verification-skill`, `/maintain-verification-skill`, `/poteto-help`, `/recall`, `/reflect`, `/sharpen`, and `/teach` never do. Otherwise it loads when the user types it or when `/poteto-mode` runs it, and it doesn't run every skill. |
 | Parallel agents overwrote each other | Give each writer its own worktree. |
 | An overnight run moved but finished nothing | `/loop` needs a check that can pass or fail, not a duration. See [guide page 7](https://github.com/cursor/plugins/blob/main/pstack/docs/guide/07-overnight.md). |
 | The reply claims success from a green build | Ask for the real command, flow, stored value, or profile. That's the prove-it-works principle. |
