@@ -2,6 +2,16 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.25.0 syncs to Cursor pstack 0.15.36 and runs Orchestrate without the `orch` scripts
+
+Open Pstack 1.25.0 tracks Cursor pstack 0.15.36 at `c742dd61706fbacc1b95f1a20b7b988cf096ce6c` (#85). It reviews one upstream commit after `ab1f702`. The catalog stays at 59 skills.
+
+**Orchestrate.** `c742dd6` rewrites the Orchestrate playbook to run on the coordinator's own tools. The coordinator spawns workers, keeps the program's state in a tracker and store, and watches PRs with event subscriptions where the harness has them. It calls no scripts and runs no polling loops. Each PR has one owner, who alone writes its branch and carries it to merge, and a verifier from another model family. The program starts with one unit before it fans out. The brief template, inbox drains, computed frontier, and verdict ledger are gone. The port substitutes `Agent` for `Task` and keeps the store at `~/.claude/orchestrate/<project-slug>/`, with `notes.md` as the tracker. Workers run as background subagents in their own worktrees, and runtime checks, including a kickoff's done evidence, go through `run` and `verify`. Upstream forks a worker that holds built state, but Claude Code cannot fork another agent, so the port resumes that worker. The port also keeps its sentence for a runtime where a subagent cannot spawn workers, and drops "fast or standard speed" under the `ce649c0` rule.
+
+**Scripts.** `c742dd6` deletes the `orch` store CLI and its tests. The three files matched the `ab1f702` blobs, so the port deletes them as upstream does and drops `orch` from `bun run test`. `commander` stays because `watch-pr` uses it. The Codex tool map, the technical reference, and `NOTICE.md` no longer list `orch`. The technical reference maps Cursor's Project tracker and store to `~/.claude/orchestrate/<project-slug>/`.
+
+**Docs.** The upstream README did not change. The guide edit in `07-overnight.md`, the Cursor manifest bumps, and the regenerated `harness/pstack/` copy have no local target, as `UPSTREAM.md` records.
+
 ## 1.24.0 syncs to Cursor pstack 0.15.35 and replaces the statechart scripts with a compiler
 
 Open Pstack 1.24.0 tracks Cursor pstack 0.15.35 at `ab1f702ce8e8b6557edb56b09f52cde8bfb83f17` (#83). It reviews six upstream commits after `e73df47`. Two of them, `7c7bde7` and `164ced1`, only bump Cursor's manifests, which are not shipped. The catalog stays at 59 skills.
