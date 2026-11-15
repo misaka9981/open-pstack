@@ -54,8 +54,15 @@ const ADDITIONAL_CLAUDE_HEADER = [
   "Claude-native agent stem",
 ] as const;
 
-const FAMILY_ORDER = ["fable", "sol", "grok", "opus"] as const;
-const MATRIX_PROVIDERS = ["claude", "codex", "grok"] as const;
+const FAMILY_ORDER = ["fable", "opus", "sol"] as const;
+const MATRIX_PROVIDERS = ["claude", "codex"] as const;
+const CLAUDE_CAP: Effort[] = ["low", "medium", "high"];
+const BUDGET_TARGETS = {
+  unlimited: "max",
+  large: "xhigh",
+  medium: "high",
+  small: "medium",
+} as const satisfies Record<string, Effort>;
 const DESCRIPTOR_RE =
   /(claude|codex|grok):[a-z0-9.-]+@(low|medium|high|xhigh|max)/g;
 const PANEL_ROLES = [
@@ -138,9 +145,9 @@ function parseModelMatrix(markdown: string): MatrixRow[] {
     .slice(start + 1, end)
     .map((line) => line.trim())
     .filter((line) => line.startsWith("|"));
-  if (table.length !== 6) {
+  if (table.length !== 2 + FAMILY_ORDER.length) {
     throw new Error(
-      `model matrix must be header, separator, and 4 data rows, got ${table.length}`
+      `model matrix must be header, separator, and ${FAMILY_ORDER.length} data rows, got ${table.length}`
     );
   }
   const header = splitRow(table[0]);
@@ -266,6 +273,29 @@ function parseAdditionalClaudeFamilies(markdown: string): AdditionalClaudeRow[] 
   });
 }
 
+function parseGrokFamily(markdown: string): RelayRow[] {
+  return parseSectionTable(markdown, "## Additional Grok family", RELAY_HEADER).map(
+    ([family, provider, model, selectableRaw]) => ({
+      family,
+      provider,
+      model,
+      selectableEfforts: selectableRaw.split(/\s+/).map(asEffort),
+    })
+  );
+}
+
+// Setup proposes one target effort per budget and clamps it to the highest
+// effort the family can select.
+function budgetProposal(target: Effort, selectable: Effort[]): Effort {
+  const ceiling = EFFORTS.indexOf(target);
+  const allowed = selectable.filter((effort) => EFFORTS.indexOf(effort) <= ceiling);
+  const proposal = allowed.at(-1);
+  if (proposal === undefined) {
+    throw new Error(`no selectable effort at or below ${target}`);
+  }
+  return proposal;
+}
+
 function defaultDescriptors(rows: MatrixRow[]): string[] {
   return rows.map(
     (row) => `${row.provider}:${row.model}@${row.defaultEffort}`
@@ -310,7 +340,7 @@ describe("model matrix", () => {
     readFileSync(DISPATCH_PATH, "utf8")
   );
   const setup = readFileSync(SETUP_PATH, "utf8");
-  const quad = defaultDescriptors(rows);
+  const panel = defaultDescriptors(rows);
 
   it("owns the effort universe and first-run defaults", () => {
     expect([...EFFORTS]).toEqual(["low", "medium", "high", "xhigh", "max"]);
@@ -326,10 +356,9 @@ describe("model matrix", () => {
     expect(
       rows.map((row) => [row.family, row.defaultEffort])
     ).toEqual([
-      ["fable", "xhigh"],
+      ["fable", "high"],
+      ["opus", "high"],
       ["sol", "xhigh"],
-      ["grok", "xhigh"],
-      ["opus", "xhigh"],
     ]);
     expect(
       rows
@@ -406,7 +435,7 @@ describe("model matrix", () => {
       }
       expect(effort).toBe(row.defaultEffort);
     }
-    const expectedPanel = quad.join(", ");
+    const expectedPanel = panel.join(", ");
     for (const role of PANEL_ROLES) {
       const line = sheet
         .split("\n")
@@ -464,7 +493,6 @@ describe("model matrix", () => {
     for (const row of additionalClaude) {
       expect(matrixFamilies.has(row.family)).toBe(false);
       expect(matrixPairs.has(`${row.provider}:${row.model}`)).toBe(false);
-      expect(row.selectableEfforts).toEqual([...EFFORTS]);
       expect(sheet).not.toContain(`${row.provider}:${row.model}@`);
       // Claude plan mode serves a read-only Haiku lane with Sonnet, so a Codex
       // parent can reach Haiku only through an isolated-write lane.
@@ -477,15 +505,62 @@ describe("model matrix", () => {
     }
   });
 
-  // Setup's budget proposes the same effort for every family and has no rule
-  // for an effort a family cannot select, so each target must stay selectable.
-  it("keeps every budget proposal selectable in each family", () => {
-    const relays = parseRelayFamilies(readFileSync(DISPATCH_PATH, "utf8"));
-    for (const row of [...rows, ...additionalClaude, ...relays]) {
-      for (const target of ["max", "xhigh", "high", "medium"] as const) {
-        expect(row.selectableEfforts).toContain(target);
+  it("keeps Grok selectable but outside the matrix defaults", () => {
+    const grok = parseGrokFamily(readFileSync(DISPATCH_PATH, "utf8"));
+    expect(grok.map((row) => [row.family, row.provider, row.model])).toEqual([
+      ["grok", "grok", "grok-4.6"],
+    ]);
+    const sheet = firstRunSheet(setup);
+    for (const row of grok) {
+      expect(rows.some((matrix) => matrix.provider === row.provider)).toBe(false);
+      expect(row.selectableEfforts).toEqual([...EFFORTS]);
+      expect(sheet).not.toContain(`${row.provider}:`);
+    }
+  });
+
+  it("caps every Claude family at high", () => {
+    const claudeRows = [...rows, ...additionalClaude].filter(
+      (row) => row.provider === "claude"
+    );
+    expect(claudeRows.map((row) => row.family)).toEqual([
+      "fable",
+      "opus",
+      "sonnet",
+      "haiku",
+    ]);
+    for (const row of claudeRows) {
+      expect(row.selectableEfforts).toEqual(CLAUDE_CAP);
+    }
+  });
+
+  it("clamps each budget proposal to a selectable effort, so large proposes the first-run defaults", () => {
+    const dispatch = readFileSync(DISPATCH_PATH, "utf8");
+    const families = [
+      ...rows,
+      ...additionalClaude,
+      ...parseGrokFamily(dispatch),
+      ...parseRelayFamilies(dispatch),
+    ];
+    for (const row of families) {
+      for (const target of Object.values(BUDGET_TARGETS)) {
+        expect(row.selectableEfforts).toContain(
+          budgetProposal(target, row.selectableEfforts)
+        );
       }
     }
+    for (const row of rows) {
+      expect(budgetProposal(BUDGET_TARGETS.large, row.selectableEfforts)).toBe(
+        row.defaultEffort
+      );
+    }
+    const opus = rows.find((row) => row.family === "opus");
+    const sol = rows.find((row) => row.family === "sol");
+    expect(budgetProposal(BUDGET_TARGETS.unlimited, opus?.selectableEfforts ?? [])).toBe("high");
+    expect(budgetProposal(BUDGET_TARGETS.unlimited, sol?.selectableEfforts ?? [])).toBe("max");
+    expect(setup).toContain(
+      "A proposal above a family's highest Selectable effort clamps to that effort."
+    );
+    expect(setup).toContain("`large` proposes the first-run defaults");
   });
 
   it("routes setup's Pi parent only to Sol and relay families", () => {
@@ -571,6 +646,11 @@ describe("model matrix", () => {
     expect(normalization).toContain(
       "`claude-fable-`, `claude-opus-`, `claude-sonnet-`, or `claude-haiku-`"
     );
+    expect(normalization).toContain(
+      "Clamp that effort in memory to `high`, the highest effort every Claude family selects."
+    );
+    expect(normalization).toContain("Never pass the old effort to Claude.");
+    expect(setup).toContain("Then clamp a Claude descriptor whose effort is `xhigh` or `max`");
   });
 });
 
