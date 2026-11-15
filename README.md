@@ -32,7 +32,7 @@ pstack does not ask you to trust an agent on day one. It helps the agent leave e
 
 ## Install
 
-You need a current Claude Code, Codex, or Pi installation. For the full four-model review, install and sign in to the Claude Code, Codex, and Grok command-line tools. [Bun](https://bun.sh) runs the small local tool that starts models outside the app you are using. You can still use the core workflows with fewer models.
+You need a current Claude Code, Codex, or Pi installation. For the default multi-model review, install and sign in to the Claude Code and Codex command-line tools. Grok is optional. [Bun](https://bun.sh) runs the small local tool that starts models outside the app you are using. You can still use the core workflows with fewer models.
 
 ### Claude Code
 
@@ -92,7 +92,7 @@ In Codex, ask:
 Use pstack:setup-pstack to configure pstack.
 ```
 
-Setup checks the models you can actually run, shows how each one will start, and asks before saving the choices. The current default group uses Fable, GPT-6.1 Sol, Grok 4.6, and Opus.
+Setup checks the models you can actually run, shows how each one will start, and asks before saving the choices. The current default group uses Fable, Opus, and GPT-6.1 Sol. Claude models run at `high` reasoning or lower.
 
 An older model sheet starts using the rolling aliases in memory as soon as this release is installed. Run setup once after updating to persist that migration. It replaces versioned Fable and Opus entries while preserving every role assignment and effort selection.
 
@@ -122,7 +122,7 @@ That is the main workflow. The other skills are there when poteto-mode needs the
 | --- | --- |
 | `poteto-help` | You are new to pstack or unsure which skill fits. It answers your question and gives you a prompt to send. On Claude Code and Pi, it runs only when you type it. |
 | `in-your-own-words` | You want the agent to play back your goal and the problem before it starts. Interrogate also uses it to state the intent of a change. |
-| `sharpen` | You want a prompt made deeper, not bigger, before you send it. It adds what a top professional would do that you did not ask for, the raw material and methods they would use, and an outside check that the result is right. It hands back the rewritten prompt, leaves your choices open, and does not do the task. On Claude Code and Pi, it runs only when you type it. |
+| `sharpen` | You want a prompt made deeper, not bigger, before you send it. It adds what a top professional would do that you did not ask for, the raw material and methods they would use, and an outside check that the result is right. It hands back the rewritten prompt, which asks the agent to prototype any choice an experiment can settle and leaves product and preference choices to you. It does not do the task. On Claude Code and Pi, it runs only when you type it. |
 | `how` | You want a clear explanation of how part of the system works. |
 | `why` | You want evidence for why the system was built that way. |
 | `architect` | A change crosses a function or module boundary and the design needs to be settled first. |
@@ -144,7 +144,7 @@ Plugin skills include `pstack:` in their name. In Claude Code, invoke a native s
 
 Some pstack workflows use one model. Skills such as `architect`, `arena`, and `interrogate` can run several models in parallel. Each model run uses the subscription and token allowance of its own command-line tool.
 
-This repository ships its model sheet at `plugins/pstack/pstack-models.md`. Claude Code loads it at session start, so no setup is needed there. To change models, edit that file in the repository, then update the plugin. The shipped sheet uses Opus for code and judgment roles, Haiku to explore code for `how`, and Sonnet for swarm workers. Its arena panel adds GPT-6.1 Sol and two models from the `magpie` relay, so that panel also needs the Codex command-line tool with the relay configured.
+This repository ships its model sheet at `plugins/pstack/pstack-models.md`. Claude Code loads it at session start, so no setup is needed there. To change models, edit that file in the repository, then update the plugin. The shipped sheet uses Opus for code and judgment roles and Sonnet for swarm workers. Its arena panel adds GPT-6.1 Sol and two models from the `magpie` relay, so that panel also needs the Codex command-line tool with the relay configured.
 
 `setup-pstack` lets you choose a reasoning budget, the models, one requested effort per model family, and how many run in parallel. It checks only the model families you assign, so a sheet that assigns every role to Claude models needs no Codex or Grok command-line tool. A model from the app you are using runs inside that app. Other models run through their own command-line tools. Open Pstack does not quietly replace a failed model with a weaker one.
 
@@ -175,7 +175,7 @@ This repository also keeps:
 
 ## Staying close to Lauren's pstack
 
-Open Pstack 1.25.0 tracks pstack 0.15.36 at Cursor commit [`c742dd61706fbacc1b95f1a20b7b988cf096ce6c`](https://github.com/cursor/plugins/commit/c742dd61706fbacc1b95f1a20b7b988cf096ce6c).
+Open Pstack 1.26.0 tracks pstack 0.15.42 at Cursor commit [`bf0c7cd80abdbf7fe47b634978a7d1b4071f71a7`](https://github.com/cursor/plugins/commit/bf0c7cd80abdbf7fe47b634978a7d1b4071f71a7).
 
 The two projects have separate version numbers. The pstack version identifies Lauren's upstream content. The Open Pstack version identifies the Claude Code and Codex package built from it.
 

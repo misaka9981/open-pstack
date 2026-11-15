@@ -11,9 +11,6 @@ perf-issue: claude:opus@medium
 hillclimb: claude:opus@medium
 judgment and prose: claude:opus@high
 hardest tasks: claude:opus@high
-how explorer: claude:haiku@medium
-how explainer: claude:opus@high
-why investigators, synthesizer: inherit-parent
 reflect tooling, judgment, divergent, synthesizer: inherit-parent
 arena runners: claude:sonnet@medium, codex:gpt-6.1-sol@medium, magpie:wevnal/deepseek-v4.1-flash@high, magpie:wevnal/glm-5.3-flash@high
 arena cross-judge pool: claude:opus@high, codex:gpt-6.1-sol@high

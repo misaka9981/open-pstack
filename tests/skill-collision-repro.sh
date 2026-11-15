@@ -92,11 +92,11 @@ else
 fi
 
 # Static invariant (CHANGES maintenance note): provider-dispatch owns the default
-# provider/model quad and the three panel skills plus setup-pstack copy it verbatim.
+# provider/model panel and the panel skills plus setup-pstack copy it verbatim.
 setup="$repo/plugins/pstack/skills/setup-pstack/SKILL.md"
 dispatch="$repo/plugins/pstack/skills/poteto-mode/references/provider-dispatch.md"
-quad_of() { { grep -oE '(claude|codex|grok):[a-z0-9.-]+@(low|medium|high|xhigh|max)' || true; } | tr '\n' ' ' | sed 's/ $//'; }
-canon_quad="$(awk '
+panel_of() { { grep -oE '(claude|codex|grok):[a-z0-9.-]+@(low|medium|high|xhigh|max)' || true; } | tr '\n' ' ' | sed 's/ $//'; }
+canon_panel="$(awk '
   $0 == "## Model matrix" { in_matrix = 1; next }
   in_matrix && /^## / { exit }
   in_matrix && /^\|/ {
@@ -118,33 +118,33 @@ canon_quad="$(awk '
   }
   END { print out }
 ' "$dispatch")"
-quad_bad=""
-[ -n "$canon_quad" ] || quad_bad="could not read the canonical quad from $dispatch"$'\n'
-# Anchor on the quad's last slug rather than a hard-coded one, so a model swap in
+panel_bad=""
+[ -n "$canon_panel" ] || panel_bad="could not read the canonical panel from $dispatch"$'\n'
+# Anchor on the panel's last slug rather than a hard-coded one, so a model swap in
 # setup-pstack cannot leave this check hunting for a slug nobody ships any more.
-anchor="${canon_quad##* }"
-# arena and architect each state the quad on one line. interrogate reads
+anchor="${canon_panel##* }"
+# arena and architect each state the panel on one line. interrogate reads
 # arena's runner defaults, so it has no copy to check.
 for name in arena architect; do
   skill="$repo/plugins/pstack/skills/$name/SKILL.md"
   n="$(grep -Fc "$anchor" "$skill" || true)"
   if [ "$n" != "1" ]; then
-    quad_bad="$quad_bad$skill: expected exactly 1 default-quad line, found $n"$'\n'
+    panel_bad="$panel_bad$skill: expected exactly 1 default-panel line, found $n"$'\n'
     continue
   fi
-  got="$(grep -F "$anchor" "$skill" | quad_of)"
-  [ "$got" = "$canon_quad" ] || quad_bad="$quad_bad$skill: [$got] != [$canon_quad]"$'\n'
+  got="$(grep -F "$anchor" "$skill" | panel_of)"
+  [ "$got" = "$canon_panel" ] || panel_bad="$panel_bad$skill: [$got] != [$canon_panel]"$'\n'
 done
 while IFS= read -r line; do
-  got="$(printf '%s\n' "$line" | quad_of)"
-  [ "$got" = "$canon_quad" ] || quad_bad="$quad_bad$setup role row: [$got] != [$canon_quad]"$'\n'
+  got="$(printf '%s\n' "$line" | panel_of)"
+  [ "$got" = "$canon_panel" ] || panel_bad="$panel_bad$setup role row: [$got] != [$canon_panel]"$'\n'
 done < <(grep -E '^(arena runners|arena cross-judge pool|architect runners|interrogate reviewers):' "$setup")
-if [ -n "$quad_bad" ]; then
-  note "FAIL: the default model quad is not identical across provider dispatch, the panel skills, and setup-pstack:"
-  note "$quad_bad"
+if [ -n "$panel_bad" ]; then
+  note "FAIL: the default model panel is not identical across provider dispatch, the panel skills, and setup-pstack:"
+  note "$panel_bad"
   fail=1
 else
-  note "ok: default model quad identical across provider dispatch + 2 panel skills + setup-pstack ($canon_quad)"
+  note "ok: default model panel identical across provider dispatch + 2 panel skills + setup-pstack ($canon_panel)"
 fi
 
 plugin="$repo/plugins/pstack"
@@ -408,35 +408,35 @@ else
   note "ok: user-only skills keep disable-model-invocation and stay unrouted"
 fi
 
-grok_descriptor="$(awk -F '|' '
-  $2 ~ /^[[:space:]]*grok[[:space:]]*$/ {
+opus_descriptor="$(awk -F '|' '
+  $2 ~ /^[[:space:]]*opus[[:space:]]*$/ {
     for (i = 4; i <= 6; i++) gsub(/^[[:space:]]+|[[:space:]]+$/, "", $i)
     print $4 ":" $5 "@" $6
   }
 ' "$dispatch")"
 code_role_bad=""
-if [ -z "$grok_descriptor" ]; then
-  code_role_bad="could not read the grok row from $dispatch"$'\n'
+if [ -z "$opus_descriptor" ]; then
+  code_role_bad="could not read the opus row from $dispatch"$'\n'
 fi
 for role in "feature, refactoring" bug-fix perf-issue hillclimb; do
   setup_descriptor="$(sed -n "s/^${role}: //p" "$setup")"
-  if [ "$setup_descriptor" != "$grok_descriptor" ]; then
-    code_role_bad="${code_role_bad}${setup} ${role}: [${setup_descriptor}] != [${grok_descriptor}]"$'\n'
+  if [ "$setup_descriptor" != "$opus_descriptor" ]; then
+    code_role_bad="${code_role_bad}${setup} ${role}: [${setup_descriptor}] != [${opus_descriptor}]"$'\n'
   fi
 done
 for playbook in feature refactoring bug-fix perf-issue hillclimb; do
   role_playbook="$plugin/skills/poteto-mode/playbooks/$playbook.md"
   playbook_descriptor="$(sed -n 's/.*default `\([^`]*\)`.*/\1/p' "$role_playbook")"
-  if [ "$playbook_descriptor" != "$grok_descriptor" ]; then
-    code_role_bad="${code_role_bad}${role_playbook}: [${playbook_descriptor}] != [${grok_descriptor}]"$'\n'
+  if [ "$playbook_descriptor" != "$opus_descriptor" ]; then
+    code_role_bad="${code_role_bad}${role_playbook}: [${playbook_descriptor}] != [${opus_descriptor}]"$'\n'
   fi
 done
 if [ -n "$code_role_bad" ]; then
-  note "FAIL: code-delegate roles must use the grok row:"
+  note "FAIL: code-delegate roles must use the opus row:"
   note "$code_role_bad"
   fail=1
 else
-  note "ok: code-delegate roles use the grok row ($grok_descriptor)"
+  note "ok: code-delegate roles use the opus row ($opus_descriptor)"
 fi
 
 codex_manifest="$plugin/.codex-plugin/plugin.json"

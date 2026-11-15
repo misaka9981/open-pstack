@@ -10,12 +10,11 @@ pstack model choices are provider-qualified descriptors:
 
 | Family | Upstream pstack choice | Provider | Model | Default effort | Selectable efforts | Claude-native agent stem |
 |---|---|---|---|---|---|---|
-| fable | fable | claude | fable | xhigh | low medium high xhigh max | fable |
+| fable | fable | claude | fable | high | low medium high | fable |
+| opus | opus | claude | opus | high | low medium high | opus |
 | sol | gpt-5.6-sol-max | codex | gpt-6.1-sol | xhigh | low medium high xhigh max | - |
-| grok | grok-4.7-xhigh-fast | grok | grok-4.6 | xhigh | low medium high xhigh max | - |
-| opus | opus | claude | opus | xhigh | low medium high xhigh max | opus |
 
-The allowed effort universe is exactly `low`, `medium`, `high`, `xhigh`, `max`. First-run requested efforts are the Default effort cell of each row. A Claude-native agent stem of `-` means the family has no Claude-native agent. Otherwise the shipped agent name is `pstack-<stem>-<effort>`.
+The allowed effort universe is exactly `low`, `medium`, `high`, `xhigh`, `max`. First-run requested efforts are the Default effort cell of each row. Every Claude family selects at most `high`, which is the maintainer's cap. Sol takes the panel seat that upstream gives Gemini. The port has no Gemini route, and Sol is the only family that a Codex parent runs natively and a Pi parent reaches. A Claude-native agent stem of `-` means the family has no Claude-native agent. Otherwise the shipped agent name is `pstack-<stem>-<effort>`.
 
 `fable`, `opus`, `sonnet`, and `haiku` are Claude Code's rolling aliases. Claude resolves each alias to the latest available family revision. A runner receipt keeps the requested alias in `model` and the concrete provider-reported revision in `reportedModel`; verification accepts only a numeric `claude-<alias>-*` revision from the matching family.
 
@@ -25,12 +24,22 @@ Setup also offers the Claude families below. They stay outside the model matrix,
 
 | Family | Provider | Model | Selectable efforts | Claude-native agent stem |
 |---|---|---|---|---|
-| sonnet | claude | sonnet | low medium high xhigh max | sonnet |
-| haiku | claude | haiku | low medium high xhigh max | haiku |
+| sonnet | claude | sonnet | low medium high | sonnet |
+| haiku | claude | haiku | low medium high | haiku |
 
 Each selectable effort passed a one-turn `claude -p` probe, and the reported models were `claude-sonnet-5-5` and `claude-haiku-5-5`. That proves Claude accepts the effort, not the reasoning depth it applies.
 
 From a Codex parent, run `claude:haiku` only in `isolated-write`. The runner maps read-only to Claude plan mode, and `claude -p --model haiku --permission-mode plan` is served by `claude-sonnet-5-5`, so a read-only Haiku lane always ends as a model-mismatch dropout. Native Claude Code dispatch through `pstack-haiku-<effort>` does not use plan mode and is not affected.
+
+## Additional Grok family
+
+Setup also offers Grok. It stays outside the model matrix, so it never joins the first-run defaults or the default panels. A role uses it only when the operator assigns it.
+
+| Family | Provider | Model | Selectable efforts |
+|---|---|---|---|
+| grok | grok | grok-4.6 | low medium high xhigh max |
+
+`fast` is part of Cursor's Grok selector, not a Grok Build CLI model or effort flag. The portable Grok route pins the CLI model `grok-4.6`. Upstream moved to Grok 4.7; the port keeps 4.6 until `grok-4.7` passes a live runner probe.
 
 ## Relay providers
 
@@ -68,9 +77,9 @@ The block holds the same bytes when the text between its markers equals the file
 
 Normalize configured descriptors before matching them to a family or choosing a route. If a provider-qualified Claude model starts with `claude-fable-`, `claude-opus-`, `claude-sonnet-`, or `claude-haiku-` and its remaining revision contains only digits and hyphens, replace that model component in memory with `fable`, `opus`, `sonnet`, or `haiku`. Preserve provider, effort, role, and lane order. Use only the normalized descriptor for native dispatch or runner argv. Never pass the versioned predecessor to Claude.
 
-This read-time rule makes an older installed sheet use the latest family revision immediately without writing user files. Once per parent run, report that the persisted sheet is stale and that `/setup-pstack` will rewrite it after its normal probes and confirmation. Unknown versioned Claude models remain invalid. The external runner rejects a missed version pin of any rolling Claude alias instead of silently executing it.
+An older sheet can also hold a Claude descriptor at `xhigh` or `max`, above its family's Selectable efforts. Clamp that effort in memory to `high`, the highest effort every Claude family selects. Preserve provider, model, role, and lane order. Never pass the old effort to Claude.
 
-`fast` is part of Cursor's Grok selector, not a Grok Build CLI model or effort flag. The portable Grok route pins the CLI model `grok-4.6`. Upstream moved to Grok 4.7; the port keeps 4.6 until `grok-4.7` passes a live runner probe. The first-run Grok effort is `xhigh`.
+These read-time rules make an older installed sheet use the latest family revision and a selectable effort immediately without writing user files. Once per parent run, report that the persisted sheet is stale and that `/setup-pstack` will rewrite it after its normal probes and confirmation. Unknown versioned Claude models remain invalid. The external runner rejects a missed version pin of any rolling Claude alias instead of silently executing it.
 
 ## The parent owns the route
 
@@ -92,9 +101,9 @@ When poteto-mode's Subagents section adjusts a lane's effort for the job, the ad
 
 ## Native lanes
 
-Native dispatch avoids a second CLI startup and its base context. The spawner decides what the child loads. A poteto-mode delegate is a subagent that poteto-mode or one of its playbooks spawns for a configured role, such as a code delegate, a `hardest tasks` or `judgment and prose` delegate, or a multi-phase plan explorer. It gets poteto-mode plus the role's model and effort. A routed skill lane is a subagent that `arena`, `architect`, `interrogate`, `swarm`, `how`, `why`, or `reflect` spawns. It gets only the model and effort, and it never starts a pstack workflow.
+Native dispatch avoids a second CLI startup and its base context. The spawner decides what the child loads. A poteto-mode delegate is a subagent that poteto-mode or one of its playbooks spawns for a configured role, such as a code delegate, a `hardest tasks` or `judgment and prose` delegate, or a multi-phase plan explorer. It gets poteto-mode plus the role's model and effort. A routed skill lane is a subagent that `arena`, `architect`, `interrogate`, `swarm`, `how`, or `reflect` spawns. It gets only the model and effort, and it never starts a pstack workflow.
 
-- Claude Code: match the descriptor's `(provider, model)` to one model-matrix row or one additional Claude family row. Dispatch a poteto-mode delegate as `subagent_type: "poteto-agent"` with `model` set to that row's model alias (`fable`, `opus`, `sonnet`, or `haiku`) and `effort` set to the descriptor's effort. The `Agent` tool applies both to the child. A probe from an Opus `high` parent with `model: sonnet` and `effort: low` produced a child whose turns record `claude-sonnet-5-5` and effort `low`. Dispatch a routed skill lane through `pstack-<stem>-<effort>` using that row's Claude-native agent stem and the descriptor's effort. Those definitions select the rolling model alias, requested effort, and `background: true`, and they tell the child not to start a pstack workflow. `pstack-fable-max` and `pstack-opus-xhigh` remain in that set. Pass the complete task, grounding paths, access mode, and unique output location in the `Agent` prompt. Retain the task handle and drain it only after fan-out.
+- Claude Code: match the descriptor's `(provider, model)` to one model-matrix row or one additional Claude family row. Dispatch a poteto-mode delegate as `subagent_type: "poteto-agent"` with `model` set to that row's model alias (`fable`, `opus`, `sonnet`, or `haiku`) and `effort` set to the descriptor's effort. The `Agent` tool applies both to the child. A probe from an Opus `high` parent with `model: sonnet` and `effort: low` produced a child whose turns record `claude-sonnet-5-5` and effort `low`. Dispatch a routed skill lane through `pstack-<stem>-<effort>` using that row's Claude-native agent stem and the descriptor's effort. Those definitions select the rolling model alias, requested effort, and `background: true`, and they tell the child not to start a pstack workflow. Each Claude family ships agents only at its Selectable efforts, so no Claude agent runs at `xhigh` or `max`. Pass the complete task, grounding paths, access mode, and unique output location in the `Agent` prompt. Retain the task handle and drain it only after fan-out.
 - Codex: call `spawn_agent` with the descriptor's model and `reasoning_effort`, the complete task, grounding paths, access mode, and unique output location. For a poteto-mode delegate, the instructions also tell the child to read poteto-mode's `SKILL.md` in full first, at the absolute path the parent passes. Use an isolated worktree for a writer. Codex subagents already run concurrently.
 - Pi: create every lane as one item of a `lody_session_create_many` call with the mapped `modelId` and `reasoningEffort`, the lane prompt, and a worktree or chat work context, as [`pi-tools.md`](pi-tools.md) specifies. A poteto-mode delegate's prompt follows the `poteto-agent` row. A routed skill lane's prompt follows the writer or read-only lane row.
 
@@ -118,7 +127,7 @@ pstack-runner \
   [--timeout <seconds>]
 ```
 
-Pass arguments as an argv array or quote every path. Never interpolate prompt text into a shell command. The launcher preflights the assigned CLI and authentication, invokes the model exactly once, disables recursive agents and ambient skill dispatch where the CLI supports it, restricts the built-in tool surface, and records the exact provider/model/effort flags. External lanes do not receive the parent's MCP surface. Keep MCP-dependent Why and Reflect roles on `inherit-parent` or `auto`. The launcher never falls back.
+Pass arguments as an argv array or quote every path. Never interpolate prompt text into a shell command. The launcher preflights the assigned CLI and authentication, invokes the model exactly once, disables recursive agents and ambient skill dispatch where the CLI supports it, restricts the built-in tool surface, and records the exact provider/model/effort flags. External lanes do not receive the parent's MCP surface. Keep the MCP-dependent Reflect roles on `inherit-parent` or `auto`. The launcher never falls back.
 
 A `codex` or `magpie` child also runs without ChatGPT apps and with every MCP server in the user's Codex config disabled. Relay models have no Codex model metadata, so Codex inlines every app and MCP tool definition into each request; on a one-line magpie prompt, disabling them cut input from 176,541 to 11,676 tokens. During preflight the runner reads `codex mcp list --json` with the child's `--disable` feature flags, because a disabled plugin drops the MCP servers it provides and an override for a server the child lacks stops Codex from starting. It then passes `--disable apps` and one `--config mcp_servers.<name>.enabled=false` for each server the listing reports as enabled. The listing shares the preflight's absolute deadline and cancellation latch and is never retried. The receipt's preflight evidence names the disabled servers. A failed listing, a listing that is not a JSON array of `name` and `enabled` entries, or an enabled server whose name is not made of letters, digits, `_`, and `-` is a preflight dropout, and the model never starts. Codex's `--config` parser splits a key on every `.` and keeps quotes literally, so it cannot address such a name; rename that server or set `enabled = false` for it in the Codex config.
 
