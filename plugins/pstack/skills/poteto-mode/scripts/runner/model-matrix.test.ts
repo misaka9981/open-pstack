@@ -71,8 +71,6 @@ const SHEET_ROLES = [
   "hillclimb",
   "judgment and prose",
   "hardest tasks",
-  "how explorer",
-  "how explainer",
   "reflect tooling, judgment, divergent, synthesizer",
   "arena runners",
   "arena cross-judge pool",

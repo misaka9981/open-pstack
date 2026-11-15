@@ -163,7 +163,7 @@ The chat that receives `/poteto-mode` runs the playbook and owns its todo list a
 
 `comment-sicko` is the read-only comment reviewer the `no-comments` skill spawns. The port first renamed upstream's `Comment Sicko` to `comment-sicko` so the name is a valid `subagent_type`, and upstream adopted the same id in `de2dba6`. Invoke it through `/no-comments`, not directly.
 
-Fable, Opus, Sonnet, and Haiku each ship at `low`, `medium`, `high`, `xhigh`, and `max`. Names are `pstack-<stem>-<effort>`. `pstack-fable-max` and `pstack-opus-xhigh` remain. Each file selects the rolling family alias and requested effort, runs in the background, and denies nested Agent/Task dispatch. Routed workflow skills such as `arena`, `swarm`, and `how` dispatch them from provider-qualified descriptors. They tell the child not to start a pstack workflow, so a poteto-mode delegate runs as `poteto-agent` with the `Agent` tool's `model` and `effort` instead. They are not user-facing workflows.
+Fable, Opus, Sonnet, and Haiku each ship at `low`, `medium`, `high`, `xhigh`, and `max`. Names are `pstack-<stem>-<effort>`. `pstack-fable-max` and `pstack-opus-xhigh` remain. Each file selects the rolling family alias and requested effort, runs in the background, and denies nested Agent/Task dispatch. Routed workflow skills such as `arena`, `swarm`, and `architect` dispatch them from provider-qualified descriptors. They tell the child not to start a pstack workflow, so a poteto-mode delegate runs as `poteto-agent` with the `Agent` tool's `model` and `effort` instead. They are not user-facing workflows.
 
 ## Differences from upstream
 
