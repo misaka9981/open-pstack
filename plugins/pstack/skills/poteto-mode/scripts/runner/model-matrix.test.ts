@@ -73,7 +73,6 @@ const SHEET_ROLES = [
   "hardest tasks",
   "how explorer",
   "how explainer",
-  "why investigators, synthesizer",
   "reflect tooling, judgment, divergent, synthesizer",
   "arena runners",
   "arena cross-judge pool",

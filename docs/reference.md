@@ -33,7 +33,7 @@ codex plugin marketplace add misaka9981/open-pstack --ref main
 codex plugin add pstack@open-pstack
 ```
 
-Codex discovers the plugin skills under the `pstack` namespace, so they list as `pstack:poteto-mode`, `pstack:tdd`, and so on. The namespace comes from `plugins/pstack/.codex-plugin/plugin.json`. To enable the multi-model and parallel-subagent skills (`interrogate`, `arena`, `how`, `why`, `reflect`, `architect`), turn on subagents in `~/.codex/config.toml`:
+Codex discovers the plugin skills under the `pstack` namespace, so they list as `pstack:poteto-mode`, `pstack:tdd`, and so on. The namespace comes from `plugins/pstack/.codex-plugin/plugin.json`. To enable the multi-model and parallel-subagent skills (`interrogate`, `arena`, `how`, `reflect`, `architect`), turn on subagents in `~/.codex/config.toml`:
 
 ```toml
 [features]
@@ -126,7 +126,7 @@ The table uses the short upstream names. Claude Code exposes each native skill w
 | `/in-your-own-words` | have the agent play back your goal and the problem before it starts |
 | `/sharpen` | rewrite a prompt to be deeper, not bigger, with what a top professional would add and an outside check, and hand it back without doing the task (user-invoked only on Claude Code and Pi) |
 | `/how` | walk through how a subsystem works |
-| `/why` | investigate why something was built this way (parallel multi-MCP evidence) |
+| `/why` | answer why something was built this way from the commits and PR discussions behind it, with citations and marked inferences |
 | `/architect` | settle types and module shape before writing code that crosses a function boundary |
 | `/arena` | run N parallel attempts at the same task and pick the best parts |
 | `/interrogate` | have four different models try to break a diff |
