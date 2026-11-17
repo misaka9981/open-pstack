@@ -38,7 +38,7 @@ poteto-mode's Subagents section sets Claude-specific defaults (`subagent_type: "
 - There is no `poteto-agent` subagent type. Dispatch every poteto-mode delegate as a `spawn_agent` whose instructions tell it to read the `poteto-mode` skill in full first, at the absolute path you pass. A configured `codex:*` role adds its model and `reasoning_effort` to the same call. A lane that a routed workflow skill spawns, such as an arena runner or swarm worker, gets the model and effort without that instruction.
 - `spawn_agent` calls already run concurrently with your turn, so `run_in_background: true` has no separate flag. Issue the dispatch and continue.
 - There is no `comment-sicko` subagent type either. The **no-comments** skill spawns it on Claude Code; on Codex dispatch a `spawn_agent` whose instructions tell it to read `agents/comment-sicko.md` in full first.
-- Claude Code runs every subagent on this machine, so the **swarm** skill's workers and the fan-out playbooks (`orchestrate`, `autopilot-full`, `autopilot-stack`) isolate writers with worktrees. The same holds on Codex.
+- Claude Code runs every subagent on this machine, so the **swarm** skill's workers and the fan-out playbooks (`autopilot-full`, `autopilot-stack`) isolate writers with worktrees. The same holds on Codex.
 - Keep the rest of the policy unchanged. Pass file pointers not inlined context, give each worker its own worktree or branch when they write, review every subagent's diff yourself.
 
 ## Models and providers

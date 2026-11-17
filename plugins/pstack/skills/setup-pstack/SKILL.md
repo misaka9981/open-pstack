@@ -33,9 +33,9 @@ Use the harness and tool surface running this skill: Claude Code, Codex, or Pi. 
 
 ### 2. Load current state
 
-On Claude Code, read `~/.claude/pstack-models.md` when it exists. On Codex and Pi, read both the sheet file and the mirror block in the global `AGENTS.md`. Classify them by the [mirror state table](../poteto-mode/references/provider-dispatch.md#mirror-state), tell the operator which row applies, and load what that row's Setup cell names. Load the block when it exists, because sessions use it. Repair an inconsistent row only through the confirmed write in step 10. Before family validation, normalize versioned predecessors of Claude's rolling aliases. A provider-qualified Claude model is migratable when its model component starts with `claude-fable-`, `claude-opus-`, `claude-sonnet-`, or `claude-haiku-` and the remaining revision contains only digits and hyphens. Replace that component in memory with `fable`, `opus`, `sonnet`, or `haiku`, preserving the provider, effort, role, and lane order. Then clamp a Claude descriptor whose effort is `xhigh` or `max`, above its family's Selectable efforts, to `high`, as provider dispatch's read-time normalization does. Record each original and normalized descriptor for the confirmation in step 9. These migrations are valid loaded state and do not require a separate operator choice.
+On Claude Code, read `~/.claude/pstack-models.md` when it exists. On Codex and Pi, read both the sheet file and the mirror block in the global `AGENTS.md`. Classify them by the [mirror state table](../poteto-mode/references/provider-dispatch.md#mirror-state), tell the operator which row applies, and load what that row's Setup cell names. Load the block when it exists, because sessions use it. Repair an inconsistent row only through the confirmed write in step 10. Before family validation, normalize versioned predecessors of Claude's rolling aliases. A provider-qualified Claude model is migratable when its model component starts with `claude-fable-`, `claude-opus-`, `claude-sonnet-`, or `claude-haiku-` and the remaining revision contains only digits and hyphens. Replace that component in memory with `fable`, `opus`, `sonnet`, or `haiku`, preserving the provider, effort, role, and lane order. Then clamp a Claude descriptor whose effort is `xhigh` or `max`, above its family's Selectable efforts, to `high`, and any other descriptor at `max` to `xhigh`, as provider dispatch's read-time normalization does. Record each original and normalized descriptor for the confirmation in step 9. These migrations are valid loaded state and do not require a separate operator choice.
 
-Treat the normalized values as current role-to-family assignments. Overlay those rows on the complete first-run role map in step 9. Materialize any missing documented role row from that map on the next successful write. A row for a retired role, such as `how explorer` or `why investigators, synthesizer`, has no consumer. Drop it and list it in the confirmation in step 9. A duplicate row or a row for any other unknown role is inconsistent state; report it and resolve it before probing. A bare host-native slug from an older sheet is also invalid because it does not say which provider owns it. A versioned Claude model outside the four migration families remains inconsistent state. If the row loads nothing, use the complete first-run role map and the model matrix's Default effort cells. A `<!-- budget: ... -->` comment in the loaded sheet records the budget chosen on the last run. Use it only to name the current budget in step 4. The role descriptors remain the only source of effort.
+Treat the normalized values as current role-to-family assignments. Overlay those rows on the complete first-run role map in step 9. Materialize any missing documented role row from that map on the next successful write. A row for a retired role, such as `hardest tasks`, `architect runners`, `reflect tooling, judgment, divergent, synthesizer`, `how explorer`, or `why investigators, synthesizer`, has no consumer. Drop it and list it in the confirmation in step 9. A duplicate row or a row for any other unknown role is inconsistent state; report it and resolve it before probing. A bare host-native slug from an older sheet is also invalid because it does not say which provider owns it. A versioned Claude model outside the four migration families remains inconsistent state. If the row loads nothing, use the complete first-run role map and the model matrix's Default effort cells. A `<!-- budget: ... -->` comment in the loaded sheet records the budget chosen on the last run. Use it only to name the current budget in step 4. An `unlimited` comment names `large`, because no role runs above `xhigh`. The role descriptors remain the only source of effort.
 
 ### 3. Parse per-family efforts
 
@@ -47,14 +47,13 @@ One distinct effort per family is the current value. A family with no non-alias 
 
 ### 4. Ask for a budget
 
-Ask one budget question with these four labels. Prefer `AskUserQuestion` over free text, and name the current budget when the sheet records one. With no sheet, say that `large` matches the first-run defaults.
+Ask one budget question with these three labels. Prefer `AskUserQuestion` over free text, and name the current budget when the sheet records one. With no sheet, say that `large` matches the first-run defaults.
 
-- `unlimited — max reasoning`
 - `large — xhigh reasoning`
 - `medium — high reasoning`
 - `small — medium reasoning`
 
-`unlimited`, `large`, `medium`, and `small` propose `max`, `xhigh`, `high`, or `medium` for every family. A proposal above a family's highest Selectable effort clamps to that effort. So `unlimited` and `large` propose `high` for the Claude families and keep `max` and `xhigh` for Sol, and `large` proposes the first-run defaults. The budget only sets the proposals in step 6. It never changes a role's family or an alias.
+`large`, `medium`, and `small` propose `xhigh`, `high`, or `medium` for every family. A proposal above a family's highest Selectable effort clamps to that effort. So `large` proposes the first-run defaults, `high` for the Claude families and `xhigh` for Sol. The budget only sets the proposals in step 6. It never changes a role's family or an alias.
 
 ### 5. Choose role families
 
@@ -100,7 +99,7 @@ Add one `<!-- budget: <label> (<target effort>) -->` comment line with the step 
 
 Show any rolling-alias migrations and effort clamps as original and normalized descriptors, any retired role rows step 2 dropped, and the mirror state row step 2 found with the repair this write makes. Then show the route table for this parent and every rendered role and descriptor. Ask for confirmation before writing.
 
-Reflect requires the parent's live MCP surface. Keep its reviewer and synthesizer roles on `inherit-parent` or `auto`; the bounded external runner deliberately omits ambient MCPs. `inherit-parent` and `auto` always validate, but say when they reduce a panel's provider diversity. For panel roles, one lane runs per entry. The list length is the fan-out count. `arena cross-judge pool` is a list from which Arena chooses a provider different from the parent and base candidate when possible. `swarm workers` is the default for every worker unless a race explicitly assigns another descriptor.
+`inherit-parent` and `auto` always validate, but say when they reduce a panel's provider diversity. For panel roles, one lane runs per entry. The list length is the fan-out count. `arena cross-judge pool` is a list from which Arena chooses a provider different from the parent and base candidate when possible. Fable and Opus share a provider, so a Fable entry could judge only where an Opus entry also could. `swarm workers` is the default for every worker unless a race explicitly assigns another descriptor.
 
 Every non-alias value must match `<provider>:<model>@<effort>` and must have passed step 7.
 
@@ -117,12 +116,9 @@ bug-fix: claude:opus@high
 perf-issue: claude:opus@high
 hillclimb: claude:opus@high
 judgment and prose: claude:opus@high
-hardest tasks: claude:fable@high
-reflect tooling, judgment, divergent, synthesizer: inherit-parent
 arena runners: claude:fable@high, claude:opus@high, codex:gpt-6.1-sol@xhigh
-arena cross-judge pool: claude:fable@high, claude:opus@high, codex:gpt-6.1-sol@xhigh
+arena cross-judge pool: claude:opus@high, codex:gpt-6.1-sol@xhigh
 swarm workers: claude:opus@high
-architect runners: claude:fable@high, claude:opus@high, codex:gpt-6.1-sol@xhigh
 interrogate reviewers: claude:fable@high, claude:opus@high, codex:gpt-6.1-sol@xhigh
 ```
 

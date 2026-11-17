@@ -12,9 +12,9 @@ pstack model choices are provider-qualified descriptors:
 |---|---|---|---|---|---|---|
 | fable | fable | claude | fable | high | low medium high | fable |
 | opus | opus | claude | opus | high | low medium high | opus |
-| sol | gpt-5.6-sol-max | codex | gpt-6.1-sol | xhigh | low medium high xhigh max | - |
+| sol | gpt-5.6-sol-max | codex | gpt-6.1-sol | xhigh | low medium high xhigh | - |
 
-The allowed effort universe is exactly `low`, `medium`, `high`, `xhigh`, `max`. First-run requested efforts are the Default effort cell of each row. Every Claude family selects at most `high`, which is the maintainer's cap. Sol takes the panel seat that upstream gives Gemini. The port has no Gemini route, and Sol is the only family that a Codex parent runs natively and a Pi parent reaches. A Claude-native agent stem of `-` means the family has no Claude-native agent. Otherwise the shipped agent name is `pstack-<stem>-<effort>`.
+The allowed effort universe is exactly `low`, `medium`, `high`, `xhigh`, `max`. First-run requested efforts are the Default effort cell of each row. No family selects `max`, because upstream runs no role above `xhigh`. Every Claude family selects at most `high`, which is the maintainer's cap. Sol takes the panel seat that upstream gives Gemini. The port has no Gemini route, and Sol is the only family that a Codex parent runs natively and a Pi parent reaches. A Claude-native agent stem of `-` means the family has no Claude-native agent. Otherwise the shipped agent name is `pstack-<stem>-<effort>`.
 
 `fable`, `opus`, `sonnet`, and `haiku` are Claude Code's rolling aliases. Claude resolves each alias to the latest available family revision. A runner receipt keeps the requested alias in `model` and the concrete provider-reported revision in `reportedModel`; verification accepts only a numeric `claude-<alias>-*` revision from the matching family.
 
@@ -37,7 +37,7 @@ Setup also offers Grok. It stays outside the model matrix, so it never joins the
 
 | Family | Provider | Model | Selectable efforts |
 |---|---|---|---|
-| grok | grok | grok-4.6 | low medium high xhigh max |
+| grok | grok | grok-4.6 | low medium high xhigh |
 
 `fast` is part of Cursor's Grok selector, not a Grok Build CLI model or effort flag. The portable Grok route pins the CLI model `grok-4.6`. Upstream moved to Grok 4.7; the port keeps 4.6 until `grok-4.7` passes a live runner probe.
 
@@ -49,8 +49,8 @@ Setup offers only the relay families below. They stay outside the model matrix, 
 
 | Family | Provider | Model | Selectable efforts |
 |---|---|---|---|
-| deepseek-flash | magpie | wevnal/deepseek-v4.1-flash | low medium high xhigh max |
-| glm-flash | magpie | wevnal/glm-5.3-flash | low medium high xhigh max |
+| deepseek-flash | magpie | wevnal/deepseek-v4.1-flash | low medium high xhigh |
+| glm-flash | magpie | wevnal/glm-5.3-flash | low medium high xhigh |
 
 Each selectable effort passed a one-turn runner probe through the relay. That proves the relay accepts the effort, not the reasoning depth it applies.
 
@@ -77,7 +77,7 @@ The block holds the same bytes when the text between its markers equals the file
 
 Normalize configured descriptors before matching them to a family or choosing a route. If a provider-qualified Claude model starts with `claude-fable-`, `claude-opus-`, `claude-sonnet-`, or `claude-haiku-` and its remaining revision contains only digits and hyphens, replace that model component in memory with `fable`, `opus`, `sonnet`, or `haiku`. Preserve provider, effort, role, and lane order. Use only the normalized descriptor for native dispatch or runner argv. Never pass the versioned predecessor to Claude.
 
-An older sheet can also hold a Claude descriptor at `xhigh` or `max`, above its family's Selectable efforts. Clamp that effort in memory to `high`, the highest effort every Claude family selects. Preserve provider, model, role, and lane order. Never pass the old effort to Claude.
+An older sheet can also hold a Claude descriptor at `xhigh` or `max`, above its family's Selectable efforts. Clamp that effort in memory to `high`, the highest effort every Claude family selects. Preserve provider, model, role, and lane order. Never pass the old effort to Claude. An older sheet can also hold any other descriptor at `max`. Clamp it in memory to `xhigh` the same way.
 
 These read-time rules make an older installed sheet use the latest family revision and a selectable effort immediately without writing user files. Once per parent run, report that the persisted sheet is stale and that `/setup-pstack` will rewrite it after its normal probes and confirmation. Unknown versioned Claude models remain invalid. The external runner rejects a missed version pin of any rolling Claude alias instead of silently executing it.
 
@@ -101,7 +101,7 @@ When poteto-mode's Subagents section adjusts a lane's effort for the job, the ad
 
 ## Native lanes
 
-Native dispatch avoids a second CLI startup and its base context. The spawner decides what the child loads. A poteto-mode delegate is a subagent that poteto-mode or one of its playbooks spawns for a configured role, such as a code delegate, a `hardest tasks` or `judgment and prose` delegate, or a multi-phase plan explorer. It gets poteto-mode plus the role's model and effort. A routed skill lane is a subagent that `arena`, `architect`, `interrogate`, `swarm`, `how`, or `reflect` spawns. It gets only the model and effort, and it never starts a pstack workflow.
+Native dispatch avoids a second CLI startup and its base context. The spawner decides what the child loads. A poteto-mode delegate is a subagent that poteto-mode or one of its playbooks spawns for a configured role, such as a code delegate or a `judgment and prose` delegate. It gets poteto-mode plus the role's model and effort. A routed skill lane is a subagent that `arena`, `interrogate`, `swarm`, or `how` spawns. It gets only the model and effort, and it never starts a pstack workflow.
 
 - Claude Code: match the descriptor's `(provider, model)` to one model-matrix row or one additional Claude family row. Dispatch a poteto-mode delegate as `subagent_type: "poteto-agent"` with `model` set to that row's model alias (`fable`, `opus`, `sonnet`, or `haiku`) and `effort` set to the descriptor's effort. The `Agent` tool applies both to the child. A probe from an Opus `high` parent with `model: sonnet` and `effort: low` produced a child whose turns record `claude-sonnet-5-5` and effort `low`. Dispatch a routed skill lane through `pstack-<stem>-<effort>` using that row's Claude-native agent stem and the descriptor's effort. Those definitions select the rolling model alias, requested effort, and `background: true`, and they tell the child not to start a pstack workflow. Each Claude family ships agents only at its Selectable efforts, so no Claude agent runs at `xhigh` or `max`. Pass the complete task, grounding paths, access mode, and unique output location in the `Agent` prompt. Retain the task handle and drain it only after fan-out.
 - Codex: call `spawn_agent` with the descriptor's model and `reasoning_effort`, the complete task, grounding paths, access mode, and unique output location. For a poteto-mode delegate, the instructions also tell the child to read poteto-mode's `SKILL.md` in full first, at the absolute path the parent passes. Use an isolated worktree for a writer. Codex subagents already run concurrently.

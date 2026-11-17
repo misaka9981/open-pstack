@@ -120,31 +120,35 @@ canon_panel="$(awk '
 ' "$dispatch")"
 panel_bad=""
 [ -n "$canon_panel" ] || panel_bad="could not read the canonical panel from $dispatch"$'\n'
-# Anchor on the panel's last slug rather than a hard-coded one, so a model swap in
-# setup-pstack cannot leave this check hunting for a slug nobody ships any more.
-anchor="${canon_panel##* }"
-# arena and architect each state the panel on one line. interrogate reads
-# arena's runner defaults, so it has no copy to check.
-for name in arena architect; do
-  skill="$repo/plugins/pstack/skills/$name/SKILL.md"
-  n="$(grep -Fc "$anchor" "$skill" || true)"
+# The cross-judge pool is the panel without Fable, because Fable and Opus share a
+# provider and a Fable judge could run only where an Opus judge also could.
+judge_panel="$(printf '%s\n' $canon_panel | grep -v '^claude:fable@' | tr '\n' ' ' | sed 's/ $//')"
+# arena states the runner panel and the judge pool on one line each. interrogate
+# reads arena's runner defaults, so it has no copy to check.
+arena="$repo/plugins/pstack/skills/arena/SKILL.md"
+for pair in "Pick the runners|$canon_panel" "choose the judge descriptor|$judge_panel"; do
+  anchor="${pair%%|*}"
+  want="${pair#*|}"
+  n="$(grep -Fc "$anchor" "$arena" || true)"
   if [ "$n" != "1" ]; then
-    panel_bad="$panel_bad$skill: expected exactly 1 default-panel line, found $n"$'\n'
+    panel_bad="$panel_bad$arena: expected exactly 1 line with [$anchor], found $n"$'\n'
     continue
   fi
-  got="$(grep -F "$anchor" "$skill" | panel_of)"
-  [ "$got" = "$canon_panel" ] || panel_bad="$panel_bad$skill: [$got] != [$canon_panel]"$'\n'
+  got="$(grep -F "$anchor" "$arena" | panel_of)"
+  [ "$got" = "$want" ] || panel_bad="$panel_bad$arena: [$got] != [$want]"$'\n'
 done
 while IFS= read -r line; do
+  want="$canon_panel"
+  case "$line" in "arena cross-judge pool:"*) want="$judge_panel" ;; esac
   got="$(printf '%s\n' "$line" | panel_of)"
-  [ "$got" = "$canon_panel" ] || panel_bad="$panel_bad$setup role row: [$got] != [$canon_panel]"$'\n'
-done < <(grep -E '^(arena runners|arena cross-judge pool|architect runners|interrogate reviewers):' "$setup")
+  [ "$got" = "$want" ] || panel_bad="$panel_bad$setup role row: [$got] != [$want]"$'\n'
+done < <(grep -E '^(arena runners|arena cross-judge pool|interrogate reviewers):' "$setup")
 if [ -n "$panel_bad" ]; then
   note "FAIL: the default model panel is not identical across provider dispatch, the panel skills, and setup-pstack:"
   note "$panel_bad"
   fail=1
 else
-  note "ok: default model panel identical across provider dispatch + 2 panel skills + setup-pstack ($canon_panel)"
+  note "ok: default model panel identical across provider dispatch, arena, and setup-pstack ($canon_panel; judge pool $judge_panel)"
 fi
 
 plugin="$repo/plugins/pstack"
@@ -193,12 +197,12 @@ else
     bugbot_bad="${bugbot_bad}standalone babysit lost ask-by-default escalation"$'\n'
   fi
 fi
-playbook_op="$(grep -E '^8\. \*\*Bugbot is triaged skeptically, always\.\*\*' "$playbook" || true)"
+playbook_op="$(grep -E '^- Triage review bots skeptically' "$playbook" || true)"
 playbook_n="$(printf '%s\n' "$playbook_op" | awk 'NF { c++ } END { print c+0 }')"
 if [ "$playbook_n" != "1" ]; then
-  bugbot_bad="${bugbot_bad}poteto-mode babysit playbook lost step-8 Bugbot operational line"$'\n'
+  bugbot_bad="${bugbot_bad}poteto-mode babysit playbook lost its review-bot triage rule"$'\n'
 elif ! printf '%s\n' "$playbook_op" | grep -Fq "$bugbot_playbook_rel"; then
-  bugbot_bad="${bugbot_bad}poteto-mode babysit playbook step 8 lost bugbot-triage binding ($bugbot_playbook_rel)"$'\n'
+  bugbot_bad="${bugbot_bad}poteto-mode babysit playbook triage rule lost bugbot-triage binding ($bugbot_playbook_rel)"$'\n'
 fi
 copies="$(find "$plugin" -name 'bugbot-triage.md' ! -path '*/node_modules/*' -print 2>/dev/null || true)"
 n="$(printf '%s\n' "$copies" | awk 'NF { c++ } END { print c+0 }')"
@@ -244,7 +248,6 @@ shipping="$plugin/skills/poteto-mode/playbooks/shipping.md"
 autopilot_full="$plugin/skills/poteto-mode/playbooks/autopilot-full.md"
 autopilot_stack="$plugin/skills/poteto-mode/playbooks/autopilot-stack.md"
 opening_a_pr="$plugin/skills/poteto-mode/playbooks/opening-a-pr.md"
-multi_phase_plan="$plugin/skills/poteto-mode/playbooks/multi-phase-plan.md"
 shipping_safety_bad=""
 # A numbered step runs until the next numbered step or the Reply line, so indented
 # continuation paragraphs belong to the step above them.
@@ -330,13 +333,10 @@ grep -Fq 'git rebase --onto "$parent_tip" "$current_base_sha" -- "$branch"' "$au
 grep -Fq "Shipping step 4's disarm-and-confirm rule to that child and every descendant" "$opening_a_pr" || shipping_safety_bad="${shipping_safety_bad}Opening a PR can rewrite or retarget an armed existing stack"$'\n'
 grep -Fq 'If repository instructions require a draft until named evidence exists' "$opening_a_pr" || shipping_safety_bad="${shipping_safety_bad}Opening a PR ignores repository-required draft evidence gates"$'\n'
 grep -Fq 'Create every fork PR' "$opening_a_pr" || shipping_safety_bad="${shipping_safety_bad}Opening a PR does not bind a root fork PR to its explicit head repository"$'\n'
-grep -Fq 'A fork child PR targets trunk while retaining local parent ancestry' "$multi_phase_plan" || shipping_safety_bad="${shipping_safety_bad}Multi-phase plan does not model fork stack PR bases"$'\n'
-for fork_file in "$autopilot_stack" "$opening_a_pr" "$multi_phase_plan"; do
+for fork_file in "$autopilot_stack" "$opening_a_pr"; do
   grep -Fq 'gh api --method POST "repos/$base_repo/pulls"' "$fork_file" || shipping_safety_bad="${shipping_safety_bad}${fork_file} does not create fork PRs through the organization-capable GitHub API"$'\n'
   grep -Fq -- '-f "head_repo=$head_name"' "$fork_file" || shipping_safety_bad="${shipping_safety_bad}${fork_file} does not identify the validated fork repository"$'\n'
 done
-grep -Fq 'Rebase each unmerged stack child onto its parent' "$multi_phase_plan" || shipping_safety_bad="${shipping_safety_bad}Multi-phase plan flattens unmerged stack children onto trunk"$'\n'
-grep -Fq 'An appended stack child keeps its recorded parent tip until that parent lands' "$multi_phase_plan" || shipping_safety_bad="${shipping_safety_bad}Multi-phase plan rebases an unmerged stack child onto trunk before delivery"$'\n'
 grep -Fq 'For fork heads, take the order from the verified local parent ancestry' "$shipping" || shipping_safety_bad="${shipping_safety_bad}Shipping tries to infer a fork stack from shared trunk bases"$'\n'
 grep -Fq 'only the current bottom PR through Shipping, one at a time' "$autopilot_stack" || shipping_safety_bad="${shipping_safety_bad}Autopilot-stack offers merge-when-ready outside the current bottom frontier"$'\n'
 grep -Fq -- '--force-with-lease="refs/heads/$branch:$captured_sha"' "$autopilot_full" || shipping_safety_bad="${shipping_safety_bad}Autopilot-full does not bind its post-rebase push to the captured SHA"$'\n'
@@ -344,8 +344,6 @@ grep -Fq 'record its exact tip as `<target-tip>`' "$autopilot_full" || shipping_
 grep -Fq 'git rebase --onto "$target_tip" "$current_base_sha" -- "$branch"' "$autopilot_full" || shipping_safety_bad="${shipping_safety_bad}Autopilot-full does not isolate its own commits when moving onto the target tip"$'\n'
 grep -Fq 'git fetch -- "$head_url" "refs/heads/$branch"' "$opening_a_pr" || shipping_safety_bad="${shipping_safety_bad}Opening a PR does not refresh a fork head through its push repository URL"$'\n'
 grep -Fq 'resolve and validate `<head-url>` through Shipping step 1, capture it as `head_url`' "$opening_a_pr" || shipping_safety_bad="${shipping_safety_bad}Opening a PR does not resolve its head URL before a shared-worktree refresh"$'\n'
-grep -Fq 'git fetch -- "$head_url" "refs/heads/$head_branch"' "$multi_phase_plan" || shipping_safety_bad="${shipping_safety_bad}Multi-phase plan does not fetch a live-lane head through its push repository URL"$'\n'
-grep -Fq 'Resolve and validate `<head-url>` through Shipping step 1 and capture it as `head_url` for the live-lane fetch' "$multi_phase_plan" || shipping_safety_bad="${shipping_safety_bad}Multi-phase plan does not resolve its head URL before a live-lane fetch"$'\n'
 autopilot_full_rewrite_order="$(step_block 2 "$autopilot_full" | awk '{ text = text $0 "\n" } END { capture = index(text, "git ls-remote"); rebase = index(text, "git rebase --onto"); if (capture == 0 || rebase == 0 || capture >= rebase) print "out of order" }')"
 if [ -n "$autopilot_full_rewrite_order" ]; then
   shipping_safety_bad="${shipping_safety_bad}Autopilot-full does not capture the published head before rebasing"$'\n'
