@@ -57,32 +57,25 @@ const ADDITIONAL_CLAUDE_HEADER = [
 const FAMILY_ORDER = ["fable", "opus", "sol"] as const;
 const MATRIX_PROVIDERS = ["claude", "codex"] as const;
 const CLAUDE_CAP: Effort[] = ["low", "medium", "high"];
+const XHIGH_CAP: Effort[] = ["low", "medium", "high", "xhigh"];
 const BUDGET_TARGETS = {
-  unlimited: "max",
   large: "xhigh",
   medium: "high",
   small: "medium",
 } as const satisfies Record<string, Effort>;
 const DESCRIPTOR_RE =
   /(claude|codex|grok):[a-z0-9.-]+@(low|medium|high|xhigh|max)/g;
-const PANEL_ROLES = [
-  "arena runners",
-  "arena cross-judge pool",
-  "architect runners",
-  "interrogate reviewers",
-] as const;
+const PANEL_ROLES = ["arena runners", "interrogate reviewers"] as const;
+const JUDGE_POOL_ROLE = "arena cross-judge pool";
 const SHEET_ROLES = [
   "feature, refactoring",
   "bug-fix",
   "perf-issue",
   "hillclimb",
   "judgment and prose",
-  "hardest tasks",
-  "reflect tooling, judgment, divergent, synthesizer",
   "arena runners",
   "arena cross-judge pool",
   "swarm workers",
-  "architect runners",
   "interrogate reviewers",
 ] as const;
 const SETUP_SECTION_ORDER = [
@@ -445,6 +438,12 @@ describe("model matrix", () => {
       }
       expect(line).toBe(`${role}: ${expectedPanel}`);
     }
+    const judgeLine = sheet
+      .split("\n")
+      .find((entry) => entry.startsWith(`${JUDGE_POOL_ROLE}:`));
+    expect(judgeLine).toBe(
+      `${JUDGE_POOL_ROLE}: ${panel.filter((entry) => !entry.startsWith("claude:fable@")).join(", ")}`
+    );
   });
 
   it("keeps relay families selectable but outside the matrix defaults", () => {
@@ -513,7 +512,7 @@ describe("model matrix", () => {
     const sheet = firstRunSheet(setup);
     for (const row of grok) {
       expect(rows.some((matrix) => matrix.provider === row.provider)).toBe(false);
-      expect(row.selectableEfforts).toEqual([...EFFORTS]);
+      expect(row.selectableEfforts).toEqual(XHIGH_CAP);
       expect(sheet).not.toContain(`${row.provider}:`);
     }
   });
@@ -553,10 +552,9 @@ describe("model matrix", () => {
         row.defaultEffort
       );
     }
-    const opus = rows.find((row) => row.family === "opus");
-    const sol = rows.find((row) => row.family === "sol");
-    expect(budgetProposal(BUDGET_TARGETS.unlimited, opus?.selectableEfforts ?? [])).toBe("high");
-    expect(budgetProposal(BUDGET_TARGETS.unlimited, sol?.selectableEfforts ?? [])).toBe("max");
+    for (const row of families) {
+      expect(row.selectableEfforts).not.toContain("max");
+    }
     expect(setup).toContain(
       "A proposal above a family's highest Selectable effort clamps to that effort."
     );
@@ -592,7 +590,6 @@ describe("model matrix", () => {
     expect(setup).toContain("Setup never substitutes a family on its own.");
     expect(setup).toContain("The descriptors keep the only effort values");
     for (const label of [
-      "`unlimited — max reasoning`",
       "`large — xhigh reasoning`",
       "`medium — high reasoning`",
       "`small — medium reasoning`",
