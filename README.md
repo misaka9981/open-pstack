@@ -92,7 +92,7 @@ In Codex, ask:
 Use pstack:setup-pstack to configure pstack.
 ```
 
-Setup checks the models you can actually run, shows how each one will start, and asks before saving the choices. The current default group uses Fable, Opus, and GPT-6.1 Sol. Claude models run at `high` reasoning or lower.
+Setup checks the models you can actually run, shows how each one will start, and asks before saving the choices. Code, prose, and judgment default to Opus. The default review panel uses Fable, Opus, and GPT-6.1 Sol. Claude models run at `high` reasoning or lower, and no model runs above `xhigh`. Outside a panel, Fable runs only when you name it or after two Opus runs of the same brief fail.
 
 An older model sheet starts using the rolling aliases in memory as soon as this release is installed. Run setup once after updating to persist that migration. It replaces versioned Fable and Opus entries while preserving every role assignment and effort selection.
 
@@ -142,7 +142,7 @@ Plugin skills include `pstack:` in their name. In Claude Code, invoke a native s
 
 ## Models and token use
 
-Some pstack workflows use one model. Skills such as `architect`, `arena`, and `interrogate` can run several models in parallel. Each model run uses the subscription and token allowance of its own command-line tool.
+Some pstack workflows use one model. Skills such as `arena` and `interrogate` can run several models in parallel. Each model run uses the subscription and token allowance of its own command-line tool.
 
 This repository ships its model sheet at `plugins/pstack/pstack-models.md`. Claude Code loads it at session start, so no setup is needed there. To change models, edit that file in the repository, then update the plugin. The shipped sheet uses Opus for code and judgment roles and Sonnet for swarm workers. Its arena panel adds GPT-6.1 Sol and two models from the `magpie` relay, so that panel also needs the Codex command-line tool with the relay configured.
 
@@ -175,7 +175,7 @@ This repository also keeps:
 
 ## Staying close to Lauren's pstack
 
-Open Pstack 1.26.0 tracks pstack 0.15.42 at Cursor commit [`bf0c7cd80abdbf7fe47b634978a7d1b4071f71a7`](https://github.com/cursor/plugins/commit/bf0c7cd80abdbf7fe47b634978a7d1b4071f71a7).
+Open Pstack 1.27.0 tracks pstack 0.15.43 at Cursor commit [`2f87c854fe3e2fcda44ca86b46ede35aad3c46b7`](https://github.com/cursor/plugins/commit/2f87c854fe3e2fcda44ca86b46ede35aad3c46b7).
 
 The two projects have separate version numbers. The pstack version identifies Lauren's upstream content. The Open Pstack version identifies the Claude Code and Codex package built from it.
 

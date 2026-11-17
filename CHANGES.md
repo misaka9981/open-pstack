@@ -2,6 +2,22 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.27.0 syncs to Cursor pstack 0.15.43, shortens the skill texts, and adds worker.md
+
+Open Pstack 1.27.0 tracks Cursor pstack 0.15.43 at `2f87c854fe3e2fcda44ca86b46ede35aad3c46b7` (#90). It reviews one upstream squash commit after `bf0c7cd`, cursor/plugins#1249. The catalog stays at 59 skills, and the playbooks drop from 23 to 22.
+
+**Shorter texts.** Fourteen principle leaves, `unslop`, and `technical-writing` take upstream's shorter bodies. `unslop` keeps its rule numbers, so poteto-mode's rule 14 citation still holds. poteto-mode's triggers become ten short lines, Writing the reply becomes one paragraph, the Comments section and the skip-reason rule go, and the Playbooks section lists the 22 playbooks by name. The port keeps its Platform Adaptation section and its provider dispatch paragraph, and maps upstream's `control-ui`, `control-cli`, and `cursor-team-kit` `/deslop` to `verify`, `run`, and the bundled `deslop`.
+
+**worker.md.** `poteto-mode/worker.md` gives every started agent the operator's rules: the kickoff's bar is the whole bar, ask no person a question, open PRs ready, and keep the PR title and body shape. Each kickoff's first line points at it. The port adds the repository-required draft exception to its draft rule.
+
+**Removed workflows.** The Orchestrate playbook is deleted, and program-scale work routes to `figure-it-out`. `check-plan.mjs`, its test, and its tsconfig are deleted, because the shorter multi-phase plan has no skeleton for it to check. `reflect` is one file that reads the transcript itself, with no reviewers or synthesizer. `architect` is one paragraph that routes a large or contested design to `arena`, and its three reference files are deleted.
+
+**Playbooks.** Babysit becomes six rules and Opening a PR three paragraphs. Both keep the port's base-repository scope, pinned watcher, fork PR API call, draft rule, and disarm-and-confirm rule, which the repro test checks. Autopilot-full owners rebase their own branch where Babysit reports a rebase. Feature, Refactoring, Bug fix, and Eval take upstream's wording.
+
+**Models.** The `hardest tasks`, `architect runners`, and `reflect tooling, judgment, divergent, synthesizer` roles are retired. Setup drops their rows, and the shipped sheet loses them. Fable runs outside a panel only when the user names it or after two Opus `high` runs of the same brief fail. The arena cross-judge pool drops Fable. Every family now selects at most `xhigh`, so Sol, Grok, and the relay families lose `max`, and setup drops the `unlimited` budget. Every Claude family stays capped at `high`. An older `max` descriptor runs at `xhigh` through read-time normalization. The model-matrix test and the repro test check the new role list, the judge pool, and the cap.
+
+**Not applied.** Upstream's `-fast` slugs, its Opus `xhigh` default, its `poteto-agent` model pin, its rejected-slug fallback chains, and its `# defaults: 3` migration stay out, as `UPSTREAM.md` records.
+
 ## 1.26.0 syncs to Cursor pstack 0.15.42, moves the default models, and cuts why and how to one file each
 
 Open Pstack 1.26.0 tracks Cursor pstack 0.15.42 at `bf0c7cd80abdbf7fe47b634978a7d1b4071f71a7` (#87). It reviews one upstream squash commit after `c742dd6`, cursor/plugins#1236. The catalog stays at 59 skills.
