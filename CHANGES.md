@@ -2,6 +2,16 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.28.0 syncs to Cursor pstack 0.15.48, adds reframe, and runs statechart on native Windows
+
+Open Pstack 1.28.0 tracks Cursor pstack 0.15.48 at `9e278fe4d4ecd8bfe98b1b79bf4be662efb338cc` (#92). It reviews five upstream commits after `2f87c85`. The catalog grows from 59 to 60 skills.
+
+**Reframe.** `2dd5c0c` adds `reframe`, and `9e278fe` adds its first step. It teaches the expert words for what the operator is building, starting from their own files and words. When the description could name more than one problem, it lists the two or three it could be, with the sign that tells each apart, and picks the likeliest. Then it gives 8 to 12 ranked terms, each with a checked link, borrows terms from 2 or 3 neighboring fields, and rewrites the description. The port takes the skill verbatim. It keeps `disable-model-invocation: true`, like `sharpen`, because nothing routes to it by name. The `poteto-help` row, the typed-only lists in `poteto-help`, `codex-tools.md`, and `pi-tools.md`, the README, the technical reference, and the repro test's user-only list follow.
+
+**Statechart on Windows.** `0b46ec3` makes `/statechart` read TLC's `\r\n` line ends, so a broken rule no longer hides behind a carriage return. The group kill and the janitor stop spawning `/bin/sh`, the janitor spares a reused Windows pid after the worker exits, and `java` and `mise` start with `windowsHide`. A replay of every corpus case with Windows line ends guards the fix. The port takes it verbatim, including the new `kill.ts` and `janitor.ts`.
+
+**Not applied.** `e58dd04` and `dd24b67` move upstream's Gemini panel seat to `gemini-4-neon-xhigh`. The port has no Gemini route, and Sol holds that seat, so the panels stay as they are. `UPSTREAM.md` records it.
+
 ## 1.27.0 syncs to Cursor pstack 0.15.43, shortens the skill texts, and adds worker.md
 
 Open Pstack 1.27.0 tracks Cursor pstack 0.15.43 at `2f87c854fe3e2fcda44ca86b46ede35aad3c46b7` (#90). It reviews one upstream squash commit after `bf0c7cd`, cursor/plugins#1249. The catalog stays at 59 skills, and the playbooks drop from 23 to 22.

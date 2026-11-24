@@ -59,7 +59,7 @@ The marketplace install is the normal user path. Direct links are only for testi
 ├── plugins/pstack/                   # the plugin itself
 │   ├── .claude-plugin/plugin.json    # Claude Code manifest
 │   ├── .codex-plugin/plugin.json     # Codex manifest (skills: ./skills/)
-│   ├── skills/                       # 59 skills shared by Claude Code, Codex, and Pi
+│   ├── skills/                       # 60 skills shared by Claude Code, Codex, and Pi
 │   │   ├── poteto-mode/references/{codex-tools,pi-tools,provider-dispatch}.md  # tool + provider routing
 │   │   └── poteto-mode/scripts/      # bun/bash/node tooling: watch-pr, runner, worktree-audit.sh
 │   ├── hooks/                        # SessionStart auto-fire: injects the poteto-mode mandate (the model sheet only on Claude Code)
@@ -124,6 +124,7 @@ The table uses the short upstream names. Claude Code exposes each native skill w
 | `/poteto-help` | learn how to set up and use pstack, or find which skill, playbook, or principle fits a task (user-invoked only on Claude Code and Pi) |
 | `/in-your-own-words` | have the agent play back your goal and the problem before it starts |
 | `/sharpen` | rewrite a prompt to be deeper, not bigger, with what a top professional would add and an outside check, and hand it back without doing the task (user-invoked only on Claude Code and Pi) |
+| `/reframe` | learn the expert words for what you're building, with terms borrowed from neighboring fields and every cited link checked, and get your description rewritten with them (user-invoked only on Claude Code and Pi) |
 | `/how` | walk through how a subsystem works |
 | `/why` | answer why something was built this way from the commits and PR discussions behind it, with citations and marked inferences |
 | `/architect` | settle types and module shape before writing code that crosses a function boundary |

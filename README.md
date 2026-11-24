@@ -123,6 +123,7 @@ That is the main workflow. The other skills are there when poteto-mode needs the
 | `poteto-help` | You are new to pstack or unsure which skill fits. It answers your question and gives you a prompt to send. On Claude Code and Pi, it runs only when you type it. |
 | `in-your-own-words` | You want the agent to play back your goal and the problem before it starts. Interrogate also uses it to state the intent of a change. |
 | `sharpen` | You want a prompt made deeper, not bigger, before you send it. It adds what a top professional would do that you did not ask for, the raw material and methods they would use, and an outside check that the result is right. It hands back the rewritten prompt, which asks the agent to prototype any choice an experiment can settle and leaves product and preference choices to you. It does not do the task. On Claude Code and Pi, it runs only when you type it. |
+| `reframe` | You can't name what you're building, so you can't ask an agent for it clearly. It starts from your files and your own words. If they could describe more than one problem, it lists the two or three it could be and picks the likeliest. Then it gives 8 to 12 expert terms, each tied to a real project whose link it checked, borrows terms from 2 or 3 neighboring fields, and rewrites your description with the new words. On Claude Code and Pi, it runs only when you type it. |
 | `how` | You want a clear explanation of how part of the system works. |
 | `why` | You want evidence for why the system was built that way. |
 | `architect` | A change crosses a function or module boundary and the design needs to be settled first. |
@@ -175,7 +176,7 @@ This repository also keeps:
 
 ## Staying close to Lauren's pstack
 
-Open Pstack 1.27.0 tracks pstack 0.15.43 at Cursor commit [`2f87c854fe3e2fcda44ca86b46ede35aad3c46b7`](https://github.com/cursor/plugins/commit/2f87c854fe3e2fcda44ca86b46ede35aad3c46b7).
+Open Pstack 1.28.0 tracks pstack 0.15.48 at Cursor commit [`9e278fe4d4ecd8bfe98b1b79bf4be662efb338cc`](https://github.com/cursor/plugins/commit/9e278fe4d4ecd8bfe98b1b79bf4be662efb338cc).
 
 The two projects have separate version numbers. The pstack version identifies Lauren's upstream content. The Open Pstack version identifies the Claude Code and Codex package built from it.
 
