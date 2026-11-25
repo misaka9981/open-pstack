@@ -10,7 +10,7 @@ bug-fix: claude:opus@medium
 perf-issue: claude:opus@medium
 hillclimb: claude:opus@medium
 judgment and prose: claude:opus@high
-arena runners: claude:sonnet@medium, codex:gpt-6.1-sol@medium, magpie:wevnal/deepseek-v4.1-flash@high, magpie:wevnal/glm-5.3-flash@high
-arena cross-judge pool: claude:opus@high, codex:gpt-6.1-sol@high
+arena runners: claude:sonnet@medium, codex:gpt-6.2-sol@high, magpie:wevnal/deepseek-v4.1-flash@high, magpie:wevnal/glm-5.3-flash@high
+arena cross-judge pool: claude:opus@high, codex:gpt-6.2-sol@high
 swarm workers: claude:sonnet@medium
-interrogate reviewers: claude:opus@high, codex:gpt-6.1-sol@high
+interrogate reviewers: claude:opus@high, codex:gpt-6.2-sol@high

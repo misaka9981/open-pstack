@@ -73,7 +73,7 @@ Probe only the selected `provider:model@effort` pair of each used family. Run on
 |---|---|---|---|---|---|
 | Fable | Fable matrix row + selected effort | native Agent `pstack-fable-<effort>` | Claude CLI | not routed | native one-turn probe or `claude auth status --json` plus one-turn probe |
 | Opus | Opus matrix row + selected effort | native Agent `pstack-opus-<effort>` | Claude CLI | not routed | native one-turn probe or `claude auth status --json` plus one-turn probe |
-| Sol | Sol matrix row + selected effort | `codex exec` | native `spawn_agent` | Lody session `magpie/codex/gpt-6.1-sol` | `codex login status` plus one-turn probe or native one-turn probe |
+| Sol | Sol matrix row + selected effort | `codex exec` | native `spawn_agent` | Lody session `magpie/codex/gpt-6.2-sol` | `codex login status` plus one-turn probe or native one-turn probe |
 | Sonnet | sonnet additional Claude row + selected effort | native Agent `pstack-sonnet-<effort>` | Claude CLI | not routed | native one-turn probe or `claude auth status --json` plus one-turn probe |
 | Haiku | haiku additional Claude row + selected effort | native Agent `pstack-haiku-<effort>` | Claude CLI for `isolated-write` only; a read-only Haiku lane is a dropout because Claude plan mode serves Sonnet | not routed | native one-turn probe or `claude auth status --json` plus one-turn probe |
 | Grok | Grok family row + selected effort | Grok CLI | Grok CLI | not routed | `grok models` must list the requested model; one-turn probe |
@@ -116,10 +116,10 @@ bug-fix: claude:opus@high
 perf-issue: claude:opus@high
 hillclimb: claude:opus@high
 judgment and prose: claude:opus@high
-arena runners: claude:fable@high, claude:opus@high, codex:gpt-6.1-sol@xhigh
-arena cross-judge pool: claude:opus@high, codex:gpt-6.1-sol@xhigh
+arena runners: claude:fable@high, claude:opus@high, codex:gpt-6.2-sol@xhigh
+arena cross-judge pool: claude:opus@high, codex:gpt-6.2-sol@xhigh
 swarm workers: claude:opus@high
-interrogate reviewers: claude:fable@high, claude:opus@high, codex:gpt-6.1-sol@xhigh
+interrogate reviewers: claude:fable@high, claude:opus@high, codex:gpt-6.2-sol@xhigh
 ```
 
 ### 10. Wire it in

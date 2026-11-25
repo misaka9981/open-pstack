@@ -12,7 +12,7 @@ pstack model choices are provider-qualified descriptors:
 |---|---|---|---|---|---|---|
 | fable | fable | claude | fable | high | low medium high | fable |
 | opus | opus | claude | opus | high | low medium high | opus |
-| sol | gpt-5.6-sol-max | codex | gpt-6.1-sol | xhigh | low medium high xhigh | - |
+| sol | gpt-5.6-sol-max | codex | gpt-6.2-sol | xhigh | low medium high xhigh | - |
 
 The allowed effort universe is exactly `low`, `medium`, `high`, `xhigh`, `max`. First-run requested efforts are the Default effort cell of each row. No family selects `max`, because upstream runs no role above `xhigh`. Every Claude family selects at most `high`, which is the maintainer's cap. Sol takes the panel seat that upstream gives Gemini. The port has no Gemini route, and Sol is the only family that a Codex parent runs natively and a Pi parent reaches. A Claude-native agent stem of `-` means the family has no Claude-native agent. Otherwise the shipped agent name is `pstack-<stem>-<effort>`.
 

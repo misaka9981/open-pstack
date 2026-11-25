@@ -193,7 +193,7 @@ The port is editorial, not mechanical. Anywhere upstream pstack assumed Cursor-s
 | Cursor cloud agents (`environment: "cloud"`, `cloud_base_branch`) | Local background subagents (`run_in_background: true`), isolated by git worktree |
 | Model rule `~/.cursor/rules/pstack-models.mdc` | The repository sheet `plugins/pstack/pstack-models.md`, injected by the SessionStart hook. Without it, `~/.claude/pstack-models.md` included from `CLAUDE.md` |
 | Arena's cross-judge: "a different model family from the parent's" | A judge whose provider differs from the parent and from the likely base candidate, so the judge did not write the candidate it most likely picks |
-| Multi-model panels (arena, interrogate) | Provider dispatch runs a cross-provider panel: `claude:fable@high`, `claude:opus@high`, `codex:gpt-6.1-sol@xhigh`. Sol takes upstream's Gemini seat. Same-provider lanes stay native; external lanes use the bundled runner. |
+| Multi-model panels (arena, interrogate) | Provider dispatch runs a cross-provider panel: `claude:fable@high`, `claude:opus@high`, `codex:gpt-6.2-sol@xhigh`. Sol takes upstream's Gemini seat. Same-provider lanes stay native; external lanes use the bundled runner. |
 
 ### Cross-vendor dispatch
 

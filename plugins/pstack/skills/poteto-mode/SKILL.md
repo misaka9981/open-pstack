@@ -92,7 +92,7 @@ Provider dispatch picks the route. On Claude Code, a `claude:*` role sets the `p
 
 - Code, prose, and judgment: `claude:opus@high`.
 - Trivial mechanical edits: `claude:opus@high`.
-- Diverse review and design panels: one lane each on `claude:fable@high`, `claude:opus@high`, and `codex:gpt-6.1-sol@xhigh`.
+- Diverse review and design panels: one lane each on `claude:fable@high`, `claude:opus@high`, and `codex:gpt-6.2-sol@xhigh`.
 
 **Fable is an exception.** It runs outside a panel only when the user named it for this task or two Opus `high` runs of the same brief failed its check. Say which. Difficulty alone never qualifies.
 
