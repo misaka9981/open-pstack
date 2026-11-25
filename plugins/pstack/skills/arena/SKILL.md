@@ -15,7 +15,7 @@ Every candidate gets the same prompt, so the prompt is the contract.
 
 1. State the artifact each candidate is producing.
 2. Derive the rubric, 3-6 concrete gradeable criteria for what success looks like on *this* task. It is the picker's tool in Phase D. Candidates only see the task.
-3. Pick the runners from `arena runners` in the current harness's pstack model sheet, by default `claude:fable@high`, `claude:opus@high`, and `codex:gpt-6.1-sol@xhigh`. Spawn more for multiple design directions, and repeat one descriptor when the work is generation-bound, not judgment-sensitive. Pick each subagent's reasoning level per the Subagents section of the **poteto-mode** skill.
+3. Pick the runners from `arena runners` in the current harness's pstack model sheet, by default `claude:fable@high`, `claude:opus@high`, and `codex:gpt-6.2-sol@xhigh`. Spawn more for multiple design directions, and repeat one descriptor when the work is generation-bound, not judgment-sensitive. Pick each subagent's reasoning level per the Subagents section of the **poteto-mode** skill.
 4. Give each candidate its own output location (a git worktree where possible, otherwise `/tmp/arena-<slug>/candidate-<n>/`), per the **separate-before-serializing-shared-state** principle skill.
 
 ## Phase B: Fan out
@@ -26,7 +26,7 @@ An external lane counts only when its receipt says `complete` and carries either
 
 ## Phase C: Cross-judge
 
-After all Phase B candidates complete, choose the judge descriptor from `arena cross-judge pool` in the current harness's pstack model sheet, by default `claude:opus@high`, `codex:gpt-6.1-sol@xhigh`. The judge never runs on the parent's provider, and Fable counts as Claude for that check. Among the entries from another provider, take the first in pool order that also differs from the likely base candidate's provider, else the first in pool order. An `auto` or `inherit-parent` entry is the parent model, so it never judges. If no entry comes from another provider, or the chosen judge drops out, skip the judge, pick the base alone in Phase D, and say so. Dispatch one read-only judge through the provider contract. While you read in Phase D, the judge scores each candidate, by path label, on each rubric criterion and recommends a base. Don't dispatch it while candidates are still writing.
+After all Phase B candidates complete, choose the judge descriptor from `arena cross-judge pool` in the current harness's pstack model sheet, by default `claude:opus@high`, `codex:gpt-6.2-sol@xhigh`. The judge never runs on the parent's provider, and Fable counts as Claude for that check. Among the entries from another provider, take the first in pool order that also differs from the likely base candidate's provider, else the first in pool order. An `auto` or `inherit-parent` entry is the parent model, so it never judges. If no entry comes from another provider, or the chosen judge drops out, skip the judge, pick the base alone in Phase D, and say so. Dispatch one read-only judge through the provider contract. While you read in Phase D, the judge scores each candidate, by path label, on each rubric criterion and recommends a base. Don't dispatch it while candidates are still writing.
 
 ## Phase D: Pick a base
 

@@ -2,6 +2,10 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.28.1 moves Sol to gpt-6.2-sol
+
+The Sol matrix family now pins `codex:gpt-6.2-sol` instead of `gpt-6.1-sol`, and Pi Sol lanes map to `magpie/codex/gpt-6.2-sol`. Setup's first-run panels, the arena defaults, poteto-mode, `codex-tools.md`, and the docs follow. The shipped Claude Code sheet runs every Codex lane at `high`; the arena runner lane moves up from `medium`. A one-turn runner probe passed for `codex:gpt-6.2-sol` at `low`, `medium`, `high`, and `xhigh`, and a Pi probe of `magpie/codex/gpt-6.2-sol` passed at `high`.
+
 ## 1.28.0 syncs to Cursor pstack 0.15.48, adds reframe, and runs statechart on native Windows
 
 Open Pstack 1.28.0 tracks Cursor pstack 0.15.48 at `9e278fe4d4ecd8bfe98b1b79bf4be662efb338cc` (#92). It reviews five upstream commits after `2f87c85`. The catalog grows from 59 to 60 skills.
