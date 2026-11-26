@@ -2,6 +2,10 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.29.1 moves the shipped sheet's Codex lanes back to Sol
+
+The shipped Claude Code sheet runs every Codex lane on `gpt-6.2-sol@high` again, because `gpt-6.2-astra@high` used too much quota. Astra stays available as a setup family.
+
 ## 1.29.0 runs DeepSeek and GLM through OpenCode and drops Pi
 
 Open Pstack now supports two parent harnesses, Claude Code and Codex. Non-Claude models run on their own command-line tools: GPT on Codex, Grok on Grok, and DeepSeek and GLM on OpenCode.
