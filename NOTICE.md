@@ -64,7 +64,6 @@ Files authored for this port (not derived from upstream):
 - `plugins/pstack/.codex-plugin/plugin.json`
 - `.agents/plugins/marketplace.json` (repo root)
 - `plugins/pstack/skills/poteto-mode/references/codex-tools.md`
-- `plugins/pstack/skills/poteto-mode/references/pi-tools.md`
 - `plugins/pstack/skills/poteto-mode/references/provider-dispatch.md`
 - `plugins/pstack/pstack-models.md` (the shipped Claude Code model sheet)
 - `plugins/pstack/skills/poteto-mode/scripts/runner/` (the external provider runner and its tests)

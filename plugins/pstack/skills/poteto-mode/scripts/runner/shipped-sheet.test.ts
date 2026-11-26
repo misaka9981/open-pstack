@@ -62,8 +62,9 @@ function selectableFamilies(): Map<string, string[]> {
   return new Map([
     ...familyEfforts("## Model matrix"),
     ...familyEfforts("## Additional Claude families"),
+    ...familyEfforts("## Additional Codex family"),
     ...familyEfforts("## Additional Grok family"),
-    ...familyEfforts("## Relay providers"),
+    ...familyEfforts("## Additional OpenCode families"),
   ]);
 }
 

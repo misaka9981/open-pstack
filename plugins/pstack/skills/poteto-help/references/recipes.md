@@ -2,7 +2,7 @@
 
 Swap in the real paths, skills, and done checks. Informal wording works.
 
-**Platform note.** Skill names here are short. Write them in the user's harness form, as the Platform note in [`SKILL.md`](../SKILL.md) says. `/loop` is a Claude Code built-in. On Codex or Pi, resolve it via [`codex-tools.md`](../../poteto-mode/references/codex-tools.md) or [`pi-tools.md`](../../poteto-mode/references/pi-tools.md).
+**Platform note.** Skill names here are short. Write them in the user's harness form, as the Platform note in [`SKILL.md`](../SKILL.md) says. `/loop` is a Claude Code built-in. On Codex, resolve it via [`codex-tools.md`](../../poteto-mode/references/codex-tools.md).
 
 ## Understand
 

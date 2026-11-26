@@ -25,6 +25,8 @@ const FAKE_MCP_ENV = [
   "FAKE_MCP_LIST_DELAY_MS",
   "FAKE_MCP_LIST_LOG_PATH",
   "FAKE_MODEL_ARGV_PATH",
+  "FAKE_MODEL_ENV_PATH",
+  "FAKE_OPENCODE_MISSING_MODEL",
 ] as const;
 const LISTING_ARGS = [
   "--disable", "plugins",
@@ -46,7 +48,8 @@ const name = process.argv[1].split("/").at(-1);
 const isPreflight =
   (name === "claude" && args[0] === "auth") ||
   (name === "codex" && (args[0] === "login" || args[0] === "--version" || args.includes("mcp"))) ||
-  (name === "grok" && args[0] === "models");
+  (name === "grok" && args[0] === "models") ||
+  (name === "opencode" && args[0] === "models");
 const stage = isPreflight ? "preflight" : "model";
 const startedPath = isPreflight
   ? process.env.FAKE_PREFLIGHT_STARTED_PATH
@@ -104,6 +107,15 @@ if (name === "codex" && args.includes("mcp")) {
 if (stage === "model" && process.env.FAKE_MODEL_ARGV_PATH) {
   writeFileSync(process.env.FAKE_MODEL_ARGV_PATH, JSON.stringify(args));
 }
+if (stage === "model" && process.env.FAKE_MODEL_ENV_PATH) {
+  writeFileSync(process.env.FAKE_MODEL_ENV_PATH, JSON.stringify(process.env));
+}
+if (name === "opencode" && args[0] === "models") {
+  const models = ["opencode/glm-5.3", "opencode/deepseek-v4.1-flash"];
+  if (process.env.FAKE_OPENCODE_MISSING_MODEL !== "1") models.push("opencode/glm-5.3-flash");
+  console.log(models.join("\\n"));
+  process.exit(0);
+}
 if (name === "grok" && args[0] === "models") {
   if (process.env.FAKE_GROK_PREFLIGHT_LOG_PATH) {
     appendFileSync(process.env.FAKE_GROK_PREFLIGHT_LOG_PATH, "attempt\\n");
@@ -157,6 +169,14 @@ if (stage === "model" && process.env.FAKE_SELF_SIGNAL) {
 }
 if (name === "claude") {
   console.log(JSON.stringify({result:"CLAUDE_OK",session_id:"c1",usage:{input_tokens:10,output_tokens:2},total_cost_usd:0.01,modelUsage:{[reportedModel]:{}}}));
+} else if (name === "opencode") {
+  const step = (text) => {
+    console.log(JSON.stringify({type:"step_start",sessionID:"oc1",part:{type:"step-start"}}));
+    console.log(JSON.stringify({type:"text",sessionID:"oc1",part:{type:"text",text}}));
+    console.log(JSON.stringify({type:"step_finish",sessionID:"oc1",part:{type:"step-finish",cost:0.25,tokens:{input:40,output:5,reasoning:2,cache:{read:8,write:0}}}}));
+  };
+  step("progress");
+  step("OPENCODE_OK");
 } else if (name === "codex") {
   console.log(JSON.stringify({type:"thread.started",thread_id:"o1"}));
   console.log(JSON.stringify({type:"item.completed",item:{type:"agent_message",text:"CODEX_OK"}}));
@@ -183,14 +203,14 @@ function options(provider: Provider, suffix: string = provider): RunnerOptions {
       ? "fable"
       : provider === "codex"
         ? "gpt-5.6-sol"
-        : provider === "magpie"
-          ? "wevnal/glm-5.3"
+        : provider === "opencode"
+          ? "opencode/glm-5.3-flash"
           : "grok-4.6";
   return {
     parent,
     provider,
     model,
-    effort: provider === "grok" ? "xhigh" : "max",
+    effort: provider === "grok" ? "xhigh" : provider === "opencode" ? "high" : "max",
     mode: "read-only",
     promptPath: join(scratch, "prompt.md"),
     cwd: scratch,
@@ -264,7 +284,7 @@ beforeEach(() => {
   bin = join(scratch, "bin");
   mkdirSync(bin);
   writeFileSync(join(scratch, "prompt.md"), "Return the marker.");
-  for (const name of ["claude", "codex", "grok"]) makeExecutable(name);
+  for (const name of ["claude", "codex", "grok", "opencode"]) makeExecutable(name);
   previousPath = process.env.PATH;
   process.env.PATH = `${bin}:${dirname(process.execPath)}:${previousPath ?? ""}`;
   delete process.env.FAKE_TIMEOUT;
@@ -317,14 +337,14 @@ afterEach(() => {
 });
 
 describe("runLane", () => {
-  for (const provider of ["claude", "codex", "grok", "magpie"] as const) {
+  for (const provider of ["claude", "codex", "grok", "opencode"] as const) {
     it(`executes and receipts the ${provider} external lane`, async () => {
       const input = options(provider);
-      const pinned = provider === "codex" || provider === "magpie";
+      const pinned = provider === "codex" || provider === "opencode";
       const result = await runLane(input);
       expect(result.exitCode).toBe(0);
       expect(readFileSync(input.outputPath, "utf8")).toContain(
-        provider === "magpie" ? "CODEX" : provider.toUpperCase()
+        provider.toUpperCase()
       );
       expect(receipt(input.receiptPath)).toMatchObject({
         status: "complete",
@@ -354,15 +374,87 @@ describe("runLane", () => {
     });
   }
 
-  it("routes a magpie lane for a Claude Code parent", async () => {
-    const input = { ...options("magpie", "claude-parent-magpie"), parent: "claude" as const };
+  it("routes an OpenCode lane for a Claude Code parent", async () => {
+    const input = { ...options("opencode", "claude-parent-opencode"), parent: "claude" as const };
     expect((await runLane(input)).exitCode).toBe(0);
     expect(receipt(input.receiptPath)).toMatchObject({
       status: "complete",
       parent: "claude",
-      provider: "magpie",
+      provider: "opencode",
       modelEvidence: "pinned-argv",
     });
+  });
+
+  it("keeps only the last OpenCode step's text and sums every step's usage", async () => {
+    const input = options("opencode", "opencode-steps");
+    expect((await runLane(input)).exitCode).toBe(0);
+    expect(readFileSync(input.outputPath, "utf8")).toBe("OPENCODE_OK");
+    expect(receipt(input.receiptPath)).toMatchObject({
+      sessionId: "oc1",
+      costUsd: 0.5,
+      usage: { inputTokens: 80, outputTokens: 10, reasoningTokens: 4, cachedInputTokens: 16 },
+    });
+  });
+
+  for (const mode of ["read-only", "isolated-write"] as const) {
+    it(`hands an OpenCode ${mode} child its agent rules and isolation flags`, async () => {
+      const envPath = join(scratch, `opencode-${mode}.env.json`);
+      process.env.FAKE_MODEL_ENV_PATH = envPath;
+      const input = { ...options("opencode", `opencode-${mode}`), mode };
+      expect((await runLane(input)).exitCode).toBe(0);
+      const env = JSON.parse(readFileSync(envPath, "utf8")) as Record<string, string>;
+      const config = JSON.parse(env.OPENCODE_CONFIG_CONTENT);
+      const allowed = config.agents["pstack-lane"].permissions
+        .filter((rule: { effect: string }) => rule.effect === "allow")
+        .map((rule: { action: string }) => rule.action);
+      expect(allowed.includes("edit")).toBe(mode === "isolated-write");
+      expect(allowed.includes("shell")).toBe(mode === "isolated-write");
+      expect(env.PWD).toBe(input.cwd);
+      expect(env.OPENCODE_DISABLE_AUTOUPDATE).toBe("1");
+      expect(env.OPENCODE_DISABLE_CLAUDE_CODE).toBe("1");
+    });
+  }
+
+  it("drops out before launch when OpenCode does not list the model", async () => {
+    process.env.FAKE_OPENCODE_MISSING_MODEL = "1";
+    const modelStarted = join(scratch, "opencode-missing-model.started");
+    process.env.FAKE_MODEL_STARTED_PATH = modelStarted;
+    const input = options("opencode");
+    const result = await runLane(input);
+    expect(result.exitCode).toBe(69);
+    expect(existsSync(modelStarted)).toBe(false);
+    expect(existsSync(input.outputPath)).toBe(false);
+    expect(receipt(input.receiptPath)).toMatchObject({
+      status: "unavailable-model",
+      provider: "opencode",
+      model: "opencode/glm-5.3-flash",
+      preflight: { status: "failed" },
+    });
+  });
+
+  it("finds OpenCode in its installer directory when PATH lacks it", async () => {
+    const home = join(scratch, "home");
+    const installDir = join(home, ".opencode", "bin");
+    mkdirSync(installDir, { recursive: true });
+    cpSync(join(bin, "opencode"), join(installDir, "opencode"));
+    rmSync(join(bin, "opencode"));
+    const previousHome = process.env.HOME;
+    process.env.HOME = home;
+    try {
+      const input = options("opencode", "opencode-install-dir");
+      expect((await runLane(input)).exitCode).toBe(0);
+      expect(receipt(input.receiptPath).executable).toBe(join(installDir, "opencode"));
+    } finally {
+      process.env.HOME = previousHome;
+    }
+  });
+
+  it("rejects an OpenCode model without a provider or with its own variant", async () => {
+    for (const model of ["glm-5.3-flash", "opencode/glm-5.3-flash#max"]) {
+      await expect(runLane({ ...options("opencode"), model })).rejects.toThrow(
+        "<provider>/<model>"
+      );
+    }
   });
 
   it("records Codex's exact argv without fabricating a reported model", async () => {
@@ -378,54 +470,52 @@ describe("runLane", () => {
     });
   });
 
-  it("classifies a magpie model the relay rejects as unavailable", async () => {
+  it("classifies an OpenCode model the provider rejects as unavailable", async () => {
     process.env.FAKE_INVALID_MODEL = "1";
-    const input = options("magpie");
+    const input = options("opencode");
     const result = await runLane(input);
     expect(result.exitCode).toBe(69);
     expect(existsSync(input.outputPath)).toBe(false);
     expect(receipt(input.receiptPath)).toMatchObject({
       status: "unavailable-model",
-      provider: "magpie",
-      model: "wevnal/glm-5.3",
+      provider: "opencode",
+      model: "opencode/glm-5.3-flash",
       preflight: { status: "passed" },
     });
   });
 
-  for (const provider of ["codex", "magpie"] as const) {
-    it(`runs a ${provider} child without apps and with each enabled MCP server off`, async () => {
-      const argvPath = join(scratch, `${provider}-mcp.argv.json`);
-      const listLog = join(scratch, `${provider}-mcp.list.log`);
-      process.env.FAKE_MODEL_ARGV_PATH = argvPath;
-      process.env.FAKE_MCP_LIST_LOG_PATH = listLog;
-      process.env.FAKE_MCP_LIST_JSON = JSON.stringify([
-        { name: "notion", enabled: true },
-        { name: "code-review", enabled: false },
-        { name: "incident-io", enabled: true },
-      ]);
-      const input = options(provider, `${provider}-mcp`);
-      expect((await runLane(input)).exitCode).toBe(0);
+  it("runs a codex child without apps and with each enabled MCP server off", async () => {
+    const argvPath = join(scratch, "codex-mcp.argv.json");
+    const listLog = join(scratch, "codex-mcp.list.log");
+    process.env.FAKE_MODEL_ARGV_PATH = argvPath;
+    process.env.FAKE_MCP_LIST_LOG_PATH = listLog;
+    process.env.FAKE_MCP_LIST_JSON = JSON.stringify([
+      { name: "notion", enabled: true },
+      { name: "code-review", enabled: false },
+      { name: "incident-io", enabled: true },
+    ]);
+    const input = options("codex", "codex-mcp");
+    expect((await runLane(input)).exitCode).toBe(0);
 
-      const args = JSON.parse(readFileSync(argvPath, "utf8")) as string[];
-      expect(disabledFeatures(args)).toContain("apps");
-      // Plugins contribute MCP servers, so the listing must see the child's
-      // feature set or it names servers the child does not have.
-      const listingArgs = readFileSync(listLog, "utf8").trim().split(" ");
-      expect(disabledFeatures(listingArgs)).toEqual(disabledFeatures(args));
-      const configs = args.filter((arg) => arg.startsWith("mcp_servers."));
-      expect(configs).toEqual([
-        "mcp_servers.notion.enabled=false",
-        "mcp_servers.incident-io.enabled=false",
-      ]);
-      const recorded = receipt(input.receiptPath);
-      expect(recorded.argv.slice(1)).toEqual(args);
-      expect(recorded.preflight).toMatchObject({ status: "passed" });
-      expect(recorded.preflight.evidence).toContain(
-        "MCP servers disabled: notion, incident-io"
-      );
-      expect(recorded.preflight.evidence).not.toContain("code-review");
-    });
-  }
+    const args = JSON.parse(readFileSync(argvPath, "utf8")) as string[];
+    expect(disabledFeatures(args)).toContain("apps");
+    // Plugins contribute MCP servers, so the listing must see the child's
+    // feature set or it names servers the child does not have.
+    const listingArgs = readFileSync(listLog, "utf8").trim().split(" ");
+    expect(disabledFeatures(listingArgs)).toEqual(disabledFeatures(args));
+    const configs = args.filter((arg) => arg.startsWith("mcp_servers."));
+    expect(configs).toEqual([
+      "mcp_servers.notion.enabled=false",
+      "mcp_servers.incident-io.enabled=false",
+    ]);
+    const recorded = receipt(input.receiptPath);
+    expect(recorded.argv.slice(1)).toEqual(args);
+    expect(recorded.preflight).toMatchObject({ status: "passed" });
+    expect(recorded.preflight.evidence).toContain(
+      "MCP servers disabled: notion, incident-io"
+    );
+    expect(recorded.preflight.evidence).not.toContain("code-review");
+  });
 
   it("drops out before the model when an enabled MCP server name cannot be disabled", async () => {
     const modelStarted = join(scratch, "mcp-unaddressable-model.started");
@@ -434,7 +524,7 @@ describe("runLane", () => {
       { name: "notion", enabled: true },
       { name: "my.server", enabled: true },
     ]);
-    const input = options("magpie", "mcp-unaddressable");
+    const input = options("codex", "mcp-unaddressable");
     const result = await runLane(input);
 
     expect(result.exitCode).toBe(69);
@@ -1127,9 +1217,11 @@ describe("childEnvironment", () => {
       PATH: "/bin",
       KEEP_ME: "yes",
     });
-    expect(childEnvironment("magpie", source)).toEqual({
+    expect(childEnvironment("opencode", source)).toEqual({
       PATH: "/bin",
       KEEP_ME: "yes",
+      OPENCODE_DISABLE_AUTOUPDATE: "1",
+      OPENCODE_DISABLE_CLAUDE_CODE: "1",
     });
   });
 });

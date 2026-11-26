@@ -159,6 +159,76 @@ function parseCodex(stdout: string): ParsedOutput {
   };
 }
 
+// `opencode run --format json` emits one event per line. Each model step opens
+// with step_start and closes with step_finish, which carries that step's cost
+// and tokens. The final answer is the text of the last step that wrote any.
+// The stream never names the served model.
+function parseOpencode(stdout: string): ParsedOutput {
+  let stepText: string[] = [];
+  let finalText: string[] = [];
+  let sessionId: string | null = null;
+  let costUsd: number | null = null;
+  const usage: Record<keyof NormalizedUsage, number | undefined> = {
+    inputTokens: undefined,
+    cachedInputTokens: undefined,
+    cacheCreationInputTokens: undefined,
+    outputTokens: undefined,
+    reasoningTokens: undefined,
+    totalTokens: undefined,
+  };
+  const add = (key: keyof NormalizedUsage, value: unknown): void => {
+    const count = finiteNumber(value);
+    if (count !== undefined) usage[key] = (usage[key] ?? 0) + count;
+  };
+
+  for (const line of stdout.split("\n")) {
+    if (line.trim().length === 0) continue;
+    let raw: unknown;
+    try {
+      raw = JSON.parse(line);
+    } catch {
+      throw new Error("opencode emitted a non-JSON event");
+    }
+    const event = object(raw);
+    if (event === null) continue;
+    sessionId = nullableString(event.sessionID) ?? sessionId;
+    const part = object(event.part);
+    if (event.type === "error") {
+      const error = object(event.error);
+      throw new Error(nullableString(error?.message) ?? "opencode reported an error");
+    }
+    if (event.type === "step_start") stepText = [];
+    if (event.type === "text") {
+      const text = nullableString(part?.text);
+      if (text !== null) stepText.push(text);
+    }
+    if (event.type === "step_finish") {
+      if (stepText.length > 0) finalText = stepText;
+      stepText = [];
+      const cost = finiteNumber(part?.cost);
+      if (cost !== undefined) costUsd = (costUsd ?? 0) + cost;
+      const tokens = object(part?.tokens);
+      const cache = object(tokens?.cache);
+      add("inputTokens", tokens?.input);
+      add("outputTokens", tokens?.output);
+      add("reasoningTokens", tokens?.reasoning);
+      add("cachedInputTokens", cache?.read);
+      add("cacheCreationInputTokens", cache?.write);
+    }
+  }
+  if (stepText.length > 0) finalText = stepText;
+
+  const text = finalText.join("\n\n");
+  if (text.length === 0) throw new Error("opencode result did not contain final text");
+  return {
+    text,
+    reportedModel: null,
+    sessionId,
+    usage: Object.values(usage).some((entry) => entry !== undefined) ? usage : null,
+    costUsd,
+  };
+}
+
 export function parseProviderOutput(
   provider: Provider,
   stdout: string,
@@ -169,8 +239,9 @@ export function parseProviderOutput(
     case "claude":
       return parseClaude(stdout, requestedModel);
     case "codex":
-    case "magpie":
       return parseCodex(stdout);
+    case "opencode":
+      return parseOpencode(stdout);
     case "grok":
       return parseGrok(stdout, requestedModel);
   }

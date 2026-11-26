@@ -16,7 +16,6 @@ Live evidence (one row per affected harness; write "unaffected" with the reason 
 |---|---|---|---|
 | Claude Code |  |  |  |
 | Codex |  |  |  |
-| Pi |  |  |  |
 
 
 A pull request without live evidence remains a draft. Do not merge, tag, release, or roll it out.

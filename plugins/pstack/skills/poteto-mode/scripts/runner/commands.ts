@@ -10,6 +10,8 @@ export interface CommandSpec {
   readonly command: string;
   readonly args: readonly string[];
   readonly stdin: "prompt" | "none";
+  // Variables added to the child environment for this command only.
+  readonly env?: Readonly<Record<string, string>>;
 }
 
 export function preflightCommand(provider: Provider): CommandSpec {
@@ -28,10 +30,14 @@ export function preflightCommand(provider: Provider): CommandSpec {
       };
     case "grok":
       return { command: "grok", args: ["models"], stdin: "none" };
-    case "magpie":
-      // Codex cannot list a custom provider's catalog, so the relay and model
-      // are proven by the invocation itself.
-      return { command: "codex", args: ["--version"], stdin: "none" };
+    case "opencode":
+      // The catalog lists a paid model only while its provider is signed in,
+      // so one listing proves the CLI, the credentials, and the model.
+      return {
+        command: "opencode",
+        args: ["models", "--standalone"],
+        stdin: "none",
+      };
   }
 }
 
@@ -56,7 +62,6 @@ const codexFeatureFlags = CODEX_DISABLED_FEATURES.flatMap((feature) => [
 export function mcpListCommand(provider: Provider): CommandSpec | null {
   switch (provider) {
     case "codex":
-    case "magpie":
       return {
         command: "codex",
         args: [...codexFeatureFlags, "mcp", "list", "--json"],
@@ -64,6 +69,7 @@ export function mcpListCommand(provider: Provider): CommandSpec | null {
       };
     case "claude":
     case "grok":
+    case "opencode":
       return null;
   }
 }
@@ -93,44 +99,49 @@ function grokTools(mode: AccessMode): string {
   return [...readonly, ...(mode === "isolated-write" ? ["search_replace"] : [])].join(",");
 }
 
+// OpenCode has no OS sandbox, so the lane runs as a config-defined agent whose
+// permission rules deny every action and then allow the mode's tools. The last
+// matching rule wins and a denied tool is removed from the model's tool list,
+// which also hides MCP, skill, subagent, question, and web tools. Read-only
+// lanes may read outside the cwd; writers keep their file tools inside it.
+const OPENCODE_AGENT = "pstack-lane";
+
+type OpencodePermission = {
+  readonly action: string;
+  readonly resource: string;
+  readonly effect: "allow" | "deny";
+};
+
+function opencodePermissions(mode: AccessMode): readonly OpencodePermission[] {
+  const allow = (action: string): OpencodePermission => ({
+    action,
+    resource: "*",
+    effect: "allow",
+  });
+  const tools = mode === "read-only"
+    ? ["read", "grep", "glob", "external_directory"]
+    : ["read", "grep", "glob", "edit", "shell"];
+  return [{ action: "*", resource: "*", effect: "deny" }, ...tools.map(allow)];
+}
+
+export function opencodeConfig(mode: AccessMode): string {
+  return JSON.stringify({
+    agents: {
+      [OPENCODE_AGENT]: {
+        mode: "primary",
+        description: `pstack external ${mode} lane`,
+        permissions: opencodePermissions(mode),
+      },
+    },
+  });
+}
+
 function permissionMode(mode: AccessMode): string {
   return mode === "read-only" ? "plan" : "acceptEdits";
 }
 
 function effortOverride(effort: Effort): string {
   return `model_reasoning_effort=${JSON.stringify(effort)}`;
-}
-
-function codexExec(
-  options: RunnerOptions,
-  config: readonly string[],
-  enabledMcpServers: readonly McpServerKey[]
-): CommandSpec {
-  return {
-    command: "codex",
-    args: [
-      "exec",
-      "--model",
-      options.model,
-      "--config",
-      effortOverride(options.effort),
-      ...config,
-      ...enabledMcpServers.flatMap((name) => [
-        "--config",
-        `mcp_servers.${name}.enabled=false`,
-      ]),
-      "--sandbox",
-      codexSandbox(options.mode),
-      "--cd",
-      options.cwd,
-      "--skip-git-repo-check",
-      "--ephemeral",
-      ...codexFeatureFlags,
-      "--json",
-      "-",
-    ],
-    stdin: "prompt",
-  };
 }
 
 export function invocationCommand(
@@ -164,13 +175,49 @@ export function invocationCommand(
         stdin: "prompt",
       };
     case "codex":
-      return codexExec(options, [], enabledMcpServers);
-    case "magpie":
-      return codexExec(
-        options,
-        ["--config", 'model_provider="magpie"'],
-        enabledMcpServers
-      );
+      return {
+        command: "codex",
+        args: [
+          "exec",
+          "--model",
+          options.model,
+          "--config",
+          effortOverride(options.effort),
+          ...enabledMcpServers.flatMap((name) => [
+            "--config",
+            `mcp_servers.${name}.enabled=false`,
+          ]),
+          "--sandbox",
+          codexSandbox(options.mode),
+          "--cd",
+          options.cwd,
+          "--skip-git-repo-check",
+          "--ephemeral",
+          ...codexFeatureFlags,
+          "--json",
+          "-",
+        ],
+        stdin: "prompt",
+      };
+    case "opencode":
+      // --standalone keeps the config in this process. The shared background
+      // service never sees OPENCODE_CONFIG_CONTENT and would not know the agent.
+      return {
+        command: "opencode",
+        args: [
+          "run",
+          "--standalone",
+          "--model",
+          `${options.model}#${options.effort}`,
+          "--agent",
+          OPENCODE_AGENT,
+          "--format",
+          "json",
+          "--archived",
+        ],
+        stdin: "prompt",
+        env: { OPENCODE_CONFIG_CONTENT: opencodeConfig(options.mode) },
+      };
     case "grok":
       return {
         command: "grok",
