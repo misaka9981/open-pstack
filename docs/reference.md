@@ -59,8 +59,8 @@ The marketplace install is the normal user path. Direct links are only for testi
 ├── plugins/pstack/                   # the plugin itself
 │   ├── .claude-plugin/plugin.json    # Claude Code manifest
 │   ├── .codex-plugin/plugin.json     # Codex manifest (skills: ./skills/)
-│   ├── skills/                       # 60 skills shared by Claude Code, Codex, and Pi
-│   │   ├── poteto-mode/references/{codex-tools,pi-tools,provider-dispatch}.md  # tool + provider routing
+│   ├── skills/                       # 60 skills shared by Claude Code and Codex
+│   │   ├── poteto-mode/references/{codex-tools,provider-dispatch}.md  # tool + provider routing
 │   │   └── poteto-mode/scripts/      # bun/bash/node tooling: watch-pr, runner, worktree-audit.sh
 │   ├── hooks/                        # SessionStart auto-fire: injects the poteto-mode mandate (the model sheet only on Claude Code)
 │   └── agents/                       # Claude subagents, including native Fable, Opus, Sonnet, and Haiku lanes at each selectable effort
@@ -86,7 +86,7 @@ The Codex build shares one `skills/` tree with the Claude Code build. Nothing is
 - **Tool and built-in mapping.** Claude tool names and built-in skills resolve through [`codex-tools.md`](../plugins/pstack/skills/poteto-mode/references/codex-tools.md). Model execution resolves separately through [`provider-dispatch.md`](../plugins/pstack/skills/poteto-mode/references/provider-dispatch.md), so Codex can keep Sol native while invoking Claude and Grok externally.
 - **Subagents.** The `Agent` tool maps to Codex `spawn_agent` / `wait_agent`, enabled by `multi_agent = true`. Parallel fan-out is multiple `spawn_agent` calls in one turn. If the native Codex lane is unavailable, record that lane as a dropout; external Claude and Grok lanes still run, and no provider is silently substituted. There is no `poteto-agent` subagent type on Codex; route ad-hoc subagents by dispatching a `spawn_agent` told to read `poteto-mode` first.
 - **Auto-fire.** Codex runs plugin SessionStart hooks. The Codex manifest declares its own hook, which runs the same `hooks/session-start` script with a `codex` argument. Codex sessions get the poteto-mode mandate but not the Claude Code model sheet, because Codex reads its sheet from `~/.codex/AGENTS.md`. That block, not `~/.codex/pstack-models.md`, is the configuration in effect. `/setup-pstack` and `/poteto-help` classify the file and the block by the mirror state table in `provider-dispatch.md` and report a mismatch. Codex runs a plugin hook only after you trust it. The hook source changed in 1.6.2, so Codex asks for that trust again after the update, and the hook does not run until you give it.
-- **Models.** `/setup-pstack` writes provider-qualified descriptors. It asks for a reasoning budget (`large`, `medium`, `small`), lets you move roles between families, then asks one requested effort per family the sheet uses (`low`, `medium`, `high`, `xhigh`). It probes only those families, so a Claude-only sheet needs no Codex or Grok CLI. The first-run code roles (feature, refactoring, bug-fix, perf-issue, hillclimb), judgment and prose roles, and swarm workers use Opus high. The panel is Fable high, Opus high, and GPT-6.1 Sol xhigh, and the arena cross-judge pool is Opus high and Sol xhigh. Outside a panel, Fable runs only when the user names it or after two Opus runs of the same brief fail their check. No family selects `max`, as upstream caps every role at `xhigh`. Every Claude family selects at most `high`, by maintainer choice. A budget proposal above a family's highest effort clamps to it, so `large` proposes these defaults. Setup also offers Sonnet and Haiku as additional Claude families, Grok 4.6, and two `magpie` relay families. They never join the first-run defaults or panels, so a role uses one only when you assign it. Fable, Opus, Sonnet, and Haiku use Claude's rolling aliases. Runtime dispatch normalizes older versioned descriptors in memory, so an installed sheet stops pinning immediately. A setup rerun persists that migration while keeping each role's family and effort. In Codex, Sol uses native `spawn_agent`; Claude, Grok, and relay models use the deterministic external runner. In Claude Code, Fable, Opus, Sonnet, and Haiku use native agents; Sol, Grok, and relay models use the runner. A relay lane runs `codex exec` against the `magpie` provider, so Claude Code itself never calls the relay. Children never detect the parent or reroute themselves.
+- **Models.** `/setup-pstack` writes provider-qualified descriptors. It asks for a reasoning budget (`large`, `medium`, `small`), lets you move roles between families, then asks one requested effort per family the sheet uses (`low`, `medium`, `high`, `xhigh`). It probes only those families, so a Claude-only sheet needs no Codex or Grok CLI. The first-run code roles (feature, refactoring, bug-fix, perf-issue, hillclimb), judgment and prose roles, and swarm workers use Opus high. The panel is Fable high, Opus high, and GPT-6.2 Sol xhigh, and the arena cross-judge pool is Opus high and Sol xhigh. Outside a panel, Fable runs only when the user names it or after two Opus runs of the same brief fail their check. No family selects `max`, as upstream caps every role at `xhigh`. Every Claude family selects at most `high`, by maintainer choice. A budget proposal above a family's highest effort clamps to it, so `large` proposes these defaults. Setup also offers Sonnet and Haiku as additional Claude families, GPT-6.2 Astra as an additional Codex family, Grok 4.6, and two OpenCode families, DeepSeek V4.1 Flash and GLM-5.3 Flash. They never join the first-run defaults or panels, so a role uses one only when you assign it. Fable, Opus, Sonnet, and Haiku use Claude's rolling aliases. Runtime dispatch normalizes older versioned descriptors in memory, so an installed sheet stops pinning immediately. A setup rerun persists that migration while keeping each role's family and effort. In Codex, Sol uses native `spawn_agent`; Claude, Grok, and OpenCode models use the deterministic external runner. In Claude Code, Fable, Opus, Sonnet, and Haiku use native agents; Sol, Grok, and OpenCode models use the runner. An OpenCode lane runs `opencode run --standalone` as a runner-defined agent whose permission rules set the access mode. Children never detect the parent or reroute themselves.
 
 Verified in fresh installed Claude Code and Codex sessions: the user-facing skills are discovered and namespaced under `pstack`; both parents fan out a cross-provider panel through the documented native/external route table, retain long-running handles without a default timeout, and cross-judge only after every candidate is terminal. The `principle-*` leaves remain available for `poteto-mode` to read by path. Claude honors their `user-invocable: false` metadata; Codex 0.149.0 does not ([ericlitman/open-pstack#8](https://github.com/ericlitman/open-pstack/issues/8)).
 
@@ -121,38 +121,38 @@ The table uses the short upstream names. Claude Code exposes each native skill w
 | skill | use it when |
 | --- | --- |
 | `/poteto-mode` | default entry point for any non-trivial task |
-| `/poteto-help` | learn how to set up and use pstack, or find which skill, playbook, or principle fits a task (user-invoked only on Claude Code and Pi) |
+| `/poteto-help` | learn how to set up and use pstack, or find which skill, playbook, or principle fits a task (user-invoked only on Claude Code) |
 | `/in-your-own-words` | have the agent play back your goal and the problem before it starts |
-| `/sharpen` | rewrite a prompt to be deeper, not bigger, with what a top professional would add and an outside check, and hand it back without doing the task (user-invoked only on Claude Code and Pi) |
-| `/reframe` | learn the expert words for what you're building, with terms borrowed from neighboring fields and every cited link checked, and get your description rewritten with them (user-invoked only on Claude Code and Pi) |
+| `/sharpen` | rewrite a prompt to be deeper, not bigger, with what a top professional would add and an outside check, and hand it back without doing the task (user-invoked only on Claude Code) |
+| `/reframe` | learn the expert words for what you're building, with terms borrowed from neighboring fields and every cited link checked, and get your description rewritten with them (user-invoked only on Claude Code) |
 | `/how` | walk through how a subsystem works |
 | `/why` | answer why something was built this way from the commits and PR discussions behind it, with citations and marked inferences |
 | `/architect` | settle types and module shape before writing code that crosses a function boundary |
 | `/arena` | run N parallel attempts at the same task and pick the best parts |
 | `/interrogate` | have four different models try to break a diff |
 | `/automate-me` | draft your own personal -mode skill from recent transcripts |
-| `/reflect` | capture a long task's lessons as a skill edit (user-invoked only on Claude Code and Pi) |
-| `/correct` | make a mistake agents keep repeating in this repo impossible, enforced by architecture, types, lint, or tests before docs (user-invoked only on Claude Code and Pi) |
+| `/reflect` | capture a long task's lessons as a skill edit (user-invoked only on Claude Code) |
+| `/correct` | make a mistake agents keep repeating in this repo impossible, enforced by architecture, types, lint, or tests before docs (user-invoked only on Claude Code) |
 | `/tdd` | fix a bug by writing the failing test first, then the fix |
 | `/benchmark-checklist` | vet a benchmark, speedup, or regression you measured before you report or act on it |
 | `/typescript-best-practices` | ground type-system discipline in TypeScript syntax |
-| `/teach` | understand a change or subsystem for real: `how` + `why` woven into one plain explanation (user-invoked only on Claude Code and Pi) |
+| `/teach` | understand a change or subsystem for real: `how` + `why` woven into one plain explanation (user-invoked only on Claude Code) |
 | `/swarm` | fan out N parallel workers across slices or races, then one aggregated report |
 | `/technical-writing` | write docs, RFCs, readmes, PR descriptions, and commit messages to one layered standard |
-| `/bro` | restate the last message in plain human language, no jargon (user-invoked only on Claude Code and Pi) |
+| `/bro` | restate the last message in plain human language, no jargon (user-invoked only on Claude Code) |
 | `/figure-it-out` | design a rigorous, auditable playbook for a task no bundled playbook fits |
 | `/show-me-your-work` | log decisions to a reviewable tsv decision trail |
-| `/blast-radius` | find what a change could break beyond the diff and prove safety by running code (user-invoked only on Claude Code and Pi) |
-| `/recall` | catch up on recent working context from chat history, live state, and the shared record (user-invoked only on Claude Code and Pi) |
-| `/ketchup` | catch up on what changed in this chat since your last message, with every item waiting on you listed and decidable from the reply alone (user-invoked only on Claude Code and Pi) |
-| `/ketchup-video` | catch up like `/ketchup`, with what happened as a short subtitled video of slides and the waiting calls as text under it (user-invoked only on Claude Code and Pi) |
+| `/blast-radius` | find what a change could break beyond the diff and prove safety by running code (user-invoked only on Claude Code) |
+| `/recall` | catch up on recent working context from chat history, live state, and the shared record (user-invoked only on Claude Code) |
+| `/ketchup` | catch up on what changed in this chat since your last message, with every item waiting on you listed and decidable from the reply alone (user-invoked only on Claude Code) |
+| `/ketchup-video` | catch up like `/ketchup`, with what happened as a short subtitled video of slides and the waiting calls as text under it (user-invoked only on Claude Code) |
 | `/setup-pstack` | configure pstack per-role model choices, reasoning budget, and per-family requested effort |
 | `/unslop` | clean up writing by removing AI tells |
 | `/no-comments` | strip comments before review via the `comment-sicko` subagent, then fix what it finds |
 | `/create-verification-skill` | generate a project-local verification skill and feature map |
-| `/maintain-verification-skill` | re-sync a drifted verification skill and its feature map (user-invoked only on Claude Code and Pi) |
+| `/maintain-verification-skill` | re-sync a drifted verification skill and its feature map (user-invoked only on Claude Code) |
 | `/create-formal-verification-skill` | formally verify one property that tests rarely reach and generate a project-local skill that rechecks it |
-| `/maintain-formal-verification-skill` | bring a formal verification back in line after the code it covers changed, and tell drift from bugs (user-invoked only on Claude Code and Pi) |
+| `/maintain-formal-verification-skill` | bring a formal verification back in line after the code it covers changed, and tell drift from bugs (user-invoked only on Claude Code) |
 | `/statechart` | draw how a product flow, protocol, or service moves between states as a Mermaid statechart checked against a TLA+ model, with the shortest path to each state that breaks a rule |
 | `/deslop` | deslop a diff before commit |
 | `/babysit` | monitor an open PR, fix CI/comments, keep it merge-ready |
@@ -197,7 +197,7 @@ The port is editorial, not mechanical. Anywhere upstream pstack assumed Cursor-s
 
 ### Cross-vendor dispatch
 
-The earlier port collapsed panels to Claude-only models. The bundled runner restores upstream's cross-provider judgment signal without adding a daemon or model-router service. Claude Code shells out to Codex and Grok, and reaches `magpie` relay models through Codex; Codex shells out to Claude and Grok, and to the relay through a second Codex process. The top-level parent chooses every route and each external process receives a complete task directly, so there is no supervising model invocation and no child-side harness detection.
+The earlier port collapsed panels to Claude-only models. The bundled runner restores upstream's cross-provider judgment signal without adding a daemon or model-router service. Claude Code shells out to Codex, Grok, and OpenCode; Codex shells out to Claude, Grok, and OpenCode. The top-level parent chooses every route and each external process receives a complete task directly, so there is no supervising model invocation and no child-side harness detection.
 
 ### What's deliberately kept
 
@@ -213,9 +213,9 @@ The earlier port collapsed panels to Claude-only models. The bundled runner rest
 - **`make-bot-ui`** (upstream `799151d`, relocated by `6fecddb`) uses Cursor routines, webhook events, hosted bot state, and Cursor UI primitives that have no shared Claude Code and Codex mapping. A provider-specific rewrite would be a separate feature, not an upstream sync.
 - **Grok 4.7** (upstream `70b2dc8`). The Grok route stays on `grok:grok-4.6` until the `grok-4.7` slug passes a live runner probe.
 - **Three-lane default panels** (upstream `70b2dc8`). Upstream drops Fable from the arena, architect, and interrogate defaults. Open Pstack kept Fable, and upstream restores it in `bf0c7cd`.
-- **Sol removal and two-lane default panels** (upstream `df58112`). Upstream drops Sol from every default, so its panels run Opus 5.5 and Grok, interrogate loses Reviewer C, and `reflect tooling` moves from Sol to Grok. Upstream's reason is a choice of two default families, not a retired model. Open Pstack keeps Sol, because Sol is the Codex parent's native family and the only matrix family a Pi parent reaches. Reflect roles stay on `inherit-parent`, so the tooling move has no target.
+- **Sol removal and two-lane default panels** (upstream `df58112`). Upstream drops Sol from every default, so its panels run Opus 5.5 and Grok, interrogate loses Reviewer C, and `reflect tooling` moves from Sol to Grok. Upstream's reason is a choice of two default families, not a retired model. Open Pstack keeps Sol, because Sol is the Codex parent's native family. Reflect roles stay on `inherit-parent`, so the tooling move has no target.
 - **Gemini seat and per-role efforts** (upstream `bf0c7cd`). Upstream's defaults move to Fable 5.2, Opus 5.5, and Gemini 4 Carbon, with an effort per role and a `# defaults: 2` marker that replaces old defaults. Open Pstack takes the Fable and Opus families and puts Sol in Gemini's seat, because it has no Gemini route. It caps every Claude family at `high` by maintainer choice. Grok leaves the defaults and stays selectable. The per-role effort steps, the marker, and its replacement pass are not ported.
-- **Built-in PR tool rule** (upstream `23e4138`). Upstream routes PR create, edit, retarget, and ready through a run's built-in PR tool when one exists. Claude Code, Codex, and Pi have no such tool, so Opening a PR and the plan skeleton keep the resolved forge CLI for every PR operation.
+- **Built-in PR tool rule** (upstream `23e4138`). Upstream routes PR create, edit, retarget, and ready through a run's built-in PR tool when one exists. Claude Code and Codex have no such tool, so Opening a PR and the plan skeleton keep the resolved forge CLI for every PR operation.
 - **Model-rejection fallbacks** (upstream `70b2dc8`, `12d587d`). Upstream reruns a rejected slug on its family default or the closest valid slug. Open Pstack reports a named dropout instead, per its no-fallback contract.
 - **Per-spawn speed** (upstream `ce649c0`). Upstream's model-to-job rule also picks fast or standard speed for each subagent. No Open Pstack route has a per-spawn speed setting, so only the reasoning-level half is ported.
 - **Stuck-after runtime** (upstream `ce649c0`). Upstream's Autopilot-full calls an agent stuck when it shows nothing new past a recorded runtime. Open Pstack has no implicit runtime timeout, so only failure evidence marks an agent stuck.

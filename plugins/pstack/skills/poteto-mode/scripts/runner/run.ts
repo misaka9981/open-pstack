@@ -8,7 +8,8 @@ import {
   unlinkSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { homedir } from "node:os";
+import { delimiter, dirname, join, resolve } from "node:path";
 import {
   invocationCommand,
   mcpListCommand,
@@ -138,6 +139,13 @@ const CLAUDE_IDENTITY = [
   "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS",
 ] as const;
 
+// OpenCode otherwise updates itself mid-lane and loads Claude Code's
+// CLAUDE.md and skills as ambient context.
+const OPENCODE_ISOLATION = {
+  OPENCODE_DISABLE_AUTOUPDATE: "1",
+  OPENCODE_DISABLE_CLAUDE_CODE: "1",
+} as const;
+
 export function childEnvironment(
   provider: Provider,
   source: NodeJS.ProcessEnv = process.env
@@ -149,7 +157,18 @@ export function childEnvironment(
       ? CLAUDE_IDENTITY
       : [...CODEX_IDENTITY, ...CLAUDE_IDENTITY];
   for (const key of remove) delete result[key];
-  return result;
+  return provider === "opencode" ? { ...result, ...OPENCODE_ISOLATION } : result;
+}
+
+// The OpenCode installer puts the binary in ~/.opencode/bin without always
+// adding that directory to PATH, so the runner searches it after PATH.
+function executableSearchPath(
+  provider: Provider,
+  env: NodeJS.ProcessEnv
+): string | undefined {
+  if (provider !== "opencode") return env.PATH;
+  const installDir = join(env.HOME ?? homedir(), ".opencode", "bin");
+  return env.PATH ? `${env.PATH}${delimiter}${installDir}` : installDir;
 }
 
 async function terminate(
@@ -233,9 +252,11 @@ async function runProcess(
   deadlineAt: number | null,
   cancellation: RunCancellation
 ): Promise<ProcessResult> {
+  // A spawn's cwd leaves the parent shell's PWD behind, and OpenCode takes its
+  // project directory from PWD, so the child gets a PWD that matches its cwd.
   const child = Bun.spawn([executable, ...spec.args], {
     cwd,
-    env,
+    env: { ...env, ...spec.env, PWD: cwd },
     stdin: spec.stdin === "prompt" ? "pipe" : "ignore",
     stdout: "pipe",
     stderr: "pipe",
@@ -379,17 +400,21 @@ function preflightPassed(provider: Provider, model: string, result: ProcessResul
       return /logged in/i.test(combined);
     case "grok":
       return /logged in/i.test(combined) && combined.includes(model);
-    case "magpie":
-      return true;
+    case "opencode":
+      return opencodeListsModel(result.stdout, model);
   }
+}
+
+function opencodeListsModel(listing: string, model: string): boolean {
+  return listing.split("\n").some((line) => line.trim() === model);
 }
 
 function successfulPreflightEvidence(provider: Provider, model: string): string {
   switch (provider) {
     case "grok":
       return `authenticated; model ${model} available`;
-    case "magpie":
-      return "codex CLI available; relay and model are proven by invocation";
+    case "opencode":
+      return `model ${model} listed for the signed-in account`;
     default:
       return "authenticated";
   }
@@ -399,7 +424,7 @@ function unavailableStatus(value: string): ReceiptStatus {
   if (/not logged in|unauthenticated|authentication|sign in|login required/i.test(value)) {
     return "unauthenticated";
   }
-  if (/model.{0,40}(not found|unknown|unavailable|unsupported|not supported|invalid)|invalid.{0,20}model/i.test(value)) {
+  if (/model.{0,40}(not found|unknown|unavailable|unsupported|not supported|invalid)|invalid.{0,20}model|variant unavailable/i.test(value)) {
     return "unavailable-model";
   }
   return "child-failed";
@@ -408,11 +433,16 @@ function unavailableStatus(value: string): ReceiptStatus {
 function preflightFailureStatus(
   provider: Provider,
   model: string,
-  value: string
+  value: string,
+  exitCode: number | null
 ): ReceiptStatus {
   const status = unavailableStatus(value);
   if (status !== "child-failed") return status;
-  if (provider === "magpie") return "unavailable-cli";
+  // OpenCode lists a paid model only while its provider is signed in, so a
+  // listing without the model means a wrong id or a signed-out account.
+  if (provider === "opencode") {
+    return exitCode === 0 ? "unavailable-model" : "child-failed";
+  }
   return provider === "grok" && !value.includes(model)
     ? "unavailable-model"
     : "unauthenticated";
@@ -467,7 +497,7 @@ function modelProof(
       modelEvidence: "provider-report",
     };
   }
-  if ((provider === "codex" || provider === "magpie") && reported === null) {
+  if ((provider === "codex" || provider === "opencode") && reported === null) {
     return {
       reportedModel: null,
       modelVerified: false,
@@ -514,6 +544,11 @@ export function validateOptions(options: RunnerOptions): void {
       `Claude model ${options.model} is a version pin; normalize it to ${staleAlias} before invoking the runner`
     );
   }
+  if (options.provider === "opencode" && !/^[^/#\s]+\/[^#\s]+$/.test(options.model)) {
+    throw new UsageError(
+      `OpenCode model ${options.model} must be <provider>/<model>; the runner adds the effort as its variant`
+    );
+  }
   if (
     options.timeoutMs !== null &&
     (!Number.isFinite(options.timeoutMs) || options.timeoutMs <= 0)
@@ -553,7 +588,7 @@ async function executeLane(
   const prompt = readFileSync(options.promptPath, "utf8");
   const env = childEnvironment(options.provider);
   const executable = Bun.which(invocation.command, {
-    PATH: env.PATH,
+    PATH: executableSearchPath(options.provider, env),
     cwd: options.cwd,
   });
   progress.executable = executable;
@@ -655,7 +690,12 @@ async function executeLane(
     !passed &&
     preflightResult.cancelledBy === null &&
     !preflightResult.timedOut &&
-    preflightFailureStatus(options.provider, options.model, rawPreflightEvidence) ===
+    preflightFailureStatus(
+      options.provider,
+      options.model,
+      rawPreflightEvidence,
+      preflightResult.exitCode
+    ) ===
       "unauthenticated"
   ) {
     preflightState = {
@@ -717,7 +757,8 @@ async function executeLane(
     const preflightFailure = preflightFailureStatus(
       options.provider,
       options.model,
-      rawPreflightEvidence
+      rawPreflightEvidence,
+      preflightResult.exitCode
     );
     const status: ReceiptStatus = preflightResult.cancelledBy !== null
       ? "cancelled"

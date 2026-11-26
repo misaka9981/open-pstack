@@ -7,7 +7,7 @@ description: "Use for \"interrogate\", \"adversarial review\", \"multi-model rev
 
 Adversaries try to break a change or a design. A finding survives only when a run proves it. Report the findings. Do not apply fixes.
 
-**Dispatch contract.** Read [`provider-dispatch.md`](../poteto-mode/references/provider-dispatch.md) before launching adversaries. Configured entries are provider-qualified descriptors; the parent starts native and external lanes directly. On Codex or Pi, resolve remaining Claude tool names via [`codex-tools.md`](../poteto-mode/references/codex-tools.md) or [`pi-tools.md`](../poteto-mode/references/pi-tools.md).
+**Dispatch contract.** Read [`provider-dispatch.md`](../poteto-mode/references/provider-dispatch.md) before launching adversaries. Configured entries are provider-qualified descriptors; the parent starts native and external lanes directly. On Codex, resolve remaining Claude tool names via [`codex-tools.md`](../poteto-mode/references/codex-tools.md).
 
 ## Frame
 

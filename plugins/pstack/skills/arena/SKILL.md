@@ -5,7 +5,7 @@ description: "Spawn N parallel candidates at the same task, pick a base, graft t
 
 # Arena
 
-**Dispatch contract.** Read [`provider-dispatch.md`](../poteto-mode/references/provider-dispatch.md) before fan-out. Configured values are provider-qualified descriptors, not host-native model slugs. The parent starts native and external lanes directly; children never route themselves. On Codex or Pi, resolve the remaining Claude tool names via [`codex-tools.md`](../poteto-mode/references/codex-tools.md) or [`pi-tools.md`](../poteto-mode/references/pi-tools.md).
+**Dispatch contract.** Read [`provider-dispatch.md`](../poteto-mode/references/provider-dispatch.md) before fan-out. Configured values are provider-qualified descriptors, not host-native model slugs. The parent starts native and external lanes directly; children never route themselves. On Codex, resolve the remaining Claude tool names via [`codex-tools.md`](../poteto-mode/references/codex-tools.md).
 
 Open a todolist with one entry per phase (Frame, Fan out, Cross-judge, Pick, Graft, Verify) before launching anything.
 

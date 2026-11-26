@@ -8,7 +8,7 @@ const DISPATCH_PATH = join(
   PLUGIN_ROOT,
   "skills/poteto-mode/references/provider-dispatch.md"
 );
-const PARENTS = ["Claude Code", "Codex", "Pi"] as const;
+const PARENTS = ["Claude Code", "Codex"] as const;
 
 function markdownFiles(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {

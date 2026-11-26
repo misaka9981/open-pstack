@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { invocationCommand, mcpListCommand } from "./commands.ts";
+import { invocationCommand, mcpListCommand, opencodeConfig } from "./commands.ts";
 import type { McpServerKey, RunnerOptions } from "./types.ts";
 
 function options(overrides: Partial<RunnerOptions> = {}): RunnerOptions {
@@ -51,44 +51,51 @@ describe("invocationCommand", () => {
     expect(spec.args).not.toContain("danger-full-access");
   });
 
-  it("routes magpie through Codex with the relay provider override", () => {
+  it("runs OpenCode standalone as the pstack agent with the effort as variant", () => {
     const spec = invocationCommand(
       options({
         parent: "codex",
-        provider: "magpie",
-        model: "wevnal/glm-5.3",
+        provider: "opencode",
+        model: "opencode/glm-5.3-flash",
         effort: "high",
       }),
       []
     );
-    expect(spec.command).toBe("codex");
+    expect(spec.command).toBe("opencode");
     expect(spec.stdin).toBe("prompt");
     expect(spec.args).toEqual([
-      "exec",
+      "run",
+      "--standalone",
       "--model",
-      "wevnal/glm-5.3",
-      "--config",
-      'model_reasoning_effort="high"',
-      "--config",
-      'model_provider="magpie"',
-      "--sandbox",
-      "read-only",
-      "--cd",
-      "/tmp/worktree",
-      "--skip-git-repo-check",
-      "--ephemeral",
-      "--disable",
-      "plugins",
-      "--disable",
-      "multi_agent",
-      "--disable",
-      "hooks",
-      "--disable",
-      "memories",
-      "--disable",
-      "apps",
-      "--json",
-      "-",
+      "opencode/glm-5.3-flash#high",
+      "--agent",
+      "pstack-lane",
+      "--format",
+      "json",
+      "--archived",
+    ]);
+    expect(Object.keys(spec.env ?? {})).toEqual(["OPENCODE_CONFIG_CONTENT"]);
+  });
+
+  it("gives OpenCode read-only lanes only read tools and writers no outside paths", () => {
+    const rules = (mode: "read-only" | "isolated-write") =>
+      JSON.parse(opencodeConfig(mode)).agents["pstack-lane"].permissions;
+    const deny = { action: "*", resource: "*", effect: "deny" };
+    const allow = (action: string) => ({ action, resource: "*", effect: "allow" });
+    expect(rules("read-only")).toEqual([
+      deny,
+      allow("read"),
+      allow("grep"),
+      allow("glob"),
+      allow("external_directory"),
+    ]);
+    expect(rules("isolated-write")).toEqual([
+      deny,
+      allow("read"),
+      allow("grep"),
+      allow("glob"),
+      allow("edit"),
+      allow("shell"),
     ]);
   });
 
@@ -209,11 +216,11 @@ describe("invocationCommand", () => {
         ],
       },
       {
-        provider: "magpie" as const,
-        model: "wevnal/glm-5.3",
+        provider: "opencode" as const,
+        model: "opencode/glm-5.3-flash",
         flag: (effort: "low" | "medium" | "high") => [
-          "--config",
-          `model_reasoning_effort="${effort}"`,
+          "--model",
+          `opencode/glm-5.3-flash#${effort}`,
         ],
       },
       {
@@ -237,34 +244,32 @@ describe("invocationCommand", () => {
 describe("Codex tool surface", () => {
   const servers = ["notion", "incident-io"] as McpServerKey[];
 
-  for (const provider of ["codex", "magpie"] as const) {
-    it(`disables apps and each listed MCP server for a ${provider} lane`, () => {
-      const spec = invocationCommand(options({ provider }), servers);
-      expect(spec.args).toEqual(expect.arrayContaining(["--disable", "apps"]));
-      const configs = spec.args.filter((arg) => arg.startsWith("mcp_servers."));
-      expect(configs).toEqual([
-        "mcp_servers.notion.enabled=false",
-        "mcp_servers.incident-io.enabled=false",
-      ]);
-      for (const config of configs) {
-        expect(spec.args[spec.args.indexOf(config) - 1]).toBe("--config");
-      }
-      expect(mcpListCommand(provider)).toEqual({
-        command: "codex",
-        args: [
-          "--disable", "plugins",
-          "--disable", "multi_agent",
-          "--disable", "hooks",
-          "--disable", "memories",
-          "--disable", "apps",
-          "mcp", "list", "--json",
-        ],
-        stdin: "none",
-      });
+  it("disables apps and each listed MCP server for a codex lane", () => {
+    const spec = invocationCommand(options(), servers);
+    expect(spec.args).toEqual(expect.arrayContaining(["--disable", "apps"]));
+    const configs = spec.args.filter((arg) => arg.startsWith("mcp_servers."));
+    expect(configs).toEqual([
+      "mcp_servers.notion.enabled=false",
+      "mcp_servers.incident-io.enabled=false",
+    ]);
+    for (const config of configs) {
+      expect(spec.args[spec.args.indexOf(config) - 1]).toBe("--config");
+    }
+    expect(mcpListCommand("codex")).toEqual({
+      command: "codex",
+      args: [
+        "--disable", "plugins",
+        "--disable", "multi_agent",
+        "--disable", "hooks",
+        "--disable", "memories",
+        "--disable", "apps",
+        "mcp", "list", "--json",
+      ],
+      stdin: "none",
     });
-  }
+  });
 
-  for (const provider of ["claude", "grok"] as const) {
+  for (const provider of ["claude", "grok", "opencode"] as const) {
     it(`leaves the ${provider} lane without a Codex MCP listing`, () => {
       expect(mcpListCommand(provider)).toBeNull();
       const spec = invocationCommand(options({ provider, model: "opus" }), servers);

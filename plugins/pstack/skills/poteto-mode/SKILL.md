@@ -9,7 +9,7 @@ Bundled skills live at `../<name>/SKILL.md` from this file, so put this file's a
 
 ## Platform Adaptation
 
-These skills share one tree across Claude Code, Codex, and Pi. Read [`references/provider-dispatch.md`](references/provider-dispatch.md) whenever a configured role launches. It defines the provider-qualified model descriptors, native/external route table, launcher, isolation, receipts, and dropout policy. Children never choose routes. When a skill names a Claude tool or built-in skill (`run`, `verify`, `plugin-dev:skill-development`), read [`references/codex-tools.md`](references/codex-tools.md) for the Codex equivalent or [`references/pi-tools.md`](references/pi-tools.md) for the Pi equivalent.
+These skills share one tree across Claude Code and Codex. Read [`references/provider-dispatch.md`](references/provider-dispatch.md) whenever a configured role launches. It defines the provider-qualified model descriptors, native/external route table, launcher, isolation, receipts, and dropout policy. Children never choose routes. When a skill names a Claude tool or built-in skill (`run`, `verify`, `plugin-dev:skill-development`), read [`references/codex-tools.md`](references/codex-tools.md) for the Codex equivalent.
 
 ## Non-negotiables
 
@@ -18,7 +18,7 @@ The Principles section below grounds every trigger. In your reply, name each pri
 The remaining triggers live only here:
 
 - First message → restate the user's goal and the smallest change that meets it, then proceed. Open each subagent brief, PR `## Why`, and final report with the goal.
-- Starting any agent, whether a native subagent, a Lody item, or an external lane → the first line of its kickoff is `Read <path>/worker.md before anything else.`, with `<path>` the absolute path of this skill's folder. The operator's rules reach a started agent no other way. Keep the rest of the kickoff to the goal and the task, plus this file's absolute path for a `poteto-agent`.
+- Starting any agent, whether a native subagent or an external lane → the first line of its kickoff is `Read <path>/worker.md before anything else.`, with `<path>` the absolute path of this skill's folder. The operator's rules reach a started agent no other way. Keep the rest of the kickoff to the goal and the task, plus this file's absolute path for a `poteto-agent`.
 - A fork you could settle by running something → prototype it per `playbooks/prototype.md` instead of asking.
 - Code → name the data shape first. Across a function boundary → **architect**. Fan-out → **swarm**. Bakeoff → **arena**. Contested design → **interrogate**.
 - Prose, your reply included → **unslop**. Docs, PR descriptions, commit messages → **technical-writing**.
@@ -86,7 +86,7 @@ Read the leaf skill in full for any principle you apply. Each entry names when i
 
 **Use `subagent_type: "poteto-agent"` for any subagent you spawn directly inside a playbook step**, read-only helpers included. On Claude Code, never use the built-in `Explore`, `general-purpose`, or `Plan` types under poteto-mode, because they do not preload this skill. The chat that receives `/poteto-mode` runs the playbook itself. Routed workflow skills (`arena`, `interrogate`, `swarm`) set their own agents for model-diverse lanes. Respect them.
 
-Provider dispatch picks the route. On Claude Code, a `claude:*` role sets the `poteto-agent` call's `model` alias and `effort`, as the Native lanes section of provider dispatch specifies. On Codex, a `codex:*` role passes its model and `reasoning_effort` to a `spawn_agent` whose instructions say to read this skill first. On Pi, the Lody item takes the mapped model and effort with the `poteto-agent` prompt. Every other role runs through the deterministic launcher. A role set to `inherit-parent` or `auto` sets neither model nor effort and runs on the parent model.
+Provider dispatch picks the route. On Claude Code, a `claude:*` role sets the `poteto-agent` call's `model` alias and `effort`, as the Native lanes section of provider dispatch specifies. On Codex, a `codex:*` role passes its model and `reasoning_effort` to a `spawn_agent` whose instructions say to read this skill first. Every other role runs through the deterministic launcher. A role set to `inherit-parent` or `auto` sets neither model nor effort and runs on the parent model.
 
 **Defaults for every delegation.** Run every lane in the background, file pointers not inlined context, and give each brief its access mode and the tools or MCPs it needs. Assign every writer a worktree or unique output directory. The model sheet that `/setup-pstack` configures overrides the defaults below and the role models in the routed skills. A role with no line keeps its default. Each code playbook reads its own line (`feature, refactoring`, `bug-fix`, `perf-issue`, or `hillclimb`), prose and judgment read `judgment and prose`, and trivial mechanical edits read `swarm workers`.
 

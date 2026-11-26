@@ -11,7 +11,7 @@ If the scope is ambiguous, state your interpretation and explore. The user can r
 
 ## 1. Explain
 
-Dispatch one `read-only` lane on `inherit-parent` through [`provider-dispatch.md`](../poteto-mode/references/provider-dispatch.md) that explores and explains in one pass. On Codex or Pi, resolve remaining Claude tool names via [`codex-tools.md`](../poteto-mode/references/codex-tools.md) or [`pi-tools.md`](../poteto-mode/references/pi-tools.md). Give it the user's question and this brief:
+Dispatch one `read-only` lane on `inherit-parent` through [`provider-dispatch.md`](../poteto-mode/references/provider-dispatch.md) that explores and explains in one pass. On Codex, resolve remaining Claude tool names via [`codex-tools.md`](../poteto-mode/references/codex-tools.md). Give it the user's question and this brief:
 
 > You are writing an architectural explanation for a senior engineer. Explore the codebase and write an explanation that a senior engineer unfamiliar with this area could read and walk away with a solid mental model. They should understand the architecture well enough to start working in it confidently. You have read-only access to the codebase.
 

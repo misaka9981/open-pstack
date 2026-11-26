@@ -39,7 +39,7 @@ const MATRIX_HEADER = [
   "Claude-native agent stem",
 ] as const;
 
-const RELAY_HEADER = [
+const FAMILY_TABLE_HEADER = [
   "Family",
   "Provider",
   "Model",
@@ -191,14 +191,14 @@ function parseModelMatrix(markdown: string): MatrixRow[] {
   });
 }
 
-interface RelayRow {
+interface FamilyRow {
   family: string;
   provider: string;
   model: string;
   selectableEfforts: Effort[];
 }
 
-interface AdditionalClaudeRow extends RelayRow {
+interface AdditionalClaudeRow extends FamilyRow {
   claudeNativeAgentStem: string;
 }
 
@@ -233,8 +233,8 @@ function parseSectionTable(
   });
 }
 
-function parseRelayFamilies(markdown: string): RelayRow[] {
-  return parseSectionTable(markdown, "## Relay providers", RELAY_HEADER).map(
+function parseFamilyTable(markdown: string, heading: string): FamilyRow[] {
+  return parseSectionTable(markdown, heading, FAMILY_TABLE_HEADER).map(
     ([family, provider, model, selectableRaw]) => ({
       family,
       provider,
@@ -266,15 +266,12 @@ function parseAdditionalClaudeFamilies(markdown: string): AdditionalClaudeRow[] 
   });
 }
 
-function parseGrokFamily(markdown: string): RelayRow[] {
-  return parseSectionTable(markdown, "## Additional Grok family", RELAY_HEADER).map(
-    ([family, provider, model, selectableRaw]) => ({
-      family,
-      provider,
-      model,
-      selectableEfforts: selectableRaw.split(/\s+/).map(asEffort),
-    })
-  );
+function parseOpencodeFamilies(markdown: string): FamilyRow[] {
+  return parseFamilyTable(markdown, "## Additional OpenCode families");
+}
+
+function parseGrokFamily(markdown: string): FamilyRow[] {
+  return parseFamilyTable(markdown, "## Additional Grok family");
 }
 
 // Setup proposes one target effort per budget and clamps it to the highest
@@ -446,16 +443,16 @@ describe("model matrix", () => {
     );
   });
 
-  it("keeps relay families selectable but outside the matrix defaults", () => {
-    const relays = parseRelayFamilies(readFileSync(DISPATCH_PATH, "utf8"));
-    expect(relays.map((row) => [row.family, row.provider, row.model])).toEqual([
-      ["deepseek-flash", "magpie", "wevnal/deepseek-v4.1-flash"],
-      ["glm-flash", "magpie", "wevnal/glm-5.3-flash"],
+  it("keeps OpenCode families selectable but outside the matrix defaults", () => {
+    const families = parseOpencodeFamilies(readFileSync(DISPATCH_PATH, "utf8"));
+    expect(families.map((row) => [row.family, row.provider, row.model])).toEqual([
+      ["deepseek-flash", "opencode", "opencode/deepseek-v4.1-flash"],
+      ["glm-flash", "opencode", "opencode/glm-5.3-flash"],
     ]);
     const matrixFamilies = new Set(rows.map((row) => row.family));
     const matrixPairs = new Set(rows.map((row) => `${row.provider}:${row.model}`));
     const sheet = firstRunSheet(setup);
-    for (const row of relays) {
+    for (const row of families) {
       expect(matrixFamilies.has(row.family)).toBe(false);
       expect(matrixPairs.has(`${row.provider}:${row.model}`)).toBe(false);
       expect(row.selectableEfforts).toEqual(
@@ -463,15 +460,16 @@ describe("model matrix", () => {
       );
       expect(sheet).not.toContain(`${row.provider}:${row.model}@`);
       expect(setup).toContain(
-        `| ${row.family} relay row + selected effort | \`codex exec\` on \`magpie\` | \`codex exec\` on \`magpie\` | Lody session \`magpie/${row.model}\` |`
+        `| ${row.family} OpenCode row + selected effort | \`opencode run\` | \`opencode run\` |`
       );
     }
     const dispatch = readFileSync(DISPATCH_PATH, "utf8");
     expect(dispatch).toContain(
       "| Claude Code | native `Agent` | external runner | external runner | external runner |"
     );
-    expect(dispatch).toContain("Claude Code itself never sends requests to the relay.");
-    expect(setup).not.toContain("A Claude Code parent does not route relay families.");
+    expect(dispatch).toContain(
+      "| Codex | external runner | native `spawn_agent` | external runner | external runner |"
+    );
   });
 
   it("keeps additional Claude families selectable but outside the matrix defaults", () => {
@@ -499,7 +497,7 @@ describe("model matrix", () => {
         ? "Claude CLI for `isolated-write` only; a read-only Haiku lane is a dropout because Claude plan mode serves Sonnet"
         : "Claude CLI";
       expect(setup).toContain(
-        `| ${row.family} additional Claude row + selected effort | native Agent \`pstack-${row.claudeNativeAgentStem}-<effort>\` | ${codexRoute} | not routed |`
+        `| ${row.family} additional Claude row + selected effort | native Agent \`pstack-${row.claudeNativeAgentStem}-<effort>\` | ${codexRoute} |`
       );
     }
   });
@@ -537,8 +535,9 @@ describe("model matrix", () => {
     const families = [
       ...rows,
       ...additionalClaude,
+      ...parseFamilyTable(dispatch, "## Additional Codex family"),
       ...parseGrokFamily(dispatch),
-      ...parseRelayFamilies(dispatch),
+      ...parseOpencodeFamilies(dispatch),
     ];
     for (const row of families) {
       for (const target of Object.values(BUDGET_TARGETS)) {
@@ -561,16 +560,17 @@ describe("model matrix", () => {
     expect(setup).toContain("`large` proposes the first-run defaults");
   });
 
-  it("routes setup's Pi parent only to Sol and relay families", () => {
-    const sol = rows.find((row) => row.family === "sol");
-    expect(sol?.model).toBe("gpt-6.2-sol");
-    expect(setup).toContain("Claude Code, Codex, or Pi.");
-    expect(setup).toContain(`| Lody session \`magpie/codex/${sol?.model}\` |`);
-    for (const family of ["Fable", "Grok", "Opus", "Sonnet", "Haiku"]) {
-      const line = setup.split("\n").find((entry) => entry.startsWith(`| ${family} | `));
-      expect(line?.split(" | ")[4]).toBe("not routed");
+  it("routes every setup family from both parents", () => {
+    expect(setup).toContain("Claude Code or Codex.");
+    const routeRows = setup
+      .split("\n")
+      .filter((line) => / row \+ selected effort \|/.test(line))
+      .map(splitRow);
+    expect(routeRows.length).toBe(9);
+    for (const row of routeRows) {
+      expect(row).toHaveLength(5);
+      expect(row.every((cell) => cell.length > 0 && cell !== "not routed")).toBe(true);
     }
-    expect(setup).toContain("`~/.pi/agent/AGENTS.md`");
   });
 
   it("keeps setup's fail-closed reconfiguration order", () => {
@@ -651,7 +651,7 @@ describe("model matrix", () => {
   });
 });
 
-// Codex and Pi sessions load only the AGENTS.md mirror block, so setup and
+// Codex sessions load only the AGENTS.md mirror block, so setup and
 // poteto-help must classify the sheet file and the block by one shared table.
 describe("mirror state table", () => {
   const dispatch = readFileSync(DISPATCH_PATH, "utf8");

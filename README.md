@@ -32,7 +32,7 @@ pstack does not ask you to trust an agent on day one. It helps the agent leave e
 
 ## Install
 
-You need a current Claude Code, Codex, or Pi installation. For the default multi-model review, install and sign in to the Claude Code and Codex command-line tools. Grok is optional. [Bun](https://bun.sh) runs the small local tool that starts models outside the app you are using. You can still use the core workflows with fewer models.
+You need a current Claude Code or Codex installation. For the default multi-model review, install and sign in to the Claude Code and Codex command-line tools. Grok and OpenCode are optional. The runner finds OpenCode on your `PATH` or in `~/.opencode/bin`, where its installer puts it. [Bun](https://bun.sh) runs the small local tool that starts models outside the app you are using. You can still use the core workflows with fewer models.
 
 ### Claude Code
 
@@ -64,16 +64,6 @@ multi_agent = true
 
 Start a new Codex task after installation so it can discover the new skills and setting.
 
-### Pi
-
-Pi runs inside Lody, an agent IDE that gives each agent its own session and worktree. Install Open Pstack into Pi from a local checkout:
-
-```shell
-pi install /path/to/open-pstack
-```
-
-In Lody, use a Pi agent config. Lody can point it at your own `pi`. Start a Lody session with that config and invoke `/skill:poteto-mode`. Pi reaches Codex models and the other relay models through the `magpie` relay; it has no route to Claude or Grok.
-
 ## Get started
 
 Lauren's original setup has two steps. Open Pstack keeps the same flow.
@@ -92,7 +82,7 @@ In Codex, ask:
 Use pstack:setup-pstack to configure pstack.
 ```
 
-Setup checks the models you can actually run, shows how each one will start, and asks before saving the choices. Code, prose, and judgment default to Opus. The default review panel uses Fable, Opus, and GPT-6.1 Sol. Claude models run at `high` reasoning or lower, and no model runs above `xhigh`. Outside a panel, Fable runs only when you name it or after two Opus runs of the same brief fail.
+Setup checks the models you can actually run, shows how each one will start, and asks before saving the choices. Code, prose, and judgment default to Opus. The default review panel uses Fable, Opus, and GPT-6.2 Sol. Claude models run at `high` reasoning or lower, and no model runs above `xhigh`. Outside a panel, Fable runs only when you name it or after two Opus runs of the same brief fail.
 
 An older model sheet starts using the rolling aliases in memory as soon as this release is installed. Run setup once after updating to persist that migration. It replaces versioned Fable and Opus entries while preserving every role assignment and effort selection.
 
@@ -120,24 +110,24 @@ That is the main workflow. The other skills are there when poteto-mode needs the
 
 | Skill | Use it when |
 | --- | --- |
-| `poteto-help` | You are new to pstack or unsure which skill fits. It answers your question and gives you a prompt to send. On Claude Code and Pi, it runs only when you type it. |
+| `poteto-help` | You are new to pstack or unsure which skill fits. It answers your question and gives you a prompt to send. On Claude Code, it runs only when you type it. |
 | `in-your-own-words` | You want the agent to play back your goal and the problem before it starts. Interrogate also uses it to state the intent of a change. |
-| `sharpen` | You want a prompt made deeper, not bigger, before you send it. It adds what a top professional would do that you did not ask for, the raw material and methods they would use, and an outside check that the result is right. It hands back the rewritten prompt, which asks the agent to prototype any choice an experiment can settle and leaves product and preference choices to you. It does not do the task. On Claude Code and Pi, it runs only when you type it. |
-| `reframe` | You can't name what you're building, so you can't ask an agent for it clearly. It starts from your files and your own words. If they could describe more than one problem, it lists the two or three it could be and picks the likeliest. Then it gives 8 to 12 expert terms, each tied to a real project whose link it checked, borrows terms from 2 or 3 neighboring fields, and rewrites your description with the new words. On Claude Code and Pi, it runs only when you type it. |
+| `sharpen` | You want a prompt made deeper, not bigger, before you send it. It adds what a top professional would do that you did not ask for, the raw material and methods they would use, and an outside check that the result is right. It hands back the rewritten prompt, which asks the agent to prototype any choice an experiment can settle and leaves product and preference choices to you. It does not do the task. On Claude Code, it runs only when you type it. |
+| `reframe` | You can't name what you're building, so you can't ask an agent for it clearly. It starts from your files and your own words. If they could describe more than one problem, it lists the two or three it could be and picks the likeliest. Then it gives 8 to 12 expert terms, each tied to a real project whose link it checked, borrows terms from 2 or 3 neighboring fields, and rewrites your description with the new words. On Claude Code, it runs only when you type it. |
 | `how` | You want a clear explanation of how part of the system works. |
 | `why` | You want evidence for why the system was built that way. |
 | `architect` | A change crosses a function or module boundary and the design needs to be settled first. |
 | `arena` | You want several complete attempts, followed by a comparison of their best parts. |
 | `interrogate` | You want different models to try to break a design or diff. |
 | `create-verification-skill` | Your project has no repeatable way for an agent to prove real behavior. |
-| `maintain-verification-skill` | The project's verification instructions no longer match the product. On Claude Code and Pi, it runs only when you type it. |
+| `maintain-verification-skill` | The project's verification instructions no longer match the product. On Claude Code, it runs only when you type it. |
 | `create-formal-verification-skill` | Tests rarely reach the case that breaks a race, retry, state machine, parser, or unsafe code. It verifies one property with a tool that fits and leaves a project skill that rechecks it. |
-| `maintain-formal-verification-skill` | Code that a formal verification covers changed since it was last checked. It brings the verification back in line and says whether each failure is drift or a bug. On Claude Code and Pi, it runs only when you type it. |
+| `maintain-formal-verification-skill` | Code that a formal verification covers changed since it was last checked. It brings the verification back in line and says whether each failure is drift or a bug. On Claude Code, it runs only when you type it. |
 | `statechart` | Someone who owns the behavior needs to see it, not read a spec. It draws how a system moves between states, such as a product flow, a protocol, or a service, as a Mermaid statechart. One command checks the TLA+ model with TLC, draws the chart, and reports the shortest path to each state that breaks a rule. It runs on Node 22.18 or later, Bun, or Deno. |
 | `babysit` | A pull request needs CI failures and review comments handled until it is ready. |
-| `reflect` | A hard task is finished and its lessons should improve the next run. On Claude Code and Pi, it runs only when you type it. |
-| `ketchup` | You want what changed in this chat since your last message, in plain words and small visuals, with every item waiting on you listed and decidable from the reply alone, even when that makes the reply long. On Claude Code and Pi, it runs only when you type it. |
-| `ketchup-video` | You want the `ketchup` catch-up as a short subtitled video of slides, with the calls waiting on you as text under it. On Claude Code and Pi, it runs only when you type it. |
+| `reflect` | A hard task is finished and its lessons should improve the next run. On Claude Code, it runs only when you type it. |
+| `ketchup` | You want what changed in this chat since your last message, in plain words and small visuals, with every item waiting on you listed and decidable from the reply alone, even when that makes the reply long. On Claude Code, it runs only when you type it. |
+| `ketchup-video` | You want the `ketchup` catch-up as a short subtitled video of slides, with the calls waiting on you as text under it. On Claude Code, it runs only when you type it. |
 
 Plugin skills include `pstack:` in their name. In Claude Code, invoke a native skill such as `/pstack:architect`. In Codex, ask for the skill, such as `Use pstack:architect for this design.` See the [technical reference](docs/reference.md) for the full list.
 
@@ -145,7 +135,7 @@ Plugin skills include `pstack:` in their name. In Claude Code, invoke a native s
 
 Some pstack workflows use one model. Skills such as `arena` and `interrogate` can run several models in parallel. Each model run uses the subscription and token allowance of its own command-line tool.
 
-This repository ships its model sheet at `plugins/pstack/pstack-models.md`. Claude Code loads it at session start, so no setup is needed there. To change models, edit that file in the repository, then update the plugin. The shipped sheet uses Opus for code and judgment roles and Sonnet for swarm workers. Its arena panel adds GPT-6.1 Sol and two models from the `magpie` relay, so that panel also needs the Codex command-line tool with the relay configured.
+This repository ships its model sheet at `plugins/pstack/pstack-models.md`. Claude Code loads it at session start, so no setup is needed there. To change models, edit that file in the repository, then update the plugin. The shipped sheet uses Opus for code and judgment roles and Sonnet for swarm workers. Its review panels use GPT-6.2 Astra through Codex, and its arena panel adds DeepSeek V4.1 Flash and GLM-5.3 Flash through OpenCode, so those panels need the Codex and OpenCode command-line tools, each signed in.
 
 `setup-pstack` lets you choose a reasoning budget, the models, one requested effort per model family, and how many run in parallel. It checks only the model families you assign, so a sheet that assigns every role to Claude models needs no Codex or Grok command-line tool. A model from the app you are using runs inside that app. Other models run through their own command-line tools. Open Pstack does not quietly replace a failed model with a weaker one.
 
@@ -157,7 +147,7 @@ Both apps read the same pstack skills. Only the way they start those skills and 
 | --- | --- | --- |
 | Start poteto-mode | Claude loads a small startup instruction that can route non-trivial work into it. You can also run `/pstack:poteto-mode` yourself. | Ask for `pstack:poteto-mode` by name. Codex does not load the Claude startup instruction. |
 | Runs inside the app | Claude models stay inside Claude Code. | The Sol model stays inside Codex. |
-| Other models | Codex and Grok run through their signed-in command-line tools. Relay models run through the Codex command-line tool; Claude Code never calls the relay itself. | Claude and Grok run through their signed-in command-line tools. |
+| Other models | Codex, Grok, and OpenCode run through their signed-in command-line tools. | Claude, Grok, and OpenCode run through their signed-in command-line tools. |
 | Skills and workflows | Shared with Codex. | Shared with Claude Code. |
 
 Grok can take part in a multi-model review. You cannot use Grok as the main app running pstack.
@@ -176,7 +166,7 @@ This repository also keeps:
 
 ## Staying close to Lauren's pstack
 
-Open Pstack 1.28.1 tracks pstack 0.15.48 at Cursor commit [`9e278fe4d4ecd8bfe98b1b79bf4be662efb338cc`](https://github.com/cursor/plugins/commit/9e278fe4d4ecd8bfe98b1b79bf4be662efb338cc).
+Open Pstack 1.29.0 tracks pstack 0.15.48 at Cursor commit [`9e278fe4d4ecd8bfe98b1b79bf4be662efb338cc`](https://github.com/cursor/plugins/commit/9e278fe4d4ecd8bfe98b1b79bf4be662efb338cc).
 
 The two projects have separate version numbers. The pstack version identifies Lauren's upstream content. The Open Pstack version identifies the Claude Code and Codex package built from it.
 
@@ -186,7 +176,7 @@ In this repository, “upstream” means Lauren's original pstack. Open Pstack d
 
 Fixes for Claude Code or Codex and help bringing over new pstack releases are welcome. Search [GitHub Issues](https://github.com/misaka9981/open-pstack/issues) before opening a new issue. For larger behavior changes, explain why the change belongs in Open Pstack instead of Lauren's original project.
 
-Read [UPSTREAM.md](UPSTREAM.md) before changing content brought over from Lauren's pstack. Pull requests must keep one shared skill tree for Claude Code, Codex, and Pi and pass the repository's tests, type checks, plugin validation, and static checks.
+Read [UPSTREAM.md](UPSTREAM.md) before changing content brought over from Lauren's pstack. Pull requests must keep one shared skill tree for Claude Code and Codex and pass the repository's tests, type checks, plugin validation, and static checks.
 
 ## License
 

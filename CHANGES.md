@@ -2,6 +2,16 @@
 
 This port applies the Cursor → Claude Code substitutions in skill bodies. Earlier drafts left them flagged; this revision resolves them. A later pass added a Codex build that shares the same skills; see [Codex port](#codex-port) below.
 
+## 1.29.0 runs DeepSeek and GLM through OpenCode and drops Pi
+
+Open Pstack now supports two parent harnesses, Claude Code and Codex. Non-Claude models run on their own command-line tools: GPT on Codex, Grok on Grok, and DeepSeek and GLM on OpenCode.
+
+**OpenCode lanes.** The runner gains an `opencode` provider with descriptors like `opencode:opencode/glm-5.3-flash@high`. It runs `opencode run --standalone --model <provider>/<model>#<effort> --agent pstack-lane --format json --archived` with the prompt on stdin, and finds `opencode` on `PATH` or in `~/.opencode/bin`. Preflight passes only when `opencode models --standalone` lists the exact model, which OpenCode does for a paid model only while its provider is signed in. OpenCode has no sandbox, so the runner defines the `pstack-lane` agent in `OPENCODE_CONFIG_CONTENT`: deny every action, then allow `read`, `grep`, `glob`, and outside-path reads for `read-only`, or `read`, `grep`, `glob`, `edit`, and `shell` for `isolated-write`. A denied tool leaves the model's tool list, so MCP, skill, subagent, question, and web tools never appear. Configured MCP servers still start, because OpenCode 2.4.2 ignores `enabled: false` from `OPENCODE_CONFIG_CONTENT`. The child also gets `OPENCODE_DISABLE_AUTOUPDATE=1`, `OPENCODE_DISABLE_CLAUDE_CODE=1`, and a `PWD` equal to its `--cwd`, because OpenCode takes its project directory from `PWD`. Every runner child now gets that `PWD`. The receipt pins the model by argv, keeps the last step's text, and sums every step's tokens and cost. The two families, `deepseek-flash` and `glm-flash`, select `low` and `high`.
+
+**Astra.** `codex:gpt-6.2-astra` joins setup as an additional Codex family that selects `low` through `xhigh`. The shipped Claude Code sheet moves every Codex lane from `gpt-6.2-sol@high` to `gpt-6.2-astra@high`, and its arena runners move from `magpie:wevnal/*` to `opencode:opencode/deepseek-v4.1-flash@high` and `opencode:opencode/glm-5.3-flash@high`. The Sol matrix row and the first-run defaults do not change.
+
+**Removed.** The `magpie` relay provider leaves the runner, setup, provider dispatch, and the docs. Pi stops being a supported harness: `pi-tools.md`, the Lody routes, the Pi route column, the root `package.json` that made the repository a Pi package, and its test are deleted, and every skill points only at `codex-tools.md`. A `magpie` descriptor in an existing sheet now matches no family, so setup reports it as inconsistent state before any probe.
+
 ## 1.28.1 moves Sol to gpt-6.2-sol
 
 The Sol matrix family now pins `codex:gpt-6.2-sol` instead of `gpt-6.1-sol`, and Pi Sol lanes map to `magpie/codex/gpt-6.2-sol`. Setup's first-run panels, the arena defaults, poteto-mode, `codex-tools.md`, and the docs follow. The shipped Claude Code sheet runs every Codex lane at `high`; the arena runner lane moves up from `medium`. A one-turn runner probe passed for `codex:gpt-6.2-sol` at `low`, `medium`, `high`, and `xhigh`, and a Pi probe of `magpie/codex/gpt-6.2-sol` passed at `high`.
